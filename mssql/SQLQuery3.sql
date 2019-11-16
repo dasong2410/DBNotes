@@ -1,1 +1,0 @@
-select DB_NAME();
