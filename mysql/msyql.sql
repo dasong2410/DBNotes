@@ -88,3 +88,8 @@ grant all privileges on *.* to 'dasong'@'%';
 
 # 备份
 mysqldump -uroot -p ODS > dump_$(date +"%Y%m%d").sql
+
+
+
+sudo firewall-cmd --zone=public --add-port=3306/tcp --permanent
+sudo firewall-cmd --reload
