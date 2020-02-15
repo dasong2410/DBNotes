@@ -48,4 +48,4 @@
 	select * from msdb.dbo.log_shipping_secondary;
 	select * from msdb.dbo.log_shipping_monitor_secondary;
 	select * from msdb.dbo.log_shipping_monitor_alert;
-	select * from msdb.dbo.log_shipping_monitor_error_detail;
+	select * from msdb.dbo.log_shipping_monitor_error_detail order by log_time desc;

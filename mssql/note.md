@@ -113,6 +113,47 @@
 	EXEC dbo.sp_help_job ;  
 	GO
 
+	EXEC dbo.sp_help_jobactivity;
+	GO
+
+### Job step
+
+	select database_name, job.job_id, name, enabled, description, step_name, command, server
+	  from msdb.dbo.sysjobs job inner join
+	       msdb.dbo.sysjobsteps steps
+	    on job.job_id = steps.job_id;
+
+### Job history
+
+	select a.job_id, a.name, a.enabled, b.run_status, b.step_id, step_name, run_duration, run_date, run_time
+	  from (select job_id, name, enabled from msdb.dbo.sysjobs) a join
+	       (select instance_id, job_id, step_id, step_name, message, run_status, run_duration, run_date, run_time
+		      from msdb.dbo.sysjobhistory
+			 where run_duration>10) b
+	    on a.job_id=b.job_id
+	 order by run_date desc;
+
+	--run_status
+	--0 = Failed
+	--1 = Succeeded
+	--2 = Retry
+	--3 = Canceled
+	--4 = In Progress
+	select job.job_id, job.name, jobh.step_name, jobh.run_status, jobh.message,
+	       jobh.run_date, jobh.run_time, jobh.run_duration
+	  from msdb.dbo.sysjobhistory jobh, 
+	       msdb.dbo.sysjobs job
+	 where jobh.job_id=job.job_id
+	   and jobh.run_status!=1
+	 order by run_date desc, run_time desc;
+
+## Data size
+
+	select db_name(database_id) database_name, name file_name, physical_name,
+	       cast(size*8/1024/1024.0 as numeric(36, 2)) "Size(G)",
+	       cast((sum(size) over(partition by database_id))*8/1024/1024.0 as numeric(36, 2)) "DB Size(G)"
+	  from sys.master_files;
+
 ## Misc
 
 
@@ -188,25 +229,6 @@
 	
 	select * from sys.database_files;
 
-#
-
-	--run_status
-	--0 = Failed
-	--1 = Succeeded
-	--2 = Retry
-	--3 = Canceled
-	--4 = In Progress
-	select job.job_id, job.name, jobh.step_name, jobh.run_status, jobh.message,
-	       jobh.run_date, jobh.run_time, jobh.run_duration
-	  from msdb.dbo.sysjobhistory jobh, 
-	       msdb.dbo.sysjobs job
-	 where jobh.job_id=job.job_id
-	   and jobh.run_status!=1
-	 order by run_date desc, run_time desc;
-	
-	select name, physical_name, cast(size*8/1024/1024.0 as numeric(36, 2)) "Size(G)",
-	cast((sum(size) over())*8/1024/1024.0 as numeric(36, 2)) "DB Size(G)" from sys.database_files;
-
 
 #
 
@@ -232,7 +254,7 @@
 
 #
 
-Query running sql
+Currently running sql
 
 	SELECT sqltext.TEXT,
 	req.session_id,
@@ -244,6 +266,7 @@ Query running sql
 	CROSS APPLY sys.dm_exec_sql_text(sql_handle) AS sqltext
 
 #
+
 Memory usage
 
 	SELECT  
