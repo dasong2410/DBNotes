@@ -54,8 +54,18 @@
 
 	EXECUTE [dbo].[DatabaseBackup]
 	@Databases = 'USER_DATABASES',
-	@Directory = 'C:\MSSQL_BACKUP',
+	@Directory = 'D:\MSSQL_BACKUP',
 	@BackupType = 'FULL',
+	@Verify = 'Y',
+    @Compress = 'Y',
+	@CleanupTime = 72,
+	@CheckSum = 'Y',
+	@LogToTable = 'Y'
+
+	EXECUTE [dbo].[DatabaseBackup]
+	@Databases = 'USER_DATABASES',
+	@Directory = 'D:\MSSQL_BACKUP',
+	@BackupType = 'LOG',
 	@Verify = 'Y',
     @Compress = 'Y',
 	@CleanupTime = 72,
@@ -70,7 +80,7 @@
 
 		EXECUTE [dbo].[DatabaseBackup]
 		@Databases = 'USER_DATABASES',
-		@Directory = 'C:\MSSQL_BACKUP',
+		@Directory = 'D:\MSSQL_BACKUP',
 		@BackupType = 'FULL',
 		@Verify = 'Y',
 	    @Compress = 'Y',
