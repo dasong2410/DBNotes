@@ -1,3 +1,5 @@
+-- https://support.microsoft.com/en-us/help/918992/how-to-transfer-logins-and-passwords-between-instances-of-sql-server
+
 USE master
 GO
 IF OBJECT_ID ('sp_hexadecimal') IS NOT NULL
