@@ -1,4 +1,7 @@
 
+# Table of contents
+1. [Introduction](#introduction)
+
 ## User
 
 ### Windows authenticated user
@@ -154,6 +157,35 @@
 	       cast((sum(size) over(partition by database_id))*8/1024/1024.0 as numeric(36, 2)) "DB Size(G)"
 	  from sys.master_files;
 
+
+## Log
+
+### Shrink log
+
+	-- shrink log
+	select db_name(database_id) database_name, name file_name, physical_name,
+	       cast(size*8/1024/1024.0 as numeric(36, 2)) "Size(G)",
+	       cast((sum(size) over())*8/1024/1024.0 as numeric(36, 2)) "DB Size(G)"
+	  from sys.master_files;
+	
+	DBCC SQLPERF(LOGSPACE);  
+	GO
+	
+	-- log files
+	select DB_NAME(database_id) database_name, name, physical_name, size*8/1024/1024.0 "Size(G)"
+	  from sys.master_files
+	 where type_desc='LOG';
+	
+	-- shrink logs
+	-- choose "results to text"
+	select 'use [' + DB_NAME(database_id)+']' + char(10) + 
+	       'go' + char(10) + 
+	       'DBCC SHRINKFILE ([' + name + '], TRUNCATEONLY);' + char(10) + 
+	       'go'
+	  from sys.master_files
+	 where type_desc='LOG';
+
+
 ## Misc
 
 
@@ -276,3 +308,6 @@ Memory usage
 	process_physical_memory_low,  
 	process_virtual_memory_low  
 	FROM sys.dm_os_process_memory; 
+
+
+# <a name="introduction"></a> xx
