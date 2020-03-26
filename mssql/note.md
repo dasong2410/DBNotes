@@ -1,7 +1,14 @@
+# Table of Contents
 
-# Table of contents
-1. [Introduction](#introduction)
+- [User](#User)
+- [Replication](#Replication)
+- [Procedure](#Procedure)
+- [Job](#Job)
+- [Data size](#db_size)
+- [Log](#Log)
+- [Misc](#Misc)
 
+<a name="User"></a>
 ## User
 
 ### Windows authenticated user
@@ -55,7 +62,7 @@
 	
 	alter database test set online;
 
-
+<a name="Replication"></a>
 ## Replication
 
 	select distinct article from distribution.dbo.MSarticles;
@@ -78,6 +85,7 @@
 	
 	GO
 
+<a name="Procedure"></a>
 ## Auto start stored procedure
 
 	select *
@@ -105,7 +113,7 @@
 	FROM MASTER.INFORMATION_SCHEMA.ROUTINES
 	WHERE OBJECTPROPERTY(OBJECT_ID(ROUTINE_NAME),'ExecIsStartup') = 1
 
-
+<a name="Job"></a>
 ## Jobs
 
 ### Show jobs
@@ -150,6 +158,7 @@
 	   and jobh.run_status!=1
 	 order by run_date desc, run_time desc;
 
+<a name="db_size"></a>
 ## Data size
 
 	select db_name(database_id) database_name, name file_name, physical_name,
@@ -157,7 +166,7 @@
 	       cast((sum(size) over(partition by database_id))*8/1024/1024.0 as numeric(36, 2)) "DB Size(G)"
 	  from sys.master_files;
 
-
+<a name="Log"></a>
 ## Log
 
 ### Shrink log
@@ -185,7 +194,7 @@
 	  from sys.master_files
 	 where type_desc='LOG';
 
-
+<a name="Misc"></a>
 ## Misc
 
 
