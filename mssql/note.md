@@ -168,7 +168,7 @@ select job.job_id, job.name, jobh.step_name, jobh.run_status, jobh.message,
     order by run_date desc, run_time desc;
 ```
 
-<a name="File-size"></a>
+<a name="File size"></a>
 ## [File size](#Table-of-Contents)
 
 ```sql

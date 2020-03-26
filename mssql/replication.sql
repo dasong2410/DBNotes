@@ -1,3 +1,6 @@
+1. $(DistPubServer) = host name
+2. Login ssms with host name
+
 -- This script uses sqlcmd scripting variables. They are in the form
 -- $(MyVariable). For information about how to use scripting variables  
 -- on the command line and in SQL Server Management Studio, see the 
