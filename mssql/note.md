@@ -1,16 +1,16 @@
-<a name="top"></a>
+<a name="Table-of-Contents"></a>
 # Table of Contents
 
 - [User](#User)
 - [Replication](#Replication)
 - [Procedure](#Procedure)
 - [Job](#Job)
-- [File size](#File size)
+- [File size](#File-size)
 - [Log](#Log)
 - [Misc](#Misc)
 
 <a name="User"></a>
-## [User](#top)
+## [User](#Table-of-Contents)
 
 ### Windows authenticated user
 
@@ -64,7 +64,7 @@
     alter database test set online;
 
 <a name="Replication"></a>
-## [Replication](#top)
+## [Replication](#Table-of-Contents)
 
     select distinct article from distribution.dbo.MSarticles;
 
@@ -87,7 +87,7 @@
     GO
 
 <a name="Procedure"></a>
-## [Procedure](#Table of Contents)
+## [Procedure](#Table-of-Contents)
 
     select *
     from sys.procedures
@@ -115,7 +115,7 @@
     WHERE OBJECTPROPERTY(OBJECT_ID(ROUTINE_NAME),'ExecIsStartup') = 1
 
 <a name="Job"></a>
-## [Job](#top)
+## [Job](#Table-of-Contents)
 
 ### Show jobs
 
@@ -159,8 +159,8 @@
        and jobh.run_status!=1
      order by run_date desc, run_time desc;
 
-<a name="File size"></a>
-## [File size](#top)
+<a name="File-size"></a>
+## [File size](#Table-of-Contents)
 
     select db_name(database_id) database_name, name file_name, physical_name,
            cast(size*8/1024/1024.0 as numeric(36, 2)) "Size(G)",
@@ -168,7 +168,7 @@
       from sys.master_files;
 
 <a name="Log"></a>
-## [Log](#top)
+## [Log](#Table-of-Contents)
 
 ### Shrink log
 
@@ -196,7 +196,7 @@
      where type_desc='LOG';
 
 <a name="Misc"></a>
-## [Misc](#top)
+## [Misc](#Table-of-Contents)
 
 
 
