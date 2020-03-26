@@ -1,3 +1,4 @@
+# <a name="top" />
 # Table of Contents
 
 - [User](#User)
@@ -9,7 +10,7 @@
 - [Misc](#Misc)
 
 <a name="User"></a>
-## User
+## [User](#top)
 
 ### Windows authenticated user
 
@@ -63,7 +64,7 @@
 	alter database test set online;
 
 <a name="Replication"></a>
-## Replication
+## [Replication](#top)
 
 	select distinct article from distribution.dbo.MSarticles;
 	
@@ -86,7 +87,7 @@
 	GO
 
 <a name="Procedure"></a>
-## Auto start stored procedure
+## [Auto start stored procedure](#top)
 
 	select *
 	from sys.procedures
@@ -114,7 +115,7 @@
 	WHERE OBJECTPROPERTY(OBJECT_ID(ROUTINE_NAME),'ExecIsStartup') = 1
 
 <a name="Job"></a>
-## Jobs
+## [Jobs](#top)
 
 ### Show jobs
 
@@ -159,7 +160,7 @@
 	 order by run_date desc, run_time desc;
 
 <a name="db_size"></a>
-## Data size
+## [Data size](#top)
 
 	select db_name(database_id) database_name, name file_name, physical_name,
 	       cast(size*8/1024/1024.0 as numeric(36, 2)) "Size(G)",
@@ -167,7 +168,7 @@
 	  from sys.master_files;
 
 <a name="Log"></a>
-## Log
+## [Log](#top)
 
 ### Shrink log
 
@@ -195,7 +196,7 @@
 	 where type_desc='LOG';
 
 <a name="Misc"></a>
-## Misc
+## [Misc](#top)
 
 
 
