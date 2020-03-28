@@ -8,7 +8,7 @@
 3. [Copy backup to remote server](#3.-Copy-backup-to-remote-server)
 4. [Restore encrypted database backup](#4.-Restore-encrypted-database-backup)
 
-<a href="1. Master key and certificate"></a>
+<a href="1.-Master-key-and-certificate"></a>
 ## 1. [Master key and certificate](#Table-of-contents)
 
 ### 1.1 Create master key and certificate
