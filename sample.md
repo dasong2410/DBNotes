@@ -32,9 +32,9 @@ Numbered list:
   2. rinse
   3. repeat
 
-An [example](http://example.com).
+An [example](https://www.pinterest.com/pin/677299231446289816/).
 
-![Image](Icon-pictures.png "icon")
+![Image](https://i.pinimg.com/564x/8d/a6/05/8da605eb692ab16565244aa3effda225.jpg "motorcycle girl")
 
 > Markdown uses email-style > characters for blockquoting.
 
