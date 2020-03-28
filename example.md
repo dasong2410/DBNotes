@@ -47,3 +47,6 @@ Inline <abbr title="Hypertext Markup Language">HTML</abbr> is supported.
 | col 3 is      | right-aligned | $1600 |
 | col 2 is      | centered      |   $12 |
 | zebra stripes | are neat      |    $1 |
+
+
+Example of [Table of contents](mssql/db_backup.md#Table-of-contents)

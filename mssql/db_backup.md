@@ -58,7 +58,7 @@
 	CLOSE MASTER KEY;
 
 <a name="2-Backup"></a>
-## 2. [Backup](#Table-of-contents)
+## [2. Backup](#Table-of-contents)
 
 ### 2.1 Backup without encryption
 
@@ -102,7 +102,7 @@
 		@LogToTable = 'Y'
 
 <a name="3-Copy-backup-to-remote-server"></a>
-## 3. [Copy backup to remote server](#Table-of-contents)
+## [3. Copy backup to remote server](#Table-of-contents)
 
 Run the following python script in a SQL Server Job step after backup. This python script need a parameter(FULL or LOG) to decide backup database or log.
 
@@ -119,7 +119,7 @@ Run the following python script in a SQL Server Job step after backup. This pyth
 	)
 
 <a name="4-Restore-encrypted-database-backup"></a>
-## 4. [Restore encrypted database backup](#Table-of-contents)
+## [4. Restore encrypted database backup](#Table-of-contents)
 
 	<1>. Create master key if not exist
 	<2>. Restore certificate
