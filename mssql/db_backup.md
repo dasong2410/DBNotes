@@ -4,9 +4,9 @@
 ## Table of contents
 
 1. [Master key and certificate](#1-Master-key-and-certificate)
-2. [Backup](#2.-Backup)
-3. [Copy backup to remote server](#3.-Copy-backup-to-remote-server)
-4. [Restore encrypted database backup](#4.-Restore-encrypted-database-backup)
+2. [Backup](#2-Backup)
+3. [Copy backup to remote server](#3-Copy-backup-to-remote-server)
+4. [Restore encrypted database backup](#4-Restore-encrypted-database-backup)
 
 <a href="1-Master-key-and-certificate"></a>
 ## [1. Master key and certificate](#Table-of-contents)
@@ -57,7 +57,7 @@
 	OPEN MASTER KEY DECRYPTION BY PASSWORD = '123456';
 	CLOSE MASTER KEY;
 
-<a name="Backup"></a>
+<a name="2-Backup"></a>
 ## 2. [Backup](#Table-of-contents)
 
 ### 2.1 Backup without encryption
@@ -101,7 +101,7 @@
 		@ServerCertificate = 'HRDBBackupEncryptCert',
 		@LogToTable = 'Y'
 
-<a name="Copy backup to remote server"></a>
+<a name="3-Copy-backup-to-remote-server"></a>
 ## 3. [Copy backup to remote server](#Table-of-contents)
 
 Run the following python script in a SQL Server Job step after backup. This python script need a parameter(FULL or LOG) to decide backup database or log.
@@ -118,7 +118,7 @@ Run the following python script in a SQL Server Job step after backup. This pyth
 	   EXIT 1
 	)
 
-<a name="Restore encrypted database backup"></a>
+<a name="4-Restore-encrypted-database-backup"></a>
 ## 4. [Restore encrypted database backup](#Table-of-contents)
 
 	<1>. Create master key if not exist
