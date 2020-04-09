@@ -7,6 +7,7 @@
 - [Job](#Job)
 - [File size](#File-size)
 - [Log](#Log)
+- [Indexes](#Indexes)
 - [Misc](#Misc)
 
 <a name="User"></a>
@@ -208,6 +209,37 @@ select 'use [' + DB_NAME(database_id)+']' + char(10) +
     where type_desc='LOG';
 ```
 
+<a name="Indexes"><a/>
+## [Indexes](#Table-of-Contents)
+
+```sql
+SELECT 
+     TableName = t.name,
+     IndexName = ind.name,
+     IndexId = ind.index_id,
+     ColumnId = ic.index_column_id,
+     ColumnName = col.name,
+     ind.*,
+     ic.*,
+     col.* 
+FROM 
+     sys.indexes ind 
+INNER JOIN 
+     sys.index_columns ic ON  ind.object_id = ic.object_id and ind.index_id = ic.index_id 
+INNER JOIN 
+     sys.columns col ON ic.object_id = col.object_id and ic.column_id = col.column_id 
+INNER JOIN 
+     sys.tables t ON ind.object_id = t.object_id 
+WHERE 
+     ind.is_primary_key = 0 
+     AND ind.is_unique = 0 
+     AND ind.is_unique_constraint = 0 
+     AND t.is_ms_shipped = 0 
+ORDER BY 
+     t.name, ind.name, ind.index_id, ic.index_column_id;
+```
+
+
 <a name="Misc"></a>
 ## [Misc](#Table-of-Contents)
 
@@ -334,4 +366,38 @@ SELECT
 process_physical_memory_low,  
 process_virtual_memory_low  
 FROM sys.dm_os_process_memory;
+```
+
+```sql
+SELECT (CASE 
+           WHEN ( [database_id] = 32767 ) THEN 'Resource Database' 
+           ELSE Db_name (database_id) 
+         END )  AS 'Database Name', 
+       Sum(CASE 
+             WHEN ( [is_modified] = 1 ) THEN 0 
+             ELSE 1 
+           END) AS 'Clean Page Count',
+		Sum(CASE 
+             WHEN ( [is_modified] = 1 ) THEN 1 
+             ELSE 0 
+           END) AS 'Dirty Page Count'
+FROM   sys.dm_os_buffer_descriptors 
+GROUP  BY database_id 
+ORDER  BY DB_NAME(database_id);
+```
+
+```sql
+declare @frag int
+declare @command nvarchar(512)
+set @frag=0.4
+
+IF @frag < 5.0
+SET @command = N'ALTER INDEX REORGANIZE';
+
+IF @frag >= 5.0
+SET @command = N'ALTER INDEX REBUILD';
+
+SET @command = N'ALTER INDEX REBUILD';
+
+print @command
 ```

@@ -19,3 +19,7 @@
 ### 5. reboot remote server
 
 	gwmi win32_operatingsystem -ComputerName xxxxxxxxxxxx | Invoke-WmiMethod -Name reboot
+
+### 5. tail file
+
+	Get-Content .\ERRORLOG -Wait
