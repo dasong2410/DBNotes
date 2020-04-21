@@ -23,3 +23,13 @@
 ### 5. tail file
 
 	Get-Content .\ERRORLOG -Wait
+
+### 6. system info
+
+uptime included
+
+	systeminfo
+
+### 7. system information(GUI)
+
+	msinfo32 

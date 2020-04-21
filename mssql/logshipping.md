@@ -2,7 +2,7 @@
 
 ## 1. Shared directory structure
 
-	X:\LogShipping\[database_name]
+	X:\Logshipping\[database_name]
 
 ## 2. LSN check
 
