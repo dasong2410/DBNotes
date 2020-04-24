@@ -33,3 +33,7 @@ uptime included
 ### 7. system information(GUI)
 
 	msinfo32 
+
+### 8. performance monitor
+
+	perfmon
