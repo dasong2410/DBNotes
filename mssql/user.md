@@ -5,17 +5,10 @@
 
 - [Create user](#Create-user)
 - [Alter user](#Alter-user)
+- [Query user](#Query-user)
 - [Permission](#Permission)
 - [Activated users](#Activated-users)
 - [Export login](#Export-login)
-
-Query sid, name
-
-```sql
-select SUSER_SID('sa');
-select SUSER_SNAME(0x01);
-```
-
 
 <a name="Create user"></a>
 ## [Create user](#Table-of-Contents)
@@ -128,6 +121,17 @@ GRANT VIEW Definition TO PUBLIC;
 USE master
 GO
 GRANT VIEW ANY DEFINITION TO User1;
+```
+
+<a href="Query-user"></a>
+### [Query user](#Table-of-Contents)
+
+```sql
+# get user sid
+select SUSER_SID('sa');
+
+# get user name
+select SUSER_SNAME(0x01);
 ```
 
 <a href="Activated-users"></a>
