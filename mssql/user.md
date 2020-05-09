@@ -26,11 +26,11 @@ select SUSER_SNAME(0x01);
 USE [master]
 GO
 
-CREATE LOGIN [APLACSVR1KR\AppleKRadmin] FROM WINDOWS WITH DEFAULT_DATABASE=[master], DEFAULT_LANGUAGE=[us_english]
+CREATE LOGIN [DESKTOP-S0V3U1D\Marcus] FROM WINDOWS WITH DEFAULT_DATABASE=[master], DEFAULT_LANGUAGE=[us_english]
 GO
 
 # https://docs.microsoft.com/en-us/sql/relational-databases/security/authentication-access/server-level-roles?view=sql-server-ver15
-ALTER SERVER ROLE [sysadmin] ADD MEMBER [APLACSVR1KR\AppleKRadmin]
+ALTER SERVER ROLE [sysadmin] ADD MEMBER [DESKTOP-S0V3U1D\Marcus]
 GO
 ```
 
