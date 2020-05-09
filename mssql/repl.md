@@ -1,5 +1,22 @@
-1. $(DistPubServer) = host name
-2. Login ssms with host name
+# Replication
+
+<a name="Table-of-Contents"></a>
+## Table of Contents
+
+- [Configure Publishing and Distribution](#Configure-Publishing-and-Distribution)
+- [Query replication metadata](#Query-replication-metadata)
+- [Remove db replication](#Remove-db-replication)
+
+<a href="Configure-Publishing-and-Distribution"></a>
+## [Configure Publishing and Distribution](#Table-of-Contents)
+
+
+
+```sql
+-- https://docs.microsoft.com/en-us/sql/relational-databases/replication/configure-publishing-and-distribution?view=sql-server-ver15
+
+-- 1. $(DistPubServer) = host name
+-- 2. Login ssms with host name
 
 -- This script uses sqlcmd scripting variables. They are in the form
 -- $(MyVariable). For information about how to use scripting variables  
@@ -51,3 +68,31 @@ EXEC sp_adddistpublisher @publisher=@publisher,
     @distribution_db=@distributionDB, 
     @security_mode = 1;
 GO
+```
+
+<a href="Query-replication-metadata"></a>
+## [Query replication metadata](#Table-of-Contents)
+
+```sql
+select distinct article from distribution.dbo.MSarticles;
+
+select * from distribution.dbo.MSpublications;
+select * from distribution.dbo.MSsubscriptions;
+select * from distribution.dbo.MSarticles order by article;
+select article from distribution.dbo.MSarticles where publication_id=xx order by article;
+
+select * from sys.tables where name not like 'MS%' order by name;
+
+use Applecare_Prod
+exec sp_droppublication @publication= 'Applecare_Prod_Repl';
+exec sp_subscription_cleanup @publication= 'Applecare_Prod_Repl';
+```
+
+<a href="Remove-db-replication"></a>
+## [Remove db replication](#Table-of-Contents)
+
+```sql
+USE Applecare_Prod
+EXEC sp_removedbreplication @dbname=Applecare_Prod
+GO
+```

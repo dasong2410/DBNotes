@@ -1,92 +1,12 @@
 <a name="Table-of-Contents"></a>
 # Table of Contents
 
-- [User](#User)
-- [Replication](#Replication)
 - [Procedure](#Procedure)
 - [Job](#Job)
 - [File size](#File-size)
 - [Log](#Log)
 - [Indexes](#Indexes)
 - [Misc](#Misc)
-
-<a name="User"></a>
-## [User](#Table-of-Contents)
-
-### Windows authenticated user
-
-```sql
-USE [master]
-GO
-
-/****** Object:  Login [APLACSVR1KR\CISADMIN]    Script Date: 11/28/2019 12:16:59 PM ******/
-CREATE LOGIN [APLACSVR1KR\AppleKRadmin] FROM WINDOWS WITH DEFAULT_DATABASE=[master], DEFAULT_LANGUAGE=[us_english]
-GO
-
-ALTER SERVER ROLE [sysadmin] ADD MEMBER [APLACSVR1KR\AppleKRadmin]
-GO
-```
-
-### Activated users
-
-```sql
-select * from sys.sysprocesses;
-
-SELECT DB_NAME(dbid) as DBName,
-       COUNT(dbid) as NumberOfConnections,
-       loginame as LoginName
-  FROM sys.sysprocesses
- WHERE dbid > 0
- GROUP BY dbid, loginame;
-
-sp_who
-sp_who2
-```
-
-### Permission
-
-```sql
-alter login dbalogin with default_database = tempdb;
-alter login sa with check_policy=off;
-alter login sa with check_expiration=off;
-
-
-USE AdventureWorks
-GO
-GRANT VIEW Definition TO PUBLIC;
-
-USE master
-GO
-GRANT VIEW ANY DEFINITION TO User1;
-
-
-alter database test set online;
-```
-
-<a name="Replication"></a>
-## [Replication](#Table-of-Contents)
-
-```sql
-select distinct article from distribution.dbo.MSarticles;
-
-select * from distribution.dbo.MSpublications;
-select * from distribution.dbo.MSsubscriptions;
-select * from distribution.dbo.MSarticles order by article;
-select article from distribution.dbo.MSarticles where publication_id=xx order by article;
-
-select * from sys.tables where name not like 'MS%' order by name;
-
-use Applecare_Prod
-exec sp_droppublication @publication= 'Applecare_Prod_Repl';
-exec sp_subscription_cleanup @publication= 'Applecare_Prod_Repl';
-
-
-USE Applecare_Prod
-
-EXEC sp_removedbreplication @dbname=Applecare_Prod
-
-GO
-```
 
 <a name="Procedure"></a>
 ## [Procedure](#Table-of-Contents)
@@ -209,6 +129,18 @@ select 'use [' + DB_NAME(database_id)+']' + char(10) +
     where type_desc='LOG';
 ```
 
+### Query log
+
+```sql
+-- listening port
+EXEC xp_ReadErrorLog 0, 1, N'Server is listening on', N'any', NULL, NULL, 'DESC'
+GO
+
+-- error logs
+EXEC sp_readerrorlog 0, 1;
+EXEC sp_readerrorlog 0, 2;
+```
+
 <a name="Indexes"><a/>
 ## [Indexes](#Table-of-Contents)
 
@@ -243,6 +175,14 @@ ORDER BY
 <a name="Misc"></a>
 ## [Misc](#Table-of-Contents)
 
+### Server Memory
+
+```sql
+select *
+from sys.configurations
+where name like '% server memory%';
+```
+
 #
 
 ```sql
@@ -261,25 +201,6 @@ SET READ_COMMITTED_SNAPSHOT ON
 -- The record size is currently 2011 bytes (7 + 4 + 1000 + 1000).
 DBCC PAGE(RCSI_SideEffects, 1, 224, 1)
 GO
-```
-
-#
-
-```sql
-net stop "SQL Server (MSSQLSERVER)"
-net stop "SQL Server Agent (MSSQLSERVER)"
-net stop "SQL Server Analysis Service (MSSQLSERVER)"
-
-net start "SQL Server (MSSQLSERVER)"
-net start "SQL Server Agent (MSSQLSERVER)"
-
-
-sc config "SQL Server (MSSQLSERVER)" start= DEMAND
-
-
-SC STOP "<nameservice>"
-
-SC CONFIG "<nameservice>" START= ( BOOT, or SYSTEM, or AUTO, or DEMAND, or DISABLED, or DELAYED-AUTO )
 ```
 
 ```sql
