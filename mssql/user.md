@@ -107,15 +107,15 @@ GO
 <a href="Permission"></a>
 ### [Permission](#Table-of-Contents)
 
-- [Permissions (Database Engine)](#https://docs.microsoft.com/en-us/sql/relational-databases/security/permissions-database-engine?view=sql-server-ver15)
+- [Permissions (Database Engine)](https://docs.microsoft.com/en-us/sql/relational-databases/security/permissions-database-engine?view=sql-server-ver15)
 
-- [GRANT Database Permissions (Transact-SQL)](#https://docs.microsoft.com/en-us/sql/t-sql/statements/grant-database-permissions-transact-sql?view=sql-server-ver15)
+- [GRANT Database Permissions (Transact-SQL)](https://docs.microsoft.com/en-us/sql/t-sql/statements/grant-database-permissions-transact-sql?view=sql-server-ver15)
 
-- [Determining Effective Database Engine Permissions](#https://docs.microsoft.com/en-us/sql/relational-databases/security/authentication-access/determining-effective-database-engine-permissions?view=sql-server-ver15)
+- [Determining Effective Database Engine Permissions](https://docs.microsoft.com/en-us/sql/relational-databases/security/authentication-access/determining-effective-database-engine-permissions?view=sql-server-ver15)
 
-- [REVERT (Transact-SQL)](#https://docs.microsoft.com/en-us/sql/t-sql/statements/revert-transact-sql?view=sql-server-ver15)
+- [REVERT (Transact-SQL)](https://docs.microsoft.com/en-us/sql/t-sql/statements/revert-transact-sql?view=sql-server-ver15)
 
-- [Permissions Hierarchy (Database Engine)](#https://docs.microsoft.com/en-us/sql/relational-databases/security/permissions-hierarchy-database-engine?view=sql-server-ver15)
+- [Permissions Hierarchy (Database Engine)](https://docs.microsoft.com/en-us/sql/relational-databases/security/permissions-hierarchy-database-engine?view=sql-server-ver15)
 
 ```sql
 # sys.server_principals
