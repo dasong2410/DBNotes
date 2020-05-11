@@ -6,6 +6,7 @@
 - [Create user](#Create-user)
 - [Alter user](#Alter-user)
 - [Query user](#Query-user)
+- [Login&User mapping](#Login&User-mapping)
 - [Permission](#Permission)
 - [Activated users](#Activated-users)
 - [Export login](#Export-login)
@@ -225,6 +226,16 @@ select SUSER_SID('sa');
 
 # get user name
 select SUSER_SNAME(0x01);
+```
+
+<a href="Login&User-mapping"></a>
+### [Login&User mapping](#Table-of-Contents)
+
+https://www.sqlserver-dba.com/2015/01/how-to-list-sql-logins-and-database-user-mappings.html
+
+```sql
+exec sp_msloginmappings 'sa', 1;
+exec sp_msloginmappings 'test1', 0;
 ```
 
 <a href="Activated-users"></a>
