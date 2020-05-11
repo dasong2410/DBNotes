@@ -174,7 +174,7 @@ WHERE pr.is_fixed_role = 0
 ORDER BY pr.name, type_desc;
 ```
 
-- [Get SQL Server user permissions](#http://dbadailystuff.com/2012/08/20/get-sql-server-user-permissions)
+- [Get SQL Server user permissions](http://dbadailystuff.com/2012/08/20/get-sql-server-user-permissions)
 
 ```sql
 EXECUTE AS USER = 'Bob';
