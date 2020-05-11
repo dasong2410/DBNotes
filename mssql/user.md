@@ -107,6 +107,99 @@ GO
 <a href="Permission"></a>
 ### [Permission](#Table-of-Contents)
 
+- [Permissions (Database Engine)](#https://docs.microsoft.com/en-us/sql/relational-databases/security/permissions-database-engine?view=sql-server-ver15)
+
+- [GRANT Database Permissions (Transact-SQL)](#https://docs.microsoft.com/en-us/sql/t-sql/statements/grant-database-permissions-transact-sql?view=sql-server-ver15)
+
+- [Determining Effective Database Engine Permissions](#https://docs.microsoft.com/en-us/sql/relational-databases/security/authentication-access/determining-effective-database-engine-permissions?view=sql-server-ver15)
+
+- [REVERT (Transact-SQL)](#https://docs.microsoft.com/en-us/sql/t-sql/statements/revert-transact-sql?view=sql-server-ver15)
+
+- [Permissions Hierarchy (Database Engine)](#https://docs.microsoft.com/en-us/sql/relational-databases/security/permissions-hierarchy-database-engine?view=sql-server-ver15)
+
+```sql
+# sys.server_principals
+# sys.server_role_members
+# sys.server_principals
+#
+# sys.database_principals
+# sys.database_role_members
+# sys.database_principals
+
+# login, role relation
+select u.name login_name, u.principal_id login_id,
+       r.name role_name, r.principal_id role_id
+  from sys.server_principals u, sys.server_role_members m, sys.server_principals r
+ where u.principal_id=m.member_principal_id
+   and m.role_principal_id = r.principal_id
+   and r.type='R'
+ order by login_name;
+
+# user, role relation
+select u.name user_name, u.principal_id user_id,
+       r.name role_name, r.principal_id role_id
+  from sys.database_principals u, sys.database_role_members m, sys.database_principals r
+ where u.principal_id=m.member_principal_id
+   and m.role_principal_id = r.principal_id
+   and r.type='R'
+ order by user_name;
+```
+
+```sql
+# aimetl is a role
+grant SELECT to aimetl;
+grant INSERT to aimetl;
+grant UPDATE to aimetl;
+grant DELETE to aimetl;
+grant EXECUTE to aimetl;
+
+# Server Permissions
+SELECT pr.type_desc, pr.name, 
+ isnull (pe.state_desc, 'No permission statements') AS state_desc, 
+ isnull (pe.permission_name, 'No permission statements') AS permission_name 
+ FROM sys.server_principals AS pr
+ LEFT OUTER JOIN sys.server_permissions AS pe
+   ON pr.principal_id = pe.grantee_principal_id
+ WHERE is_fixed_role = 0 -- Remove for SQL Server 2008
+ ORDER BY pr.name, type_desc;
+
+# Database Permissions
+SELECT pr.type_desc, pr.name, 
+ isnull (pe.state_desc, 'No permission statements') AS state_desc, 
+ isnull (pe.permission_name, 'No permission statements') AS permission_name 
+FROM sys.database_principals AS pr
+LEFT OUTER JOIN sys.database_permissions AS pe
+    ON pr.principal_id = pe.grantee_principal_id
+WHERE pr.is_fixed_role = 0 
+ORDER BY pr.name, type_desc;
+```
+
+- [Get SQL Server user permissions](#http://dbadailystuff.com/2012/08/20/get-sql-server-user-permissions)
+
+```sql
+EXECUTE AS USER = 'Bob';
+
+-- Server rights
+SELECT * FROM fn_my_permissions(NULL, 'SERVER');
+
+-- Database rights
+SELECT * FROM fn_my_permissions(NULL, 'DATABASE');
+
+-- Specific per object rigths
+SELECT T.TABLE_TYPE AS OBJECT_TYPE, T.TABLE_SCHEMA AS [SCHEMA_NAME], T.TABLE_NAME AS [OBJECT_NAME], P.PERMISSION_NAME 
+    FROM INFORMATION_SCHEMA.TABLES T
+    CROSS APPLY fn_my_permissions(T.TABLE_SCHEMA + '.' + T.TABLE_NAME, 'OBJECT') P
+    WHERE P.subentity_name = ''
+UNION
+SELECT R.ROUTINE_TYPE AS OBJECT_TYPE, R.ROUTINE_SCHEMA AS [SCHEMA_NAME], R.ROUTINE_NAME AS [OBJECT_NAME], P.PERMISSION_NAME
+    FROM INFORMATION_SCHEMA.ROUTINES R
+    CROSS APPLY fn_my_permissions(R.ROUTINE_SCHEMA + '.' + R.ROUTINE_NAME, 'OBJECT') P
+ORDER BY OBJECT_TYPE, [SCHEMA_NAME], [OBJECT_NAME], P.PERMISSION_NAME
+
+REVERT;
+GO
+```
+
 ```sql
 EXEC sp_addsrvrolemember 'Corporate\HelenS', 'sysadmin';
 GO
