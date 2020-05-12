@@ -205,9 +205,3 @@ select * from schwms_molexctu.sys.database_principals
 use schwms_molexctu;
 --use schwms_molexinv;
 SELECT *  FROM sys.sql_modules where lower(definition) like '%execute as%';
-
-USE schwms_molexctu;  
-GO  
-EXEC sp_helptext N'[dbo].[BAX_kwc_EdtNumeric]';  
-SELECT OBJECT_DEFINITION (OBJECT_ID(N'[dbo].[BAX_kwc_EdtNumeric]'));  
-

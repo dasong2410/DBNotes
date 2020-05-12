@@ -105,8 +105,68 @@ ALTER LOGIN [shcooper] WITH CHECK_POLICY = ON;
 GO
 ```
 
+<a href="Query-user"></a>
+### [Query user](#Table-of-Contents)
+
+```sql
+# get user sid
+select SUSER_SID('sa');
+
+# get user name
+select SUSER_SNAME(0x01);
+```
+
+<a href="Login&User-mapping"></a>
+### [Login&User mapping](#Table-of-Contents)
+
+- All logins and users mapping
+```sql
+# https://www.sqlserver-dba.com/2015/01/how-to-list-sql-logins-and-database-user-mappings.html
+
+--Step 1 : Create temp tab;le
+CREATE TABLE #tempMappings
+(
+    LoginName nvarchar(1000),
+    DBname    nvarchar(1000),
+    Username  nvarchar(1000),
+    Alias     nvarchar(1000)
+)
+
+--Step 2:Insert the sp_msloginmappings into the temp table
+INSERT INTO #tempMappings
+    EXEC master..sp_msloginmappings
+
+--Step 3 : List the results . Filter as required
+SELECT *
+FROM #tempMappings
+ORDER BY DBname, username
+
+--Step 4: Manage cleanup of temp table
+DROP TABLE #tempMappings
+```
+
+- Specific login mapping
+```sql
+# @loginname: the login account name, If loginname is not specified, results are returned for the login accounts
+# @Flags: value can be 0 and 1, by default 0. 0 means show mapping user in all databases. 1 indicates how mapping user in current database context.
+exec sp_msloginmappings @Loginname , @Flags
+
+# show mapping user in all databases
+exec sp_msloginmappings 'sa', 0;
+
+# show mapping user in current database
+exec sp_msloginmappings 'sa', 1;
+```
+
+
 <a href="Permission"></a>
 ### [Permission](#Table-of-Contents)
+
+```sql
+-- all permissions of user: test1
+select * from sys.database_permissions
+ where grantee_principal_id=user_id('test1');
+```
 
 - [Permissions (Database Engine)](https://docs.microsoft.com/en-us/sql/relational-databases/security/permissions-database-engine?view=sql-server-ver15)
 
@@ -148,10 +208,7 @@ select u.name user_name, u.principal_id user_id,
 
 ```sql
 # aimetl is a role
-grant SELECT to aimetl;
-grant INSERT to aimetl;
-grant UPDATE to aimetl;
-grant DELETE to aimetl;
+grant CONNECT to aimetl;
 grant EXECUTE to aimetl;
 
 # Server Permissions
@@ -165,7 +222,7 @@ SELECT pr.type_desc, pr.name,
  ORDER BY pr.name, type_desc;
 
 # Database Permissions
-SELECT pr.type_desc, pr.name, 
+SELECT distinct pr.type_desc, pr.name, 
  isnull (pe.state_desc, 'No permission statements') AS state_desc, 
  isnull (pe.permission_name, 'No permission statements') AS permission_name 
 FROM sys.database_principals AS pr
@@ -215,27 +272,6 @@ GRANT VIEW Definition TO PUBLIC;
 USE master
 GO
 GRANT VIEW ANY DEFINITION TO User1;
-```
-
-<a href="Query-user"></a>
-### [Query user](#Table-of-Contents)
-
-```sql
-# get user sid
-select SUSER_SID('sa');
-
-# get user name
-select SUSER_SNAME(0x01);
-```
-
-<a href="Login&User-mapping"></a>
-### [Login&User mapping](#Table-of-Contents)
-
-https://www.sqlserver-dba.com/2015/01/how-to-list-sql-logins-and-database-user-mappings.html
-
-```sql
-exec sp_msloginmappings 'sa', 1;
-exec sp_msloginmappings 'test1', 0;
 ```
 
 <a href="Activated-users"></a>

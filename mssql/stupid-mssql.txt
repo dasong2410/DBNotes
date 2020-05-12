@@ -4,3 +4,4 @@ Stupid MSSQL
 3. can not increase column len if there is an index on it
 4. logshipping is just couple jobs to backup, copy and retore logs to sendary database, so crude
 5. job history has a up limit, default 1000 totally, 100 per job
+6. offering too much procedures, and make it too complex
