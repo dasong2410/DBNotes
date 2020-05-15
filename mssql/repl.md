@@ -74,6 +74,12 @@ GO
 ## [Query replication metadata](#Table-of-Contents)
 
 ```sql
+select * from distribution.dbo.MSlogreader_agents;
+select * from distribution.dbo.MSlogreader_history;
+
+select * from distribution.dbo.MSdistribution_agents;
+select * from distribution.dbo.MSdistribution_history;
+
 select distinct article from distribution.dbo.MSarticles;
 
 select * from distribution.dbo.MSpublications;
