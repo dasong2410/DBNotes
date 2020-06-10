@@ -32,12 +32,12 @@ GO
 
 ```sql
 # create login
-CREATE LOGIN shcooper   
-  WITH PASSWORD = 'Baz1nga'
+CREATE LOGIN shcooper
+  WITH PASSWORD = 'Baz1nga',
        DEFAULT_DATABASE = MyDatabase,
-       DEFAULT_LANGUAGE = us_english
+       DEFAULT_LANGUAGE = us_english,
        CHECK_POLICY = ON,
-       CHECK_EXPIRATION = OFF;  
+       CHECK_EXPIRATION = OFF;
 GO
 
 # add to db_owner role

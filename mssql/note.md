@@ -1,42 +1,9 @@
 <a name="Table-of-Contents"></a>
 # Table of Contents
 
-- [Procedure](#Procedure)
 - [Job](#Job)
-- [File size](#File-size)
 - [Log](#Log)
-- [Indexes](#Indexes)
 - [Misc](#Misc)
-
-<a name="Procedure"></a>
-## [Procedure](#Table-of-Contents)
-
-```sql
-select *
-from sys.procedures
-where is_auto_executed = 1;
-
-
-USE MASTER
-GO
-SELECT VALUE, VALUE_IN_USE, DESCRIPTION
-FROM SYS.CONFIGURATIONS
-WHERE NAME = 'scan for startup procs'
-
-
-
-sp_procoption
-
-
-select *
-from sys.procedures
-where is_auto_executed = 1;
-
-
-SELECT *
-FROM MASTER.INFORMATION_SCHEMA.ROUTINES
-WHERE OBJECTPROPERTY(OBJECT_ID(ROUTINE_NAME),'ExecIsStartup') = 1
-```
 
 <a name="Job"></a>
 ## [Job](#Table-of-Contents)
@@ -89,16 +56,6 @@ select job.job_id, job.name, jobh.step_name, jobh.run_status, jobh.message,
     order by run_date desc, run_time desc;
 ```
 
-<a name="File size"></a>
-## [File size](#Table-of-Contents)
-
-```sql
-select db_name(database_id) database_name, name file_name, physical_name,
-        cast(size*8/1024/1024.0 as numeric(36, 2)) "Size(G)",
-        cast((sum(size) over(partition by database_id))*8/1024/1024.0 as numeric(36, 2)) "DB Size(G)"
-    from sys.master_files;
-```
-
 <a name="Log"></a>
 ## [Log](#Table-of-Contents)
 
@@ -141,37 +98,6 @@ EXEC sp_readerrorlog 0, 1;
 EXEC sp_readerrorlog 0, 2;
 ```
 
-<a name="Indexes"><a/>
-## [Indexes](#Table-of-Contents)
-
-```sql
-SELECT 
-     TableName = t.name,
-     IndexName = ind.name,
-     IndexId = ind.index_id,
-     ColumnId = ic.index_column_id,
-     ColumnName = col.name,
-     ind.*,
-     ic.*,
-     col.* 
-FROM 
-     sys.indexes ind 
-INNER JOIN 
-     sys.index_columns ic ON  ind.object_id = ic.object_id and ind.index_id = ic.index_id 
-INNER JOIN 
-     sys.columns col ON ic.object_id = col.object_id and ic.column_id = col.column_id 
-INNER JOIN 
-     sys.tables t ON ind.object_id = t.object_id 
-WHERE 
-     ind.is_primary_key = 0 
-     AND ind.is_unique = 0 
-     AND ind.is_unique_constraint = 0 
-     AND t.is_ms_shipped = 0 
-ORDER BY 
-     t.name, ind.name, ind.index_id, ic.index_column_id;
-```
-
-
 <a name="Misc"></a>
 ## [Misc](#Table-of-Contents)
 
@@ -186,33 +112,11 @@ where name like '% server memory%';
 #
 
 ```sql
-Accelerated Database Recovery (ADR)
-
-ALTER DATABASE MyDatabase  
-SET ALLOW_SNAPSHOT_ISOLATION ON  
-
-ALTER DATABASE MyDatabase  
-SET READ_COMMITTED_SNAPSHOT ON  
-
-
-
 4
 -- Let's dump out a specific Data Page.
 -- The record size is currently 2011 bytes (7 + 4 + 1000 + 1000).
 DBCC PAGE(RCSI_SideEffects, 1, 224, 1)
 GO
-```
-
-```sql
-1. DROP DATABASE Practice
-
-2. RESTORE DATABASE Practice FROM DISK = 'D:/Practice.BAK' WITH NORECOVERY
-
-3. RESTORE DATABASE Practice FROM DISK = 'D:/Practice1.TRN' WITH NORECOVERY
-
-4. RESTORE DATABASE Practice FROM DISK = 'D:/Practice2.TRN' WITH NORECOVERY
-
-5. RESTORE DATABASE Practice WITH RECOVERY
 ```
 
 #
@@ -236,28 +140,6 @@ select backup_set_id, backup_set_uuid, name, first_lsn, last_lsn, checkpoint_lsn
 select * from msdb.INFORMATION_SCHEMA.COLUMNS where COLUMN_NAME like '%lsn%';
 
 select * from sys.database_files;
-```
-
-#
-
-```sql
-ALTER DATABASE Applecare_Prod
-SET SINGLE_USER
-WITH ROLLBACK IMMEDIATE;
-
-GO
-
-use master;
-restore database Applecare_Prod with recovery;
-
-
-ALTER DATABASE Applecare_Prod
-SET multi_USER
-WITH ROLLBACK IMMEDIATE;
-
-GO
-
-DROP DATABASE Applecare_Prod;
 ```
 
 #
