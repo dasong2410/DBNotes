@@ -4,15 +4,18 @@ SET QUOTED_IDENTIFIER ON
 GO
 IF NOT EXISTS(SELECT *
               FROM sys.objects
-              WHERE object_id = OBJECT_ID(N'[dbo].[CreateLogshippingDirs]')
+              WHERE object_id = OBJECT_ID(N'[dbo].[dba_CreateLogshippingDirs]')
                 AND type in (N'P', N'PC'))
     BEGIN
-        EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[CreateLogshippingDirs] AS'
+        EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[dba_CreateLogshippingDirs] AS'
     END
 GO
 
-ALTER PROCEDURE [dbo].[CreateLogshippingDirs]
-    @LogshippingRootDir varchar(64)
+ALTER PROCEDURE [dbo].[dba_CreateLogshippingDirs]
+    @LogshippingRootDir varchar(64),
+        @PrimaryServer varchar(64),
+        @LogshippingSrcSharedDir varchar(64),
+        @database varchar(64) = '%'
     AS
     BEGIN
         set @LogshippingRootDir = LTRIM(RTRIM(@LogshippingRootDir))
@@ -22,6 +25,17 @@ ALTER PROCEDURE [dbo].[CreateLogshippingDirs]
                 RAISERROR ('%s',10,1,'Please input logshipping root dir.') WITH NOWAIT
                 return
             end
+
+        declare @BackupFileDir varchar(128)
+        declare @BackupFiles table
+                             (
+                                 subdirectory varchar(128),
+                                 depth        int,
+                                 isFile       int
+                             )
+        set @BackupFileDir = '\\' + @PrimaryServer + '\' + @LogshippingSrcSharedDir + '\init'
+        insert into @BackupFiles
+            EXEC master..xp_dirtree @BackupFileDir, 10, 1
 
         DECLARE @DBName varchar(64);
         declare @LogshippingDBDir varchar(128);
@@ -34,9 +48,10 @@ ALTER PROCEDURE [dbo].[CreateLogshippingDirs]
                                );
 
         DECLARE CUR_DBNames CURSOR FAST_FORWARD FOR
-            select name from sys.databases where state = 1 or is_in_standby=1;
-
-        --set @LogshippingRootDir = 'C:\MSSQL_BACKUP2\Logshipping'
+            select SUBSTRING(subdirectory, 1, CHARINDEX('___', subdirectory) - 1) dbname
+            from @BackupFiles
+            where isFile = 1
+              and lower(subdirectory) like lower(@Database + '[___]%');
 
         OPEN CUR_DBNames
         FETCH NEXT FROM CUR_DBNames INTO @DBName

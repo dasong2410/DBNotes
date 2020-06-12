@@ -4,16 +4,17 @@ SET QUOTED_IDENTIFIER ON
 GO
 IF NOT EXISTS(SELECT *
               FROM sys.objects
-              WHERE object_id = OBJECT_ID(N'[dbo].[CreateLogshippingDirs]')
+              WHERE object_id = OBJECT_ID(N'[dbo].[dba_CreateLogshippingDirs]')
                 AND type in (N'P', N'PC'))
     BEGIN
-        EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[CreateLogshippingDirs] AS'
+        EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[dba_CreateLogshippingDirs] AS'
     END
 GO
 
-ALTER PROCEDURE [dbo].[CreateLogshippingDirs]
+ALTER PROCEDURE [dbo].[dba_CreateLogshippingDirs]
 
-    @LogshippingRootDir varchar(64)
+    @LogshippingRootDir varchar(64),
+        @Database varchar(64) = '%'
     AS
     BEGIN
         set @LogshippingRootDir = LTRIM(RTRIM(@LogshippingRootDir))
@@ -26,22 +27,15 @@ ALTER PROCEDURE [dbo].[CreateLogshippingDirs]
 
         DECLARE @DBName varchar(64);
         declare @LogshippingDBDir varchar(128);
-        declare @Command varchar(256);
-        DECLARE @DirectoryInfo TABLE
-                               (
-                                   FileExists            bit,
-                                   FileIsADirectory      bit,
-                                   ParentDirectoryExists bit
-                               );
+        DECLARE @ReturnCode int
 
         DECLARE CUR_DBNames CURSOR FAST_FORWARD FOR
             select name
             from logshipping_cfg
             where logshipping = 1
+              and lower(name) like lower(@Database)
             union all
             select 'init' name;
-
-        --set @LogshippingRootDir = 'C:\MSSQL_BACKUP2\Logshipping'
 
         OPEN CUR_DBNames
         FETCH NEXT FROM CUR_DBNames INTO @DBName
@@ -50,22 +44,15 @@ ALTER PROCEDURE [dbo].[CreateLogshippingDirs]
             BEGIN
                 set @LogshippingDBDir = @LogshippingRootDir + '\' + @DBName
 
-                delete from @DirectoryInfo
-                INSERT INTO @DirectoryInfo (FileExists, FileIsADirectory, ParentDirectoryExists)
-                    EXECUTE [master].dbo.xp_fileexist @LogshippingDBDir
+                -- if db dir exists
+                declare @Exist int
+                exec dba_FileExist @LogshippingDBDir, @isDirectory=1, @Exist = @Exist output
 
-                IF NOT EXISTS(SELECT *
-                              FROM @DirectoryInfo
-                              WHERE FileExists = 0
-                                AND FileIsADirectory = 1
-                                AND ParentDirectoryExists = 1)
+                -- create db dir if not exist
+                IF @Exist = 0
                     BEGIN
-                        SET @Command =
-                                    'DECLARE @ReturnCode int EXECUTE @ReturnCode = [master].dbo.xp_create_subdir N''' +
-                                    @LogshippingRootDir + '\' + @DBName +
-                                    ''' IF @ReturnCode <> 0 RAISERROR(''Error creating directory.'', 16, 1)'
-                        print @Command
-                        execute (@Command)
+                        exec @ReturnCode = [master].dbo.xp_create_subdir @LogshippingDBDir
+                        IF @ReturnCode <> 0 RAISERROR ('Error creating directory.', 16, 1)
                     END
                 else
                     print 'Directory already exists: ' + @LogshippingDBDir

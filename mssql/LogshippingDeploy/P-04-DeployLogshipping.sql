@@ -4,26 +4,30 @@ SET QUOTED_IDENTIFIER ON
 GO
 IF NOT EXISTS(SELECT *
               FROM sys.objects
-              WHERE object_id = OBJECT_ID(N'[dbo].[DeployLogshipping]')
+              WHERE object_id = OBJECT_ID(N'[dbo].[dba_DeployLogshipping]')
                 AND type in (N'P', N'PC'))
     BEGIN
-        EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[DeployLogshipping] AS'
+        EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[dba_DeployLogshipping] AS'
     END
 GO
 
 IF NOT EXISTS(SELECT *
               FROM sys.objects
-              WHERE object_id = OBJECT_ID(N'[dbo].[DeployLogshippingSub]')
+              WHERE object_id = OBJECT_ID(N'[dbo].[dba_DeployLogshippingSub]')
                 AND type in (N'P', N'PC'))
     BEGIN
-        EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[DeployLogshippingSub] AS'
+        EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[dba_DeployLogshippingSub] AS'
     END
 GO
 
-ALTER PROCEDURE [dbo].[DeployLogshipping]
+ALTER PROCEDURE [dbo].[dba_DeployLogshipping]
     @LogshippingRootDir varchar(64),
         @PrimaryServer varchar(64),
-        @SecondaryServer varchar(64)
+        @PrimaryServerPort varchar(64),
+        @SecondaryServer varchar(64),
+        @SecondaryServerPort varchar(64),
+        @LogshippingSharedDir varchar(64) = 'Logshipping',
+        @Database varchar(64) = '%'
     AS
     BEGIN
 
@@ -40,18 +44,22 @@ ALTER PROCEDURE [dbo].[DeployLogshipping]
         DECLARE CUR_DBNames CURSOR FAST_FORWARD FOR
             select name
             from logshipping_cfg
-            where logshipping = 1;
+            where logshipping = 1
+              and lower(name) like lower(@Database);
 
         OPEN CUR_DBNames
         FETCH NEXT FROM CUR_DBNames INTO @DBName
 
         WHILE @@FETCH_STATUS = 0
             BEGIN
-                exec DeployLogshippingSub
+                exec dba_DeployLogshippingSub
                      @LogshippingRootDir = @LogshippingRootDir
                     , @DBName=@DBName
                     , @PrimaryServer = @PrimaryServer
+                    , @PrimaryServerPort = @PrimaryServerPort
                     , @SecondaryServer = @SecondaryServer
+                    , @SecondaryServerPort = @SecondaryServerPort
+                    , @LogshippingSharedDir = @LogshippingSharedDir
 
                 FETCH NEXT FROM CUR_DBNames INTO @DBName
             END
@@ -63,22 +71,27 @@ ALTER PROCEDURE [dbo].[DeployLogshipping]
 GO
 
 
-ALTER PROCEDURE [dbo].[DeployLogshippingSub]
+ALTER PROCEDURE [dbo].[dba_DeployLogshippingSub]
     @LogshippingRootDir varchar(64),
         @DBName varchar(64),
         @PrimaryServer varchar(64),
-        @SecondaryServer varchar(64)
+        @PrimaryServerPort varchar(64),
+        @SecondaryServer varchar(64),
+        @SecondaryServerPort varchar(64),
+        @LogshippingSharedDir varchar(64)
     AS
     BEGIN
+        declare @Secondary varchar(64)
         declare @backup_directory varchar(64)
         declare @backup_share varchar(64)
         declare @backup_job_name varchar(64)
         declare @schedule_name varchar(64)
 
+        set @Secondary = @SecondaryServer + ',' + @SecondaryServerPort
         set @backup_directory = @LogshippingRootDir + '\' + @DBName
-        set @backup_share = '\\' + @PrimaryServer + '\Logshipping\' + @DBName
+        set @backup_share = '\\' + @PrimaryServer + '\' + @LogshippingSharedDir + '\' + @DBName
         set @backup_job_name = 'LSBackup_' + @DBName
-        set @schedule_name = 'LSBackupSchedule_' + @DBName
+        set @schedule_name = 'LSBackupSchedule_' + @DBName + ',' + @PrimaryServerPort
 
         print @backup_directory
         print @backup_share
@@ -91,7 +104,7 @@ ALTER PROCEDURE [dbo].[DeployLogshippingSub]
         DECLARE @SP_Add_RetCode As int
 
         EXEC @SP_Add_RetCode = master.dbo.sp_add_log_shipping_primary_database
-                               @database = @DBName
+                               @Database = @DBName
             , @backup_directory = @backup_directory
             , @backup_share = @backup_share
             , @backup_job_name = @backup_job_name
@@ -146,7 +159,7 @@ ALTER PROCEDURE [dbo].[DeployLogshippingSub]
 
         EXEC master.dbo.sp_add_log_shipping_primary_secondary
              @primary_database = @DBName
-            , @secondary_server = @SecondaryServer
+            , @secondary_server = @Secondary
             , @secondary_database = @DBName
             , @overwrite = 1
 
