@@ -38,6 +38,7 @@ exec dba_LogshippingClean
 exec dba_RestoreLogshippingDBs
      @PrimaryServer = '10.213.20.18'
     , @LogshippingSrcSharedDir = 'Logshipping'
+    , @DatafileLocation = 'd:\database'
 exec dba_CreateLogshippingDirs
      @LogshippingRootDir = 'C:\LogShipping'
     , @PrimaryServer = '10.213.20.18'
@@ -76,6 +77,7 @@ exec dba_LogshippingClean
 exec dba_RestoreLogshippingDBs
      @PrimaryServer = '10.213.20.18'
     , @LogshippingSharedDir = 'Logshipping'
+    , @DatafileLocation = 'd:\database'
     , @Database = 'test10'
 exec dba_CreateLogshippingDirs
      @LogshippingRootDir = 'C:\Logshipping'

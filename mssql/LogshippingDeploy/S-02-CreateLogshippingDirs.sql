@@ -39,7 +39,8 @@ ALTER PROCEDURE [dbo].[dba_CreateLogshippingDirs]
 
         DECLARE @DBName varchar(64);
         declare @LogshippingDBDir varchar(128);
-        declare @Command varchar(256);
+        DECLARE @ReturnCode int
+
         DECLARE @DirectoryInfo TABLE
                                (
                                    FileExists            bit,
@@ -70,12 +71,8 @@ ALTER PROCEDURE [dbo].[dba_CreateLogshippingDirs]
                                 AND FileIsADirectory = 1
                                 AND ParentDirectoryExists = 1)
                     BEGIN
-                        SET @Command =
-                                    'DECLARE @ReturnCode int EXECUTE @ReturnCode = [master].dbo.xp_create_subdir N''' +
-                                    @LogshippingRootDir + '\' + @DBName +
-                                    ''' IF @ReturnCode <> 0 RAISERROR(''Error creating directory.'', 16, 1)'
-                        print @Command
-                        execute (@Command)
+                        exec @ReturnCode = [master].dbo.xp_create_subdir @LogshippingDBDir
+                        IF @ReturnCode <> 0 RAISERROR ('Error creating directory.', 16, 1)
                     END
                 else
                     print 'Directory already exists: ' + @LogshippingDBDir
