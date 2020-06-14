@@ -11,16 +11,17 @@ IF NOT EXISTS(SELECT *
     END
 GO
 
+use master
+go
+
 ALTER PROCEDURE [dbo].[dba_LogshippingClean]
-    @SecondaryServer varchar(64),
-        @SecondaryServerPort varchar(64),
+    @SecondaryServers varchar(64), -- ip,port;ip,port
         @Database varchar(64) = '%'
     AS
     BEGIN
-        declare @Secondary varchar(64)
+        declare @SecondaryServer varchar(64)
         DECLARE @DBName varchar(64)
 
-        set @Secondary = @SecondaryServer + ',' + @SecondaryServerPort
 
         DECLARE CUR_DBNames CURSOR FAST_FORWARD FOR
             select name
@@ -30,22 +31,35 @@ ALTER PROCEDURE [dbo].[dba_LogshippingClean]
 
         OPEN CUR_DBNames
         FETCH NEXT FROM CUR_DBNames INTO @DBName
-
+        -- loop logshipping database
         WHILE @@FETCH_STATUS = 0
-            BEGIN
-                EXEC sp_delete_log_shipping_primary_secondary
-                     @primary_database = @DBName
-                    , @secondary_server = @Secondary
-                    , @secondary_database = @DBName
+            begin
+                DECLARE CUR_SecondaryServers CURSOR FAST_FORWARD FOR
+                    SELECT value FROM STRING_SPLIT(@SecondaryServers, ';')
 
-                exec sp_delete_log_shipping_primary_database
-                     @Database = @DBName
+                OPEN CUR_SecondaryServers
+                FETCH NEXT FROM CUR_SecondaryServers INTO @SecondaryServer
+                -- loop secondary server
+                WHILE @@FETCH_STATUS = 0
+                    BEGIN
+                        EXEC sp_delete_log_shipping_primary_secondary
+                             @primary_database = @DBName
+                            , @secondary_server = @SecondaryServer
+                            , @secondary_database = @DBName
+
+                        exec sp_delete_log_shipping_primary_database
+                             @Database = @DBName
+
+                        FETCH NEXT FROM CUR_SecondaryServers INTO @SecondaryServer
+                    END
+
+                CLOSE CUR_SecondaryServers
+                DEALLOCATE CUR_SecondaryServers
 
                 FETCH NEXT FROM CUR_DBNames INTO @DBName
-            END
+            end
 
         CLOSE CUR_DBNames
         DEALLOCATE CUR_DBNames
-
     END
 GO

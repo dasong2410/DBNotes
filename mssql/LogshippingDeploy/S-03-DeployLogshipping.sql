@@ -1,3 +1,6 @@
+use master
+go
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -21,17 +24,15 @@ IF NOT EXISTS(SELECT *
 GO
 
 ALTER PROCEDURE [dbo].[dba_DeployLogshipping]
-    @PrimaryServer varchar(64),
-        @PrimaryServerPort varchar(64),
-        @SecondaryServer varchar(64),
-        @SecondaryServerPort varchar(64),
+    @PrimaryServer varchar(64), -- ip,port
+        @SecondaryServer varchar(64), -- ip,port
         @LogshippingSrcSharedDir varchar(64) = 'Logshipping',
         @LogshippingDestSharedDir varchar(64) = 'Logshipping',
         @Database varchar(64) = '%'
     AS
     BEGIN
         DECLARE @DBName varchar(64);
-
+        declare @PrimaryServerHost varchar(64)
         declare @BackupFileDir varchar(128)
         declare @BackupFiles table
                              (
@@ -39,7 +40,10 @@ ALTER PROCEDURE [dbo].[dba_DeployLogshipping]
                                  depth        int,
                                  isFile       int
                              )
-        set @BackupFileDir = '\\' + @PrimaryServer + '\' + @LogshippingSrcSharedDir + '\init'
+
+        set @PrimaryServerHost = substring(@PrimaryServer, 1, charindex(',', @PrimaryServer) - 1)
+        set @BackupFileDir = '\\' + @PrimaryServerHost + '\' + @LogshippingSrcSharedDir + '\init'
+
         insert into @BackupFiles
             EXEC master..xp_dirtree @BackupFileDir, 10, 1
 
@@ -57,9 +61,7 @@ ALTER PROCEDURE [dbo].[dba_DeployLogshipping]
                 exec dba_DeployLogshippingSub
                      @DBName=@DBName
                     , @PrimaryServer = @PrimaryServer
-                    , @PrimaryServerPort = @PrimaryServerPort
                     , @SecondaryServer = @SecondaryServer
-                    , @SecondaryServerPort = @SecondaryServerPort
                     , @LogshippingSrcSharedDir = @LogshippingSrcSharedDir
                     , @LogshippingDestSharedDir = @LogshippingDestSharedDir
 
@@ -75,27 +77,27 @@ GO
 
 ALTER PROCEDURE [dbo].[dba_DeployLogshippingSub]
     @DBName varchar(64),
-        @PrimaryServer varchar(64),
-        @PrimaryServerPort varchar(64),
-        @SecondaryServer varchar(64),
-        @SecondaryServerPort varchar(64),
+        @PrimaryServer varchar(64), -- ip,port
+        @SecondaryServer varchar(64), -- ip,port
         @LogshippingSrcSharedDir varchar(64) = 'Logshipping',
         @LogshippingDestSharedDir varchar(64) = 'Logshipping'
     AS
     BEGIN
-        declare @Primary varchar(64)
-        declare @Secondary varchar(64)
+        declare @PrimaryServerHost varchar(64)
+        declare @PrimaryServerPort varchar(64)
         declare @backup_source_directory varchar(64)
         declare @backup_destination_directory varchar(64)
         declare @copy_job_name varchar(64)
         declare @restore_job_name varchar(64)
 
-        set @Primary = @PrimaryServer + ',' + @PrimaryServerPort
-        set @Secondary = @SecondaryServer + ',' + @SecondaryServerPort
-        set @backup_source_directory = '\\' + @PrimaryServer + '\' + @LogshippingSrcSharedDir + '\' + @DBName
+        -- split primary server to host and port
+        set @PrimaryServerHost = substring(@PrimaryServer, 1, charindex(',', @PrimaryServer) - 1)
+        set @PrimaryServerPort = substring(@PrimaryServer, charindex(',', @PrimaryServer) + 1, len(@PrimaryServer))
+
+        set @backup_source_directory = '\\' + @PrimaryServerHost + '\' + @LogshippingSrcSharedDir + '\' + @DBName
         set @backup_destination_directory = '\\' + @SecondaryServer + '\' + @LogshippingDestSharedDir + '\' + @DBName
-        set @copy_job_name = 'LSCopy_' + @Primary + '_' + @DBName
-        set @restore_job_name = 'LSRestore_' + @Secondary + '_' + @DBName
+        set @copy_job_name = 'LSCopy_' + @PrimaryServer + '_' + @DBName
+        set @restore_job_name = 'LSRestore_' + @SecondaryServer + '_' + @DBName
 
 
         print @backup_source_directory
@@ -112,7 +114,7 @@ ALTER PROCEDURE [dbo].[dba_DeployLogshippingSub]
 
 
         EXEC @LS_Add_RetCode = master.dbo.sp_add_log_shipping_secondary_primary
-                               @primary_server = @Primary
+                               @primary_server = @PrimaryServer
             , @primary_database = @DBName
             , @backup_source_directory = @backup_source_directory
             , @backup_destination_directory = @backup_destination_directory
@@ -185,7 +187,7 @@ ALTER PROCEDURE [dbo].[dba_DeployLogshippingSub]
 
                 EXEC @LS_Add_RetCode2 = master.dbo.sp_add_log_shipping_secondary_database
                                         @secondary_database = @DBName
-                    , @primary_server = @Primary
+                    , @primary_server = @PrimaryServer
                     , @primary_database = @DBName
                     , @restore_delay = 0
                     , @restore_mode = 0

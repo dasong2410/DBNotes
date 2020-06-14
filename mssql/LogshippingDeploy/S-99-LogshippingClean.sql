@@ -1,3 +1,6 @@
+use master
+go
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -36,6 +39,5 @@ ALTER PROCEDURE [dbo].[dba_LogshippingClean]
 
         CLOSE CUR_DBNames
         DEALLOCATE CUR_DBNames
-
     END
 GO

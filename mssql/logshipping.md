@@ -42,6 +42,7 @@
 
 	-- primary database
 	select * from msdb.dbo.log_shipping_primary_databases;
+	select * from msdb.dbo.log_shipping_primary_secondaries;
 	select * from msdb.dbo.log_shipping_monitor_primary;
 	
 	-- secondary database

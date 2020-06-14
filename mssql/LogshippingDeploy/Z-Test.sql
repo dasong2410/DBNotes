@@ -4,11 +4,13 @@ go
 
 DROP PROCEDURE IF EXISTS [dbo].[dba_CreateLogshippingDirs];
 DROP PROCEDURE IF EXISTS [dbo].[dba_CreateDBInitBackups];
-DROP PROCEDURE IF EXISTS [dbo].[dba_DeployLogshippingSub];
 DROP PROCEDURE IF EXISTS [dbo].[dba_DeployLogshipping];
+DROP PROCEDURE IF EXISTS [dbo].[dba_DeployLogshippingAddPrimary];
+DROP PROCEDURE IF EXISTS [dbo].[dba_DeployLogshippingAddSecondary];
 DROP PROCEDURE IF EXISTS [dbo].[dba_LogshippingClean];
 
 DROP PROCEDURE IF EXISTS [dbo].[dba_RestoreLogshippingDBs];
+DROP PROCEDURE IF EXISTS [dbo].[dba_DeployLogshippingSub];
 
 DROP PROCEDURE IF EXISTS [dbo].[dba_DeleteBackupFile];
 DROP PROCEDURE IF EXISTS [dbo].[dba_FileExist];
@@ -25,14 +27,11 @@ exec dba_CreateDBInitBackups
      @LogshippingRootDir = 'C:\Logshipping'
 exec dba_DeployLogshipping
      @LogshippingRootDir = 'C:\Logshipping'
-    , @PrimaryServer = '10.213.20.18'
-    , @PrimaryServerPort = '1433'
-    , @SecondaryServer = '10.213.20.38'
-    , @SecondaryServerPort = '1436'
+    , @PrimaryServer = '10.213.20.18,1433'
+    , @SecondaryServers = '10.213.20.38,1436'
 
 exec dba_LogshippingClean
-     @SecondaryServer = '10.213.20.38'
-    , @SecondaryServerPort= '1436'
+     @SecondaryServers = '10.213.20.38,1436'
 
 -- Secondary
 exec dba_RestoreLogshippingDBs
@@ -40,14 +39,12 @@ exec dba_RestoreLogshippingDBs
     , @LogshippingSrcSharedDir = 'Logshipping'
     , @DatafileLocation = 'd:\database'
 exec dba_CreateLogshippingDirs
-     @LogshippingRootDir = 'C:\LogShipping'
+     @LogshippingRootDir = 'C:\Logshipping'
     , @PrimaryServer = '10.213.20.18'
     , @LogshippingSrcSharedDir = 'Logshipping'
 exec dba_DeployLogshipping
-     @PrimaryServer = '10.213.20.18'
-    , @PrimaryServerPort = '1433'
-    , @SecondaryServer = '10.213.20.38'
-    , @SecondaryServerPort = '1436'
+     @PrimaryServer = '10.213.20.18,1433'
+    , @SecondaryServer = '10.213.20.38,1436'
     , @LogshippingSrcSharedDir = 'Logshipping'
     , @LogshippingDestSharedDir = 'Logshipping'
 
@@ -63,20 +60,18 @@ exec dba_CreateDBInitBackups
     , @Database = 'test10'
 exec dba_DeployLogshipping
      @LogshippingRootDir = 'C:\Logshipping'
-    , @PrimaryServer = '10.213.20.18'
-    , @PrimaryServerPort = '1433'
-    , @SecondaryServer = '10.213.20.38'
-    , @SecondaryServerPort = '1436'
+    , @PrimaryServer = '10.213.20.18,1433'
+    , @SecondaryServers = '10.213.20.38,1436'
     , @Database = 'test10'
 
 exec dba_LogshippingClean
-     @SecondaryServer = '10.213.20.38'
+     @SecondaryServers = '10.213.20.38,1436'
     , @Database = 'test10'
 
 -- Secondary
 exec dba_RestoreLogshippingDBs
      @PrimaryServer = '10.213.20.18'
-    , @LogshippingSharedDir = 'Logshipping'
+    , @LogshippingSrcSharedDir = 'Logshipping'
     , @DatafileLocation = 'd:\database'
     , @Database = 'test10'
 exec dba_CreateLogshippingDirs
@@ -85,10 +80,8 @@ exec dba_CreateLogshippingDirs
     , @LogshippingSrcSharedDir = 'Logshipping'
     , @Database = 'test10'
 exec dba_DeployLogshipping
-     @PrimaryServer = '10.213.20.18'
-    , @PrimaryServerPort = '1433'
-    , @SecondaryServer = '10.213.20.38'
-    , @SecondaryServerPort = '1436'
+     @PrimaryServer = '10.213.20.18,1433'
+    , @SecondaryServer = '10.213.20.38,1436'
     , @LogshippingSrcSharedDir = 'Logshipping'
     , @LogshippingDestSharedDir = 'Logshipping'
     , @Database = 'test10'

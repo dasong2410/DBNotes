@@ -1,3 +1,6 @@
+use master
+go
+
 create table logshipping_cfg
 (
     database_id     int,
