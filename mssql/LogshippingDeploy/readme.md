@@ -13,16 +13,17 @@
 
 #
 
+- All the effort is made to make logshipping setup friend for multiple databases, like 40 databases
 - All database objects created in master database
 
 <a name="Primary Server"></a>
 ## [**Primary Server**](#Table-of-Contents)
 
-### 1. Create logshipping root dir and make it shared on Primary Server
+### 1. Create logshipping root dir and make it shared
 
     D:\Logshipping
 
-### 2. Config logshipping metadata table and create procedures
+### 2. Configure logshipping metadata table and create procedures
 
 Run following sql scripts
 
@@ -47,26 +48,26 @@ exec dba_CreateDBInitBackups
      @LogshippingRootDir = 'LogshippingRootDir' -- D:\Logshipping
 ```
 
-### 5. Config databases
+### 5. Configure databases
 
 ```sql
 exec dba_DeployLogshipping
      @LogshippingRootDir = 'LogshippingRootDir' -- D:\Logshipping
-    , @PrimaryServer = 'PrimaryServer' -- ip,port
-    , @SecondaryServers = 'SecondaryServer' --ip,port;ip,port;ip,port
+    , @PrimaryServer = 'PrimaryServer'          -- ip,port
+    , @SecondaryServers = 'SecondaryServer'     -- ip,port;ip,port;ip,port
 ```
 
-### 6. Clean logshipping setups, if you need it
+### 6. Clean logshipping setups, if it needed
 
 ```sql
 exec dba_LogshippingClean
-     @SecondaryServers = 'SecondaryServer' -- ip,port;ip,port;ip,port
+     @SecondaryServers = 'SecondaryServer'      -- ip,port;ip,port;ip,port
 ```
 
 <a name="Secondary Server"></a>
 ## [**Secondary Server**](#Table-of-Contents)
 
-### 1. Create logshipping root dir and make it shared on Secondary Server
+### 1. Create logshipping root dir and make it shared
 
     D:\Logshipping
 
@@ -84,31 +85,31 @@ Run following sql scripts
 
 ```sql
 exec dba_RestoreLogshippingDBs
-     @PrimaryServer = 'PrimaryServer' -- ip
+     @PrimaryServer = 'PrimaryServer'            -- ip
     , @LogshippingSrcSharedDir = 'Logshipping'
-    , @DatafileLocation = 'DatafileLocation' -- D:\Database
+    , @DatafileLocation = 'DatafileLocation'     -- D:\Database
 ```
 
 ### 3. Create dirs for logshipping
 
 ```sql
 exec dba_CreateLogshippingDirs
-     @LogshippingRootDir = 'LogshippingRootDir' -- D:\Logshipping
-    , @PrimaryServer = 'PrimaryServer' -- ip
+     @LogshippingRootDir = 'LogshippingRootDir'  -- D:\Logshipping
+    , @PrimaryServer = 'PrimaryServer'           -- ip
     , @LogshippingSrcSharedDir = 'Logshipping'
 ```
 
-### 4. Config databases
+### 4. Configure databases
 
 ```sql
 exec dba_DeployLogshippingSecondary
-     @PrimaryServer = 'PrimaryServer' -- ip,port
-    , @SecondaryServer = 'SecondaryServer' -- ip,port
+     @PrimaryServer = 'PrimaryServer'            -- ip,port
+    , @SecondaryServer = 'SecondaryServer'       -- ip,port
     , @LogshippingSrcSharedDir = 'Logshipping'
     , @LogshippingDestSharedDir = 'Logshipping'
 ```
 
-### 5. Clean logshipping setups, if you need it
+### 5. Clean logshipping setups, if it needed
 
 ```sql
 exec dba_LogshippingClean
@@ -176,7 +177,7 @@ exec dba_DeployLogshipping
 exec dba_LogshippingClean
 ```
 
-
+<a name="Single database"></a>
 ### [**Single database**](#Table-of-Contents)
 
 ```sql
