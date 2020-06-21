@@ -1,20 +1,12 @@
+use master
+go
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF NOT EXISTS(SELECT *
-              FROM sys.objects
-              WHERE object_id = OBJECT_ID(N'[dbo].[dba_LogshippingClean]')
-                AND type in (N'P', N'PC'))
-    BEGIN
-        EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[dba_LogshippingClean] AS'
-    END
-GO
 
-use master
-go
-
-ALTER PROCEDURE [dbo].[dba_LogshippingClean]
+CREATE OR ALTER PROCEDURE [dbo].[dba_LogshippingClean]
     @SecondaryServers varchar(64), -- ip,port;ip,port
         @Database varchar(64) = '%'
     AS

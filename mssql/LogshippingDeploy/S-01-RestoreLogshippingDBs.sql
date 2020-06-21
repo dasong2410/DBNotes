@@ -5,16 +5,8 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF NOT EXISTS(SELECT *
-              FROM sys.objects
-              WHERE object_id = OBJECT_ID(N'[dbo].[dba_RestoreLogshippingDBs]')
-                AND type in (N'P', N'PC'))
-    BEGIN
-        EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[dba_RestoreLogshippingDBs] AS'
-    END
-GO
 
-ALTER PROCEDURE [dbo].[dba_RestoreLogshippingDBs]
+CREATE OR ALTER PROCEDURE [dbo].[dba_RestoreLogshippingDBs]
     @PrimaryServer varchar(64),
         @LogshippingSrcSharedDir varchar(64) = 'Logshipping',
         @DatafileLocation varchar(1024) = null,

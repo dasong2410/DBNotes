@@ -5,25 +5,8 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF NOT EXISTS(SELECT *
-              FROM sys.objects
-              WHERE object_id = OBJECT_ID(N'[dbo].[dba_DeployLogshipping]')
-                AND type in (N'P', N'PC'))
-    BEGIN
-        EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[dba_DeployLogshipping] AS'
-    END
-GO
 
-IF NOT EXISTS(SELECT *
-              FROM sys.objects
-              WHERE object_id = OBJECT_ID(N'[dbo].[dba_DeployLogshippingSub]')
-                AND type in (N'P', N'PC'))
-    BEGIN
-        EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[dba_DeployLogshippingSub] AS'
-    END
-GO
-
-ALTER PROCEDURE [dbo].[dba_DeployLogshipping]
+CREATE OR ALTER PROCEDURE [dbo].[dba_DeployLogshipping]
     @PrimaryServer varchar(64), -- ip,port
         @SecondaryServer varchar(64), -- ip,port
         @LogshippingSrcSharedDir varchar(64) = 'Logshipping',
@@ -75,7 +58,7 @@ ALTER PROCEDURE [dbo].[dba_DeployLogshipping]
 GO
 
 
-ALTER PROCEDURE [dbo].[dba_DeployLogshippingSub]
+CREATE OR ALTER PROCEDURE [dbo].[dba_DeployLogshippingSub]
     @DBName varchar(64),
         @PrimaryServer varchar(64), -- ip,port
         @SecondaryServer varchar(64), -- ip,port

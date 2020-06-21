@@ -5,34 +5,8 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF NOT EXISTS(SELECT *
-              FROM sys.objects
-              WHERE object_id = OBJECT_ID(N'[dbo].[dba_DeployLogshipping]')
-                AND type in (N'P', N'PC'))
-    BEGIN
-        EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[dba_DeployLogshipping] AS'
-    END
-GO
 
-IF NOT EXISTS(SELECT *
-              FROM sys.objects
-              WHERE object_id = OBJECT_ID(N'[dbo].[dba_DeployLogshippingAddPrimary]')
-                AND type in (N'P', N'PC'))
-    BEGIN
-        EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[dba_DeployLogshippingAddPrimary] AS'
-    END
-GO
-
-IF NOT EXISTS(SELECT *
-              FROM sys.objects
-              WHERE object_id = OBJECT_ID(N'[dbo].[dba_DeployLogshippingAddSecondary]')
-                AND type in (N'P', N'PC'))
-    BEGIN
-        EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[dba_DeployLogshippingAddSecondary] AS'
-    END
-GO
-
-ALTER PROCEDURE [dbo].[dba_DeployLogshipping]
+CREATE OR ALTER PROCEDURE [dbo].[dba_DeployLogshipping]
     @LogshippingRootDir varchar(64),
         @PrimaryServer varchar(64), -- ip,port
         @SecondaryServers varchar(64), -- ip,port;ip,port
@@ -86,7 +60,7 @@ ALTER PROCEDURE [dbo].[dba_DeployLogshipping]
 GO
 
 
-ALTER PROCEDURE [dbo].[dba_DeployLogshippingAddPrimary]
+CREATE OR ALTER PROCEDURE [dbo].[dba_DeployLogshippingAddPrimary]
     @LogshippingRootDir varchar(64),
         @DBName varchar(64),
         @PrimaryServer varchar(64), -- ip,port
@@ -179,7 +153,7 @@ ALTER PROCEDURE [dbo].[dba_DeployLogshippingAddPrimary]
 GO
 
 
-ALTER PROCEDURE [dbo].[dba_DeployLogshippingAddSecondary]
+CREATE OR ALTER PROCEDURE [dbo].[dba_DeployLogshippingAddSecondary]
     @DBName varchar(64)
         , @SecondaryServers varchar(64) -- ip,port;ip,port
     AS

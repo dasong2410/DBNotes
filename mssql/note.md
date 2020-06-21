@@ -101,6 +101,15 @@ EXEC sp_readerrorlog 0, 2;
 <a name="Misc"></a>
 ## [Misc](#Table-of-Contents)
 
+### Deadlock trace
+
+```sql
+DBCC TRACEON(1222,-1)
+
+DBCC TRACESTATUS(-1)
+GO
+```
+
 ### Server Memory
 
 ```sql
@@ -187,20 +196,4 @@ SELECT (CASE
 FROM   sys.dm_os_buffer_descriptors 
 GROUP  BY database_id 
 ORDER  BY DB_NAME(database_id);
-```
-
-```sql
-declare @frag int
-declare @command nvarchar(512)
-set @frag=0.4
-
-IF @frag < 5.0
-SET @command = N'ALTER INDEX REORGANIZE';
-
-IF @frag >= 5.0
-SET @command = N'ALTER INDEX REBUILD';
-
-SET @command = N'ALTER INDEX REBUILD';
-
-print @command
 ```
