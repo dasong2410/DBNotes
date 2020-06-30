@@ -6,8 +6,9 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER PROCEDURE [dbo].[dba_CreateDBInitBackups] @LogshippingRootDir varchar(64),
-                                                          @Database varchar(64) = '%'
+CREATE OR
+ALTER PROCEDURE [dbo].[dba_CreateDBInitBackups] @LogshippingRootDir varchar(64),
+                                                @Database varchar(64) = '%'
 AS
 BEGIN
 

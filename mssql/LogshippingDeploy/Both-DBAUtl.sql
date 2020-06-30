@@ -6,10 +6,11 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER PROCEDURE [dbo].[dba_FileExist] @FilePath varchar(128),
-                                                @isFile int = 0,
-                                                @isDirectory int =0,
-                                                @Exist int output
+CREATE OR
+ALTER PROCEDURE [dbo].[dba_FileExist] @FilePath varchar(128),
+                                      @isFile int = 0,
+                                      @isDirectory int =0,
+                                      @Exist int output
 AS
 BEGIN
     DECLARE @DirectoryInfo TABLE
@@ -39,7 +40,8 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER PROCEDURE [dbo].[dba_GetDefaultBackupDir] @DefaultBackupDir varchar(128) output
+CREATE OR
+ALTER PROCEDURE [dbo].[dba_GetDefaultBackupDir] @DefaultBackupDir varchar(128) output
 AS
 BEGIN
     DECLARE @BackupDir TABLE
@@ -63,8 +65,9 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER PROCEDURE [dbo].[dba_DeleteBackupFile] @LogshippingDBInitDir varchar(1024),
-                                                       @BackupFile varchar(128)
+CREATE OR
+ALTER PROCEDURE [dbo].[dba_DeleteBackupFile] @LogshippingDBInitDir varchar(1024),
+                                             @BackupFile varchar(128)
 AS
 BEGIN
     DECLARE @ReturnCode int

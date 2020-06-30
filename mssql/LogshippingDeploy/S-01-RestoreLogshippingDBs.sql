@@ -6,10 +6,11 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER PROCEDURE [dbo].[dba_RestoreLogshippingDBs] @PrimaryServer varchar(64),
-                                                            @LogshippingSrcSharedDir varchar(64) = 'Logshipping',
-                                                            @DatafileLocation varchar(1024) = null,
-                                                            @Database varchar(64) = '%'
+CREATE OR
+ALTER PROCEDURE [dbo].[dba_RestoreLogshippingDBs] @PrimaryServer varchar(64),
+                                                  @LogshippingSrcSharedDir varchar(64) = 'Logshipping',
+                                                  @DatafileLocation varchar(1024) = null,
+                                                  @Database varchar(64) = '%'
 AS
 BEGIN
 

@@ -6,11 +6,12 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER PROCEDURE [dbo].[dba_DeployLogshipping] @LogshippingRootDir varchar(64),
-                                                        @PrimaryServer varchar(64), -- ip,port
-                                                        @SecondaryServers varchar(64), -- ip,port;ip,port
-                                                        @LogshippingSharedDir varchar(64) = 'Logshipping',
-                                                        @Database varchar(64) = '%'
+CREATE OR
+ALTER PROCEDURE [dbo].[dba_DeployLogshipping] @LogshippingRootDir varchar(64),
+                                              @PrimaryServer varchar(64), -- ip,port
+                                              @SecondaryServers varchar(64), -- ip,port;ip,port
+                                              @LogshippingSharedDir varchar(64) = 'Logshipping',
+                                              @Database varchar(64) = '%'
 AS
 BEGIN
 
@@ -59,10 +60,11 @@ END
 GO
 
 
-CREATE OR ALTER PROCEDURE [dbo].[dba_DeployLogshippingAddPrimary] @LogshippingRootDir varchar(64),
-                                                                  @DBName varchar(64),
-                                                                  @PrimaryServer varchar(64), -- ip,port
-                                                                  @LogshippingSharedDir varchar(64)
+CREATE OR
+ALTER PROCEDURE [dbo].[dba_DeployLogshippingAddPrimary] @LogshippingRootDir varchar(64),
+                                                        @DBName varchar(64),
+                                                        @PrimaryServer varchar(64), -- ip,port
+                                                        @LogshippingSharedDir varchar(64)
 AS
 BEGIN
     declare @PrimaryServerHost varchar(64)
@@ -151,7 +153,8 @@ END
 GO
 
 
-CREATE OR ALTER PROCEDURE [dbo].[dba_DeployLogshippingAddSecondary] @DBName varchar(64)
+CREATE OR
+ALTER PROCEDURE [dbo].[dba_DeployLogshippingAddSecondary] @DBName varchar(64)
 , @SecondaryServers varchar(64) -- ip,port;ip,port
 AS
 BEGIN

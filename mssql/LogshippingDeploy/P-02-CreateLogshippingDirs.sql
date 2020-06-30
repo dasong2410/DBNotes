@@ -6,8 +6,9 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER PROCEDURE [dbo].[dba_CreateLogshippingDirs] @LogshippingRootDir varchar(64),
-                                                            @Database varchar(64) = '%'
+CREATE OR
+ALTER PROCEDURE [dbo].[dba_CreateLogshippingDirs] @LogshippingRootDir varchar(64),
+                                                  @Database varchar(64) = '%'
 AS
 BEGIN
     set @LogshippingRootDir = LTRIM(RTRIM(@LogshippingRootDir))

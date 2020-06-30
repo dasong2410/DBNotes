@@ -6,8 +6,9 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER PROCEDURE [dbo].[dba_LogshippingClean] @SecondaryServers varchar(64), -- ip,port;ip,port
-                                                       @Database varchar(64) = '%'
+CREATE OR
+ALTER PROCEDURE [dbo].[dba_LogshippingClean] @SecondaryServers varchar(64), -- ip,port;ip,port
+                                             @Database varchar(64) = '%'
 AS
 BEGIN
     declare @SecondaryServer varchar(64)
