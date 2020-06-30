@@ -1,0 +1,7 @@
+Get-WmiObject -Query "Select * from Win32_PerfRawData_PerfProc_Process where name='alertmanager' or name='loki-windows-amd64' or name='prometheus' or name='grafana-server' or name='promtail-1.4.1-ucs2' or name='sql_exporter' or name='windows_exporter-0.13.0-amd64'" | Format-List -Property name, PrivateBytes
+
+
+Get-WmiObject -Query "Select * from Win32_PerfRawData_PerfProc_Process where name='promtail-1.4.1-ucs2' or name='sql_exporter' or name='windows_exporter-0.13.0-amd64'" | Format-List -Property name, PrivateBytes
+
+
+Get-WmiObject -Query "Select name, PrivateBytes from Win32_PerfRawData_PerfProc_Process where name like 'grafana%'"

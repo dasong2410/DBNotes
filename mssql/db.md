@@ -38,9 +38,12 @@ where a.database_id = b.database_id;
 ### file size
 
 ```sql
-select db_name(database_id) database_name, name file_name, physical_name,
+select db_name(database_id) DatabaseName,
+       name FileName,
+       type_desc Type,
        cast(size*8/1024/1024.0 as numeric(36, 2)) "Size(G)",
-       cast((sum(size) over(partition by database_id))*8/1024/1024.0 as numeric(36, 2)) "DB Size(G)"
+       cast((sum(size) over(partition by database_id))*8/1024/1024.0 as numeric(36, 2)) "DB Size(G)",
+       physical_name PhysicalName
   from sys.master_files;
 ```
 
@@ -84,4 +87,22 @@ SET multi_USER
 WITH ROLLBACK IMMEDIATE;
 
 GO
+```
+
+### Cycle error log
+
+```sql
+USE master
+GO
+
+EXEC sp_cycle_errorlog ;  
+GO  
+```
+
+```sql
+USE msdb ;  
+GO  
+  
+EXEC dbo.sp_cycle_agent_errorlog ;  
+GO  
 ```
