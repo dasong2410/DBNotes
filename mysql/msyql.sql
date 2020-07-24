@@ -1,5 +1,3 @@
--- innodb_version,8.0.16
--- 常用sql
 select * from performance_schema.data_locks;
 select * from performance_schema.data_lock_waits;
 SELECT * FROM information_schema.tables where TABLE_SCHEMA='ODS' and lower(TABLE_NAME) like '%old';
@@ -10,7 +8,17 @@ ALTER TABLE ODS_TicketBaseOld CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_b
 ALTER TABLE ODS_TicketBase_ALL CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
 select DATE_ADD(now(),INTERVAL 1 DAY), date_sub(now(),INTERVAL 15 DAY) from dual;
 
-SHOW VARIABLES LIKE "%version%";
+
+SHOW VARIABLES LIKE '%version%';
+SHOW VARIABLES LIKE 'datadir';
+show variables like 'innodb_file_per_table';
+show variables like 'innodb_%';
+
+show create table test.test1;
+
+select * from information_schema.TABLESPACES;
+
+show engines ;
 
 show engine innodb status;
 Show processlist;
@@ -19,13 +27,13 @@ explain for connection 341;
 
 kill 1135;
 
--- 查看字符集
+-- query character set
 SELECT @@character_set_database, @@collation_database;
 
-SELECT DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME
-FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'ODS';
+SELECT SCHEMA_NAME, DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME
+FROM INFORMATION_SCHEMA.SCHEMATA;
 
--- 修改字符集（待确认）
+-- modify character set
 ALTER DATABASE database_name CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS table_name (
@@ -55,7 +63,7 @@ select count(1) from ODS.dwd_trade;
 
 show databases ;
 
--- 存储过程 语法样例
+-- procedure example
 CREATE DEFINER=`root`@`%` PROCEDURE `calculate_register_user`()
 BEGIN
 declare i date;
@@ -80,16 +88,29 @@ SELECT DATE_ADD('2016-08-02', INTERVAL help_topic_id DAY) as mydate
 FROM mysql.help_topic order by help_topic_id asc limit 14;
 
 
-# 创建用户
+-- create user
 create user dasong@'%' identified by '2wsx@WSX';
 
-# 赋权限
+-- grant permission
 grant all privileges on *.* to 'dasong'@'%';
 
-# 备份
+-- backup
 mysqldump -uroot -p ODS > dump_$(date +"%Y%m%d").sql
 
-
-
+-- setup firewall
 sudo firewall-cmd --zone=public --add-port=3306/tcp --permanent
 sudo firewall-cmd --reload
+
+--
+mysqld --verbose --help
+
+
+select * from sys.sys_config;
+
+
+SHOW ENGINE INNODB STATUS;
+SELECT @@default_storage_engine;
+select @@innodb_default_row_format;
+SHOW TABLE STATUS FROM test LIKE 't%';
+
+SELECT @@datadir,@@innodb_data_home_dir,@@innodb_directories;
