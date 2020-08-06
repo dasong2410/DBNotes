@@ -30,3 +30,11 @@ https://hub.docker.com/_/microsoft-mssql-server
     docker pull mcr.microsoft.com/mssql/server:2017-latest
 
     docker run --name mssql-2017-dev -p 1433:1433 -e 'ACCEPT_EULA=Y' -e 'SSQL_PID=Developer' -e 'MSSQL_AGENT_ENABLED=True' -e 'SA_PASSWORD=yourStrong(!)Password' -d mcr.microsoft.com/mssql/server:2017-latest
+
+
+### Docker commands
+
+    docker container ls -a
+    docker container start ora-19.3-ee
+    docker container stop ora-19.3-ee
+    docker exec -it ora-19.3-ee /bin/bash
