@@ -41,7 +41,7 @@ BEGIN
         BEGIN
             set @LogshippingDBInitDir = @LogshippingRootDir + '\init'
             set @BackupFile =
-                        @DBName + '___just_for_sure_nobody_using_this_name___falg___standby' + @Standby + '.bak'
+                        @DBName + '___just_for_sure_nobody_using_this_name___flag___standby' + @Standby + '.bak'
             set @BackupFilePath = @LogshippingDBInitDir + '\' + @BackupFile
             --set @BackupDesc = 'standby:' + @Standby
 
