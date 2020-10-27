@@ -87,6 +87,10 @@ select * from distribution.dbo.MSsubscriptions;
 select * from distribution.dbo.MSarticles order by article;
 select article from distribution.dbo.MSarticles where publication_id=xx order by article;
 
+-- generate sql
+select 'select count(1) cnt, ''' + article + ''' tab from ' + article + ' union all' from distribution.dbo.MSarticles where publication_id=2 order by article;
+
+
 select * from sys.tables where name not like 'MS%' order by name;
 
 use Applecare_Prod

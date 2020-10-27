@@ -37,3 +37,8 @@ uptime included
 ### 8. performance monitor
 
 	perfmon
+
+### 9. get domain name
+
+	wmic computersystem get domain
+	systeminfo | findstr /B /C:"Domain"
