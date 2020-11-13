@@ -13,4 +13,3 @@ select schema_name(t.schema_id) [schema_name], t.name tab_name, ix.name idx_name
  where ix.type>0 and ix.is_primary_key=0 and ix.is_unique_constraint=0 --and schema_name(tb.schema_id)= @SchemaName and tb.name=@TableName
  and t.is_ms_shipped=0 and t.name<>'sysdiagrams'
  and ix.type_desc='NONCLUSTERED'
- 
