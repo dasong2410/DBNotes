@@ -7,10 +7,27 @@
 ## 2. LSN check
 
 ```sql
+-- primary server
+--select d.name database_name, f.backup_lsn, f.*
+--  from sys.master_files f, sys.databases d
+-- where f.database_id=d.database_id
+--   and f.type_desc='ROWS'
+--   and f.backup_lsn is not null
+-- order by database_name;
+select database_name, backup_lsn from (select d.name database_name, f.backup_lsn, f.type_desc, ROW_NUMBER() over(partition by d.name order by backup_lsn desc) rn
+  from sys.master_files f, sys.databases d
+ where f.database_id=d.database_id
+   and f.backup_lsn is not null) x
+   where x.rn=1
+ order by database_name;
+
+-- secondary server
 select d.name database_name, f.redo_start_lsn, f.*
   from sys.master_files f, sys.databases d
- where f.database_id=d.database_id 
-   and f.redo_start_lsn is not null;
+ where f.database_id=d.database_id
+   and f.type_desc='ROWS'
+   and f.redo_start_lsn is not null
+ order by database_name;
 
 -- restore lsn info from transaction log
 RESTORE HEADERONLY FROM DISK = N'D:\LogShipping\Applecare_Arc\Applecare_Arc_20191203014000.trn';
