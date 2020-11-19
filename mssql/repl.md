@@ -1,14 +1,12 @@
+<a name="Replication"></a>
 # Replication
-
-<a name="Table-of-Contents"></a>
-## Table of Contents
 
 - [Configure Publishing and Distribution](#Configure-Publishing-and-Distribution)
 - [Query replication metadata](#Query-replication-metadata)
 - [Remove db replication](#Remove-db-replication)
 
 <a href="Configure-Publishing-and-Distribution"></a>
-## [Configure Publishing and Distribution](#Table-of-Contents)
+## [Configure Publishing and Distribution](#Replication)
 
 
 
@@ -71,7 +69,7 @@ GO
 ```
 
 <a href="Query-replication-metadata"></a>
-## [Query replication metadata](#Table-of-Contents)
+## [Query replication metadata](#Replication)
 
 ```sql
 select * from distribution.dbo.MSlogreader_agents;
@@ -99,7 +97,7 @@ exec sp_subscription_cleanup @publication= 'Applecare_Prod_Repl';
 ```
 
 <a href="Remove-db-replication"></a>
-## [Remove db replication](#Table-of-Contents)
+## [Remove db replication](#Replication)
 
 ```sql
 USE Applecare_Prod

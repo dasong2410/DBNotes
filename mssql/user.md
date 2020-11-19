@@ -96,13 +96,13 @@ ALTER LOGIN shcooper WITH PASSWORD = 'Baz1nga@1024' OLD_PASSWORD = 'Baz1nga';
 
 # unlock login
 ALTER LOGIN [shcooper] WITH PASSWORD = '****' UNLOCK ;
-GO
 
 # unlock login without changing password
 ALTER LOGIN [shcooper] WITH CHECK_POLICY = OFF;
 ALTER LOGIN [shcooper] UNLOCK;
 ALTER LOGIN [shcooper] WITH CHECK_POLICY = ON;
-GO
+
+alter user schooper with LOGIN = schooper;
 ```
 
 <a href="Query-user"></a>
