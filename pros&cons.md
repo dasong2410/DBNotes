@@ -13,13 +13,11 @@
 ### Pros
 
 - placeholder
-
 - placeholder
 
 ### Cons
 
 - placeholder
-
 - placeholder
 
 
@@ -29,15 +27,20 @@
 
 ### Pros
 
-- placeholder
-
-- placeholder
+- stable
+- simple to use
+- simple to install
 
 ### Cons
 
-- placeholder
-
-- placeholder
+- read, write mutex
+- increase char len will modify all table
+- can not increase column len if there is an index on it
+- logshipping is just couple jobs to backup, copy and retore logs to secondary database, so crude
+- job history has a up limit, default 1000 totally, 100 per job
+- offering too much procedures, and make things too complex
+- master.dbo.xp_delete_file can delete backup and maint plan files only
+- too many unnecessary features like autoclose database
 
 
 ---
@@ -47,13 +50,11 @@
 ### Pros
 
 - placeholder
-
 - placeholder
 
 ### Cons
 
 - placeholder
-
 - placeholder
 
 
@@ -64,7 +65,6 @@
 ### Pros
 
 - placeholder
-
 - placeholder
 
 ### Cons
@@ -89,11 +89,9 @@
 
 
 - mysql 表可以设置区分大小写，linux默认区分，windows默认不区分，操蛋的功能
-
 - mysql 中没有区间值生成函数，如生成 1-10000 的连续数字，需要自己写函数
-
-- mysql 社区版没有物理备份功能
-
+- no sequence generating function out of box, unless user creates themself
+- community edition doesn't include physical backup feature
+- no physical duplication feature
 - mysql 表可以单独设置字符集，不知道实际有没有用
-
-- 数据库名不能直接改，要新建数据库
+- cann't rename database, unless create a new one
