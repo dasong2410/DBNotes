@@ -149,8 +149,8 @@ BEGIN
                 , @freq_recurrence_factor = 0
                 , @active_start_date = 20200608
                 , @active_end_date = 99991231
-                , @active_start_time = 0
-                , @active_end_time = 235900
+                , @active_start_time = 100
+                , @active_end_time = 59
                 , @schedule_uid = @LS_SecondaryCopyJobScheduleUID OUTPUT
                 , @schedule_id = @LS_SecondaryCopyJobScheduleID OUTPUT
 
@@ -172,8 +172,8 @@ BEGIN
                 , @freq_recurrence_factor = 0
                 , @active_start_date = 20200608
                 , @active_end_date = 99991231
-                , @active_start_time = 0
-                , @active_end_time = 235900
+                , @active_start_time = 200
+                , @active_end_time = 159
                 , @schedule_uid = @LS_SecondaryRestoreJobScheduleUID OUTPUT
                 , @schedule_id = @LS_SecondaryRestoreJobScheduleID OUTPUT
 
