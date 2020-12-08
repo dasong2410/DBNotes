@@ -74,7 +74,7 @@ select * from msdb.dbo.log_shipping_monitor_primary;
 -- secondary database
 select * from msdb.dbo.log_shipping_secondary;
 select * from msdb.dbo.log_shipping_monitor_secondary;
-select secondary_database, last_copied_date, last_copied_file, last_restored_date, last_restored_file from msdb.dbo.log_shipping_monitor_secondary;
+select secondary_database, last_copied_date, last_copied_file, last_restored_date, last_restored_file from msdb.dbo.log_shipping_monitor_secondary order by secondary_database;
 select * from msdb.dbo.log_shipping_monitor_alert;
 select * from msdb.dbo.log_shipping_monitor_error_detail order by log_time desc;
 ```
