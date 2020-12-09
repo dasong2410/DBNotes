@@ -7,75 +7,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 CREATE OR
-ALTER PROCEDURE [dbo].[dba_DeployLogshipping] @PrimaryServer varchar(64), -- ip,port
-                                              @SecondaryServer varchar(64), -- ip,port
-                                              @LogshippingSrcSharedDir varchar(64) = 'Logshipping',
-                                              @LogshippingDestSharedDir varchar(64) = 'Logshipping',
-                                              @Database varchar(64) = '%'
-AS
-BEGIN
-    DECLARE @DBName varchar(64)
-    declare @Standby varchar(2)
-    declare @restore_mode int
-    declare @disconnect_users int
-    declare @PrimaryServerHost varchar(64)
-    declare @BackupFileDir varchar(128)
-    declare @BackupFiles table
-                         (
-                             subdirectory varchar(128),
-                             depth        int,
-                             isFile       int
-                         )
-
-    set @PrimaryServerHost = substring(@PrimaryServer, 1, charindex(',', @PrimaryServer) - 1)
-    set @BackupFileDir = '\\' + @PrimaryServerHost + '\' + @LogshippingSrcSharedDir + '\init'
-
-    insert into @BackupFiles
-        EXEC master..xp_dirtree @BackupFileDir, 10, 1
-
-    DECLARE CUR_DBNames CURSOR FAST_FORWARD FOR
-        select SUBSTRING(subdirectory, 1, CHARINDEX('___', subdirectory) - 1)         dbname,
-               SUBSTRING(subdirectory, CHARINDEX('___standby', subdirectory) + 10, 1) standby
-        from @BackupFiles
-        where isFile = 1
-          and lower(subdirectory) like lower(@Database + '[___]%');
-
-    OPEN CUR_DBNames
-    FETCH NEXT FROM CUR_DBNames INTO @DBName, @Standby
-
-    WHILE @@FETCH_STATUS = 0
-        BEGIN
-            if @Standby = '0'
-                begin
-                    set @restore_mode = 0
-                    set @disconnect_users = 0
-                end
-            else
-                begin
-                    set @restore_mode = 1
-                    set @disconnect_users = 1
-                end
-
-            exec dba_DeployLogshippingSub
-                 @DBName=@DBName
-                , @PrimaryServer = @PrimaryServer
-                , @SecondaryServer = @SecondaryServer
-                , @LogshippingSrcSharedDir = @LogshippingSrcSharedDir
-                , @LogshippingDestSharedDir = @LogshippingDestSharedDir
-                , @restore_mode = @restore_mode
-                , @disconnect_users = @disconnect_users
-
-            FETCH NEXT FROM CUR_DBNames INTO @DBName, @Standby
-        END
-
-    CLOSE CUR_DBNames
-    DEALLOCATE CUR_DBNames
-
-END
-GO
-
-
-CREATE OR
 ALTER PROCEDURE [dbo].[dba_DeployLogshippingSub] @DBName varchar(64),
                                                  @PrimaryServer varchar(64), -- ip,port
                                                  @SecondaryServer varchar(64), -- ip,port
@@ -221,5 +152,73 @@ BEGIN
 
 
     -- End: Generated Script
+END
+GO
+
+CREATE OR
+ALTER PROCEDURE [dbo].[dba_DeployLogshipping] @PrimaryServer varchar(64), -- ip,port
+                                              @SecondaryServer varchar(64), -- ip,port
+                                              @LogshippingSrcSharedDir varchar(64) = 'Logshipping',
+                                              @LogshippingDestSharedDir varchar(64) = 'Logshipping',
+                                              @Database varchar(64) = '%'
+AS
+BEGIN
+    DECLARE @DBName varchar(64)
+    declare @Standby varchar(2)
+    declare @restore_mode int
+    declare @disconnect_users int
+    declare @PrimaryServerHost varchar(64)
+    declare @BackupFileDir varchar(128)
+    declare @BackupFiles table
+                         (
+                             subdirectory varchar(128),
+                             depth        int,
+                             isFile       int
+                         )
+
+    set @PrimaryServerHost = substring(@PrimaryServer, 1, charindex(',', @PrimaryServer) - 1)
+    set @BackupFileDir = '\\' + @PrimaryServerHost + '\' + @LogshippingSrcSharedDir + '\init'
+
+    insert into @BackupFiles
+        EXEC master..xp_dirtree @BackupFileDir, 10, 1
+
+    DECLARE CUR_DBNames CURSOR FAST_FORWARD FOR
+        select SUBSTRING(subdirectory, 1, CHARINDEX('___', subdirectory) - 1)         dbname,
+               SUBSTRING(subdirectory, CHARINDEX('___standby', subdirectory) + 10, 1) standby
+        from @BackupFiles
+        where isFile = 1
+          and lower(subdirectory) like lower(@Database + '[___]%');
+
+    OPEN CUR_DBNames
+    FETCH NEXT FROM CUR_DBNames INTO @DBName, @Standby
+
+    WHILE @@FETCH_STATUS = 0
+        BEGIN
+            if @Standby = '0'
+                begin
+                    set @restore_mode = 0
+                    set @disconnect_users = 0
+                end
+            else
+                begin
+                    set @restore_mode = 1
+                    set @disconnect_users = 1
+                end
+
+            exec dba_DeployLogshippingSub
+                 @DBName=@DBName
+                , @PrimaryServer = @PrimaryServer
+                , @SecondaryServer = @SecondaryServer
+                , @LogshippingSrcSharedDir = @LogshippingSrcSharedDir
+                , @LogshippingDestSharedDir = @LogshippingDestSharedDir
+                , @restore_mode = @restore_mode
+                , @disconnect_users = @disconnect_users
+
+            FETCH NEXT FROM CUR_DBNames INTO @DBName, @Standby
+        END
+
+    CLOSE CUR_DBNames
+    DEALLOCATE CUR_DBNames
+
 END
 GO

@@ -7,60 +7,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 CREATE OR
-ALTER PROCEDURE [dbo].[dba_DeployLogshipping] @LogshippingRootDir varchar(64),
-                                              @PrimaryServer varchar(64), -- ip,port
-                                              @SecondaryServers varchar(64), -- ip,port;ip,port
-                                              @LogshippingSharedDir varchar(64) = 'Logshipping',
-                                              @Database varchar(64) = '%'
-AS
-BEGIN
-
-    set @LogshippingRootDir = LTRIM(RTRIM(@LogshippingRootDir))
-    -- print 'debug: ' + @LogshippingRootDir
-    if (@LogshippingRootDir is null or @LogshippingRootDir = '')
-        begin
-            RAISERROR ('%s',10,1,'Please input logshipping root dir.') WITH NOWAIT
-            return
-        end
-
-    DECLARE @DBName varchar(64);
-
-    DECLARE CUR_DBNames CURSOR FAST_FORWARD FOR
-        select name
-        from logshipping_cfg
-        where logshipping = 1
-          and lower(name) like lower(@Database);
-
-    OPEN CUR_DBNames
-    FETCH NEXT FROM CUR_DBNames INTO @DBName
-
-    WHILE @@FETCH_STATUS = 0
-        BEGIN
-            -- Begin: add primary server
-            exec dba_DeployLogshippingAddPrimary
-                 @LogshippingRootDir = @LogshippingRootDir
-                , @DBName=@DBName
-                , @PrimaryServer = @PrimaryServer
-                , @LogshippingSharedDir = @LogshippingSharedDir
-            -- End: add primary server
-
-            -- Begin: add secondary servers
-            exec dba_DeployLogshippingAddSecondary
-                 @DBName = @DBName
-                , @SecondaryServers = @SecondaryServers
-            -- End: add secondary servers
-
-            FETCH NEXT FROM CUR_DBNames INTO @DBName
-        END
-
-    CLOSE CUR_DBNames
-    DEALLOCATE CUR_DBNames
-
-END
-GO
-
-
-CREATE OR
 ALTER PROCEDURE [dbo].[dba_DeployLogshippingAddPrimary] @LogshippingRootDir varchar(64),
                                                         @DBName varchar(64),
                                                         @PrimaryServer varchar(64), -- ip,port
@@ -152,7 +98,6 @@ BEGIN
 END
 GO
 
-
 CREATE OR
 ALTER PROCEDURE [dbo].[dba_DeployLogshippingAddSecondary] @DBName varchar(64)
 , @SecondaryServers varchar(64) -- ip,port;ip,port
@@ -180,5 +125,58 @@ BEGIN
 
     CLOSE CUR_SecondaryServers
     DEALLOCATE CUR_SecondaryServers
+END
+GO
+
+CREATE OR
+ALTER PROCEDURE [dbo].[dba_DeployLogshipping] @LogshippingRootDir varchar(64),
+                                              @PrimaryServer varchar(64), -- ip,port
+                                              @SecondaryServers varchar(64), -- ip,port;ip,port
+                                              @LogshippingSharedDir varchar(64) = 'Logshipping',
+                                              @Database varchar(64) = '%'
+AS
+BEGIN
+
+    set @LogshippingRootDir = LTRIM(RTRIM(@LogshippingRootDir))
+    -- print 'debug: ' + @LogshippingRootDir
+    if (@LogshippingRootDir is null or @LogshippingRootDir = '')
+        begin
+            RAISERROR ('%s',10,1,'Please input logshipping root dir.') WITH NOWAIT
+            return
+        end
+
+    DECLARE @DBName varchar(64);
+
+    DECLARE CUR_DBNames CURSOR FAST_FORWARD FOR
+        select name
+        from logshipping_cfg
+        where logshipping = 1
+          and lower(name) like lower(@Database);
+
+    OPEN CUR_DBNames
+    FETCH NEXT FROM CUR_DBNames INTO @DBName
+
+    WHILE @@FETCH_STATUS = 0
+        BEGIN
+            -- Begin: add primary server
+            exec dba_DeployLogshippingAddPrimary
+                 @LogshippingRootDir = @LogshippingRootDir
+                , @DBName=@DBName
+                , @PrimaryServer = @PrimaryServer
+                , @LogshippingSharedDir = @LogshippingSharedDir
+            -- End: add primary server
+
+            -- Begin: add secondary servers
+            exec dba_DeployLogshippingAddSecondary
+                 @DBName = @DBName
+                , @SecondaryServers = @SecondaryServers
+            -- End: add secondary servers
+
+            FETCH NEXT FROM CUR_DBNames INTO @DBName
+        END
+
+    CLOSE CUR_DBNames
+    DEALLOCATE CUR_DBNames
+
 END
 GO

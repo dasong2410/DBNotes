@@ -19,6 +19,4 @@ select database_id,
        0 standby
   from sys.databases
  where state=0
-   and lower(name) not in('master', 'tempdb', 'model', 'msdb');
-
-select * from logshipping_cfg;
+   and database_id>4;

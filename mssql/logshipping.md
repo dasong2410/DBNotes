@@ -78,3 +78,23 @@ select secondary_database, last_copied_date, last_copied_file, last_restored_dat
 select * from msdb.dbo.log_shipping_monitor_alert;
 select * from msdb.dbo.log_shipping_monitor_error_detail order by log_time desc;
 ```
+
+## 6. Switch over
+
+```sql
+-- on primary server
+-- generate sql to run logshipping backup jobs
+select 'exec msdb..sp_start_job @job_name=''' + name + ''';' from msdb..sysjobs where name like 'LSBackup_%';
+
+-- on secondary server
+-- generate sql to run logshipping copy jobs
+select 'exec msdb..sp_start_job @job_name=''' + name + ''';' from msdb..sysjobs where name like 'LSCopy_%';
+
+-- on secondary server
+-- generate sql to run logshipping restore jobs
+select 'exec msdb..sp_start_job @job_name=''' + name + ''';' from msdb..sysjobs where name like 'LSRestore_%';
+
+-- on secondary server
+-- generate sql to convert logshipping databases to read-write
+select 'RESTORE LOG ' + name + ' WITH RECOVERY;' from sys.databases where database_id>4 and (state_desc='RESTORING' or is_in_standby=1);
+```
