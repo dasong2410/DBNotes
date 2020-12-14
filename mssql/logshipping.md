@@ -96,5 +96,6 @@ select 'exec msdb..sp_start_job @job_name=''' + name + ''';' from msdb..sysjobs 
 
 -- on secondary server
 -- generate sql to convert logshipping databases to read-write
-select 'RESTORE LOG ' + name + ' WITH RECOVERY;' from sys.databases where database_id>4 and (state_desc='RESTORING' or is_in_standby=1);
+-- select 'RESTORE LOG ' + name + ' WITH RECOVERY;' from sys.databases where database_id>4 and (state_desc='RESTORING' or is_in_standby=1);
+select 'RESTORE LOG ' + secondary_database + ' WITH RECOVERY;' from msdb.dbo.log_shipping_monitor_secondary;
 ```
