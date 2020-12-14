@@ -99,3 +99,19 @@ select 'exec msdb..sp_start_job @job_name=''' + name + ''';' from msdb..sysjobs 
 -- select 'RESTORE LOG ' + name + ' WITH RECOVERY;' from sys.databases where database_id>4 and (state_desc='RESTORING' or is_in_standby=1);
 select 'RESTORE LOG ' + secondary_database + ' WITH RECOVERY;' from msdb.dbo.log_shipping_monitor_secondary;
 ```
+
+## 7. Trouble shooting
+
+SQL Server Agent Job waiting for a worker thread
+
+https://blog.sqlterritory.com/2018/09/25/sql-server-agent-job-waiting-for-a-worker-thread/
+
+```sql
+UPDATE msdb.dbo.syssubsystems
+SET max_worker_threads = 120
+WHERE subsystem_id = 3;
+
+UPDATE msdb.dbo.syssubsystems
+SET max_worker_threads = 120
+WHERE subsystem = N'CmdExec';
+```
