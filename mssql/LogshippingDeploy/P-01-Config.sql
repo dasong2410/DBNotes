@@ -20,3 +20,4 @@ select database_id,
   from sys.databases
  where state=0
    and database_id>4;
+

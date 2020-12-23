@@ -116,6 +116,7 @@ BEGIN
     DEALLOCATE CUR_BackupFiles
 END;
 GO
+
 use master
 go
 
@@ -138,6 +139,7 @@ select database_id,
   from sys.databases
  where state=0
    and database_id>4;
+
 use master
 go
 
@@ -198,7 +200,9 @@ BEGIN
     DEALLOCATE CUR_DBNames
 
 END
-GOuse master
+GO
+
+use master
 go
 
 SET ANSI_NULLS ON
@@ -264,7 +268,9 @@ BEGIN
     DEALLOCATE CUR_DBNames
 
 END
-GOuse master
+GO
+
+use master
 go
 
 SET ANSI_NULLS ON
@@ -446,6 +452,7 @@ BEGIN
 
 END
 GO
+
 use master
 go
 
@@ -503,3 +510,4 @@ BEGIN
     DEALLOCATE CUR_DBNames
 END
 GO
+

@@ -116,6 +116,7 @@ BEGIN
     DEALLOCATE CUR_BackupFiles
 END;
 GO
+
 use master
 go
 
@@ -280,6 +281,7 @@ BEGIN
 
 END
 GO
+
 use master
 go
 
@@ -361,7 +363,9 @@ BEGIN
     DEALLOCATE CUR_DBNames
 
 END
-GOuse master
+GO
+
+use master
 go
 
 SET ANSI_NULLS ON
@@ -585,6 +589,7 @@ BEGIN
 
 END
 GO
+
 use master
 go
 
@@ -620,3 +625,4 @@ BEGIN
     DEALLOCATE CUR_DBNames
 END
 GO
+
