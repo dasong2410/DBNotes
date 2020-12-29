@@ -106,7 +106,7 @@
 
 Run the following python script in a SQL Server Job step after backup. This python script need a parameter(FULL or LOG) to decide backup database or log.
 
-	C:\MSSQL_BACKUP\DBBackupCopy\python-3.8.0-embed-amd64\python.exe C:\MSSQL_BACKUP\DBBackupCopy\DBBackupCopy.py [FULL|LOG] [INSTANCE_NAME]
+	D:\DBA\Apps\DBBackupCopy\venv\Scripts\python.exe D:\DBA\Apps\DBBackupCopy\DBBackupCopy.py [FULL|LOG] $(ESCAPE_SQUOTE(INST))
 	
 	SET EXITCODE = %ERRORLEVEL% 
 	IF %EXITCODE% EQ 0 ( 
