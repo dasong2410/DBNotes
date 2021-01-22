@@ -380,7 +380,8 @@ ALTER PROCEDURE [dbo].[dba_DeployLogshippingSub] @DBName varchar(64),
                                                  @LogshippingSrcSharedDir varchar(64) = 'Logshipping',
                                                  @LogshippingDestSharedDir varchar(64) = 'Logshipping',
                                                  @restore_mode int = 0,
-                                                 @disconnect_users int =0
+                                                 @disconnect_users int =0,
+                                                 @Interval int = 5
 AS
 BEGIN
     declare @PrimaryServerHost varchar(64)
@@ -391,6 +392,9 @@ BEGIN
     declare @backup_destination_directory varchar(64)
     declare @copy_job_name varchar(64)
     declare @restore_job_name varchar(64)
+
+    declare @restore_threshold int
+    set @restore_threshold = @Interval * 5
 
     -- split primary server to host and port
     set @PrimaryServerHost = substring(@PrimaryServer, 1, charindex(',', @PrimaryServer) - 1)
@@ -443,7 +447,7 @@ BEGIN
                 , @freq_type = 4
                 , @freq_interval = 1
                 , @freq_subday_type = 4
-                , @freq_subday_interval = 5
+                , @freq_subday_interval = @Interval
                 , @freq_recurrence_factor = 0
                 , @active_start_date = 20200608
                 , @active_end_date = 99991231
@@ -466,7 +470,7 @@ BEGIN
                 , @freq_type = 4
                 , @freq_interval = 1
                 , @freq_subday_type = 4
-                , @freq_subday_interval = 5
+                , @freq_subday_interval = @Interval
                 , @freq_recurrence_factor = 0
                 , @active_start_date = 20200608
                 , @active_end_date = 99991231
@@ -496,7 +500,7 @@ BEGIN
                 , @restore_delay = 0
                 , @restore_mode = @restore_mode
                 , @disconnect_users = @disconnect_users
-                , @restore_threshold = 45
+                , @restore_threshold = @restore_threshold
                 , @threshold_alert_enabled = 1
                 , @history_retention_period = 5760
                 , @overwrite = 1
@@ -527,7 +531,8 @@ ALTER PROCEDURE [dbo].[dba_DeployLogshipping] @PrimaryServer varchar(64), -- ip,
                                               @SecondaryServer varchar(64), -- ip,port
                                               @LogshippingSrcSharedDir varchar(64) = 'Logshipping',
                                               @LogshippingDestSharedDir varchar(64) = 'Logshipping',
-                                              @Database varchar(64) = '%'
+                                              @Database varchar(64) = '%',
+                                              @Interval int = 5
 AS
 BEGIN
     DECLARE @DBName varchar(64)
@@ -580,6 +585,7 @@ BEGIN
                 , @LogshippingDestSharedDir = @LogshippingDestSharedDir
                 , @restore_mode = @restore_mode
                 , @disconnect_users = @disconnect_users
+                , @Interval = @Interval
 
             FETCH NEXT FROM CUR_DBNames INTO @DBName, @Standby
         END

@@ -282,7 +282,8 @@ CREATE OR
 ALTER PROCEDURE [dbo].[dba_DeployLogshippingAddPrimary] @LogshippingRootDir varchar(64),
                                                         @DBName varchar(64),
                                                         @PrimaryServer varchar(64), -- ip,port
-                                                        @LogshippingSharedDir varchar(64)
+                                                        @LogshippingSharedDir varchar(64),
+                                                        @Interval int = 5
 AS
 BEGIN
     declare @PrimaryServerHost varchar(64)
@@ -291,6 +292,9 @@ BEGIN
     declare @backup_share varchar(64)
     declare @backup_job_name varchar(64)
     declare @schedule_name varchar(64)
+
+    declare @backup_threshold int
+    set @backup_threshold = @Interval * 5
 
     -- split primary server to host and port
     set @PrimaryServerHost = substring(@PrimaryServer, 1, charindex(',', @PrimaryServer) - 1)
@@ -318,7 +322,7 @@ BEGIN
         , @backup_job_name = @backup_job_name
         , @backup_retention_period = 4320
         , @backup_compression = 1
-        , @backup_threshold = 25
+        , @backup_threshold = @backup_threshold
         , @threshold_alert_enabled = 1
         , @history_retention_period = 5760
         , @backup_job_id = @LS_BackupJobId OUTPUT
@@ -342,7 +346,7 @@ BEGIN
                 , @freq_type = 4
                 , @freq_interval = 1
                 , @freq_subday_type = 4
-                , @freq_subday_interval = 5
+                , @freq_subday_interval = @Interval
                 , @freq_recurrence_factor = 0
                 , @active_start_date = 20200526
                 , @active_end_date = 99991231
@@ -405,7 +409,8 @@ ALTER PROCEDURE [dbo].[dba_DeployLogshipping] @LogshippingRootDir varchar(64),
                                               @PrimaryServer varchar(64), -- ip,port
                                               @SecondaryServers varchar(64), -- ip,port;ip,port
                                               @LogshippingSharedDir varchar(64) = 'Logshipping',
-                                              @Database varchar(64) = '%'
+                                              @Database varchar(64) = '%',
+                                              @Interval int = 5
 AS
 BEGIN
 
@@ -436,6 +441,7 @@ BEGIN
                 , @DBName=@DBName
                 , @PrimaryServer = @PrimaryServer
                 , @LogshippingSharedDir = @LogshippingSharedDir
+                , @Interval = @Interval
             -- End: add primary server
 
             -- Begin: add secondary servers
