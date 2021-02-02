@@ -107,6 +107,9 @@ SQL Server Agent Job waiting for a worker thread
 https://blog.sqlterritory.com/2018/09/25/sql-server-agent-job-waiting-for-a-worker-thread/
 
 ```sql
+select * from msdb.dbo.syssubsystems
+ where subsystem_id = 3;
+
 UPDATE msdb.dbo.syssubsystems
 SET max_worker_threads = 120
 WHERE subsystem_id = 3;

@@ -99,7 +99,6 @@ ALTER LOGIN [shcooper] WITH PASSWORD = '****' UNLOCK ;
 
 # unlock login without changing password
 ALTER LOGIN [shcooper] WITH CHECK_POLICY = OFF;
-ALTER LOGIN [shcooper] UNLOCK;
 ALTER LOGIN [shcooper] WITH CHECK_POLICY = ON;
 
 alter user schooper with LOGIN = schooper;

@@ -1,6 +1,6 @@
 ## Database Info
 
-### sql server info
+### SQL server info
 
 ```sql
 select serverproperty('MachineName')                           as host,
@@ -17,7 +17,7 @@ select serverproperty('MachineName')                           as host,
            end                                                 as authentication_mode;
 ```
 
-### db info
+### DB info
 
 ```sql
 with a as (select name, database_id, recovery_model_desc, collation_name
@@ -35,7 +35,7 @@ from a,
 where a.database_id = b.database_id;
 ```
 
-### file size
+### File size
 
 ```sql
 select db_name(database_id) DatabaseName,
@@ -45,6 +45,37 @@ select db_name(database_id) DatabaseName,
        cast((sum(size) over(partition by database_id))*8/1024/1024.0 as numeric(36, 2)) "DB Size(G)",
        physical_name PhysicalName
   from sys.master_files;
+```
+
+### Move data file
+
+```sql
+-- 1. modify file names
+ALTER DATABASE AdventureWorks2014   
+    MODIFY FILE ( NAME = AdventureWorks2014_Data,   
+                  FILENAME = 'E:\New_location\AdventureWorks2014_Data.mdf');  
+GO
+ 
+ALTER DATABASE AdventureWorks2014   
+    MODIFY FILE ( NAME = AdventureWorks2014_Log,   
+                  FILENAME = 'E:\New_location\AdventureWorks2014_Log.ldf');  
+GO
+
+-- 2. offline database
+ALTER DATABASE AdventureWorks2014 SET OFFLINE;  
+GO
+
+-- 3. move data files in os
+
+-- 4. online database
+ALTER DATABASE AdventureWorks2014 SET ONLINE;  
+GO
+
+-- 5. verify
+SELECT name, physical_name AS NewLocation, state_desc AS OnlineStatus
+FROM sys.master_files  
+WHERE database_id = DB_ID(N'AdventureWorks2014')  
+GO
 ```
 
 ### ADR

@@ -39,3 +39,16 @@ need to install powerline fonts with PowerShell in windows
 - https://github.com/ohmyzsh/ohmyzsh
 - https://github.com/powerline/fonts
 - https://blog.nillsf.com/index.php/2020/02/17/setting-up-wsl2-windows-terminal-and-oh-my-zsh/
+
+
+### Export & Import
+
+```cmd
+wsl --export Ubuntu-20.04-Docker "D:\Ubuntu-20.04-Docker.tar"
+wsl --unregister Ubuntu-20.04-Docker
+wsl --import Ubuntu-20.04-Docker "D:\WSL\Ubuntu-20.04-Docker" "D:\Ubuntu-20.04-Docker.tar" --version 2
+
+wsl --export docker-desktop-data "D:\docker-desktop-data.tar"
+wsl --unregister docker-desktop-data
+wsl --import docker-desktop-data "D:\WSL\docker\wsl\data" "D:\docker-desktop-data.tar" --version 2
+```
