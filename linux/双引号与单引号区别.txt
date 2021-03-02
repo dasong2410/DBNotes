@@ -1,0 +1,12 @@
+双引号与单引号区别
+1.单引号会把之中的所有内容当成普通字符，包括特殊字符：
+FILE_NAME="marcus.txt"
+echo 'the file name is: ${FILE_NAME}'
+
+输出：the file name is: ${FILE_NAME}
+
+2.双引号则会将变量转为所代表的值：
+FILE_NAME="marcus.txt"
+echo "the file name is: ${FILE_NAME}"
+
+输出：the file name is: marcus.txt

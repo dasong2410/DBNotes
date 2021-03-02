@@ -1,0 +1,117 @@
+脚本中常用事例
+
+1.修改密码
+echo "dasong" | passwd --stdin dasong
+
+2.连接sqlplus
+sqlplus -L -S / as sysdba <<EOF
+    select sysdate from dual;
+    exit;
+EOF
+注：第二个EOF顶格写
+
+使用spool命令导出数据，则可以使用：
+sqlplus -L -S / as sysdba <<EOF
+    set newp none;
+    set feedback off;
+    set trimspool on;
+    set heading off;
+    spool /tmp/user_name.txt
+    select table_name from user_tables;
+    spool off;
+    exit;
+EOF
+
+3.读取文件
+while read file_line; do
+    echo ${file_line}
+done < dasong.txt
+
+4.dos2unxi
+将ds.sh转为unix格式
+dos2unix ds.sh
+
+将当前目录下的所有以sh结尾的文件转为unix格式
+find . *sh -exec dos2unix {} \;
+dos2unxi改dos格式的换行符为unix格式换行符
+
+相对的命令为unix2dos
+
+5.判断一个字符是否包含另一个字符
+echo "marcus mao" | grep "marcus"
+
+6.输出第n个字段
+echo "marcus,mao,dasong" | awk -F',' '{print $1}'
+
+7.解压*.tar.gz文件到指定目录
+tar -xzvf marcus.tar.gz -C /home/marcus
+
+8.以某用户执行一个命令
+su - oracle -c "tnsping ds01"
+
+9.替换字符
+echo "dasong mao" | sed 's/dasong/marcus/g'
+
+10.调用函数
+function show_msg(){
+    echo $1
+}
+
+show_msg "Hi everybody, I'm Marcus Mao."
+
+11.调试
+set -x 会将所执行的命令及结果一并显示出来，如果要调试整个文件，则在shell脚本的#! /bin/bash的下一行写set -x；
+如果只调试单个函数，则可以在函数体的第一行写上些语句。
+
+12.获取文件的绝对路径
+abso_dir=$(cd "$(dirname $0)"; pwd)
+
+13.显示菜单
+function show_lang(){
+    cat <<MENU
+  -----------------------------------------------------------------------
+    Welcome to Report System Installation, please select language:
+  -----------------------------------------------------------------------
+    [1].English
+    [2].中文
+    [0].Exit
+  -----------------------------------------------------------------------
+    Message: ${RESULT_MESG_EN}
+  ----------------------------------------------------------------------- 
+MENU
+}
+
+两个MENU之间的文字是需要输入的内容。
+并且，后一个MENU要顶格写。
+
+14.设置默认值
+lang="${1:-en}"
+如果传进的第一个参数没有值，则赋en给lang
+
+15.在一个文件中载入另一个文件
+ds.sh为shell脚本，default.cfg为一些默认参数值，ds.sh中载入default.cfg，如下：
+if [ -f default.cfg ]; then
+    . default.cfg
+fi
+
+16.修改文件名
+将文件ds.txt重命名为dsmao.txt
+mv ds.txt dsmao.txt
+
+将所有文件中的ds替换为dsmao，
+rename ds dsmao *
+文件名如下：
+ds-01.txt ds-02.txt ds-03.txt ds-04.txt ds-05.txt 
+
+17.输出变量中变量的值
+mao=dasong
+var1=mao
+var2=${!var1}
+echo $var2
+
+18.获取ip
+hostname --all-ip-addresses
+hostname -i
+
+19.获取昨天YYYYMMDD
+date -d "-1 days" "+%Y%m%d"
