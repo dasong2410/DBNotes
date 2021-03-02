@@ -47,6 +47,27 @@ select db_name(database_id) DatabaseName,
   from sys.master_files;
 ```
 
+### Free space
+
+https://www.mssqltips.com/sqlservertip/1805/different-ways-to-determine-free-space-for-sql-server-databases-and-database-files/
+
+```sql
+USE master 
+GO 
+
+DBCC SQLPERF(logspace) 
+
+
+USE Test5 
+GO 
+
+SELECT DB_NAME() AS DbName, 
+name AS FileName, 
+size/128.0 AS CurrentSizeMB, 
+size/128.0 - CAST(FILEPROPERTY(name, 'SpaceUsed') AS INT)/128.0 AS FreeSpaceMB 
+FROM sys.database_files; 
+```
+
 ### Move data file
 
 ```sql
