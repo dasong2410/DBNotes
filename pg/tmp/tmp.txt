@@ -1,0 +1,6 @@
+patch -p1 < /tmp/v10-0001-Overhaul-inheritance-update-delete-planning.patch
+
+--rt commands
+make check
+make installcheck
+make installcheck USE_PGXS=1

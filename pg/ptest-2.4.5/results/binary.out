@@ -1,0 +1,75 @@
+SET client_min_messages TO warning;
+CREATE SCHEMA tm;
+\set tmpfile '\'/tmp/tmp.txt\''
+CREATE TABLE tm.geoms (id serial, g geometry);
+select sn_create_distributed_table('tm.geoms', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CONTEXT:  while executing command on localhost:57637
+SQL statement "SELECT pg_catalog.create_distributed_table('tm.geoms','id','hash','none')"
+PL/pgSQL function sn_create_distributed_table(regclass,text,text) line 58 at EXECUTE
+INSERT INTO tm.geoms(g) values ('POINT EMPTY');
+INSERT INTO tm.geoms(g) values ('LINESTRING EMPTY');
+INSERT INTO tm.geoms(g) values ('POLYGON EMPTY');
+INSERT INTO tm.geoms(g) values ('MULTIPOINT EMPTY');
+INSERT INTO tm.geoms(g) values ('MULTILINESTRING EMPTY');
+INSERT INTO tm.geoms(g) values ('MULTIPOLYGON EMPTY');
+INSERT INTO tm.geoms(g) values ('GEOMETRYCOLLECTION EMPTY');
+INSERT INTO tm.geoms(g) values ('CIRCULARSTRING EMPTY');
+INSERT INTO tm.geoms(g) values ('COMPOUNDCURVE EMPTY');
+INSERT INTO tm.geoms(g) values ('CURVEPOLYGON EMPTY');
+INSERT INTO tm.geoms(g) values ('MULTICURVE EMPTY');
+INSERT INTO tm.geoms(g) values ('MULTISURFACE EMPTY');
+INSERT INTO tm.geoms(g) values ('POLYHEDRALSURFACE EMPTY');
+INSERT INTO tm.geoms(g) values ('TRIANGLE EMPTY');
+INSERT INTO tm.geoms(g) values ('TIN EMPTY');
+-- all zm flags
+INSERT INTO tm.geoms(id, g)
+SELECT id, st_force3dz(g) FROM tm.geoms WHERE id < 15 ORDER BY id;
+INSERT INTO tm.geoms(id, g)
+SELECT id, st_force3dm(g) FROM tm.geoms WHERE id < 15 ORDER BY id;
+INSERT INTO tm.geoms(id, g)
+SELECT id, st_force4d(g) FROM tm.geoms WHERE id < 15 ORDER BY id;
+-- known srid
+INSERT INTO tm.geoms(id, g)
+SELECT id, st_setsrid(g,4326) FROM tm.geoms ORDER BY id;
+COPY tm.geoms TO :tmpfile WITH BINARY;
+CREATE TABLE tm.geoms_in AS SELECT * FROM tm.geoms LIMIT 0;
+select sn_create_distributed_table('tm.geoms_in', 'id', 'tm.geoms');
+ERROR:  relation geoms is not distributed
+CONTEXT:  SQL statement "SELECT pg_catalog.create_distributed_table('tm.geoms_in','id','hash','tm.geoms')"
+PL/pgSQL function sn_create_distributed_table(regclass,text,text) line 36 at EXECUTE
+COPY tm.geoms_in FROM :tmpfile WITH BINARY;
+SELECT 'geometry', count(*) FROM tm.geoms_in i, tm.geoms o WHERE i.id = o.id
+ AND ST_OrderingEquals(i.g, o.g);
+ ?column? | count 
+----------+-------
+ geometry |  1236
+(1 row)
+
+CREATE TABLE tm.geogs AS SELECT id,g::geography FROM tm.geoms
+WHERE geometrytype(g) NOT LIKE '%CURVE%'
+  AND geometrytype(g) NOT LIKE '%CIRCULAR%'
+  AND geometrytype(g) NOT LIKE '%SURFACE%'
+  AND geometrytype(g) NOT LIKE 'TRIANGLE%'
+  AND geometrytype(g) NOT LIKE 'TIN%'
+;
+select sn_create_distributed_table('tm.geogs', 'id', 'none');
+ERROR:  type "public.geography" does not exist
+CONTEXT:  while executing command on localhost:57637
+SQL statement "SELECT pg_catalog.create_distributed_table('tm.geogs','id','hash','none')"
+PL/pgSQL function sn_create_distributed_table(regclass,text,text) line 58 at EXECUTE
+COPY tm.geogs TO :tmpfile WITH BINARY;
+CREATE TABLE tm.geogs_in AS SELECT * FROM tm.geogs LIMIT 0;
+select sn_create_distributed_table('tm.geogs_in', 'id', 'tm.geogs');
+ERROR:  relation geogs is not distributed
+CONTEXT:  SQL statement "SELECT pg_catalog.create_distributed_table('tm.geogs_in','id','hash','tm.geogs')"
+PL/pgSQL function sn_create_distributed_table(regclass,text,text) line 36 at EXECUTE
+COPY tm.geogs_in FROM :tmpfile WITH BINARY;
+SELECT 'geometry', count(*) FROM tm.geogs_in i, tm.geogs o WHERE i.id = o.id
+ AND ST_OrderingEquals(i.g::geometry, o.g::geometry);
+ ?column? | count 
+----------+-------
+ geometry |   616
+(1 row)
+
+DROP SCHEMA tm CASCADE;

@@ -1,0 +1,44 @@
+CREATE TABLE clean_cases (origin varchar, caseno numeric,
+                          orig geometry,
+                          valid geometry);
+select sn_create_distributed_table('clean_cases', 'origin', 'none');
+ sn_create_distributed_table 
+-----------------------------
+ 
+(1 row)
+
+COPY clean_cases FROM stdin;
+ERROR:  Polygon must have closed rings
+-- PG.1 : polygon with single ring with single point in it
+--        to be converted to a POINT
+--
+SELECT origin,caseno,
+       st_equals(st_collectionextract(st_makevalid(orig),1), st_collectionextract(valid,1)) AND
+       st_equals(st_collectionextract(st_makevalid(orig),2), st_collectionextract(valid,2)) AND
+       st_equals(st_collectionextract(st_makevalid(orig),3), st_collectionextract(valid,3)),
+       st_isvalid(st_makevalid(orig)), -- paranoia
+       (st_isvaliddetail(orig)).valid
+  FROM clean_cases;
+ origin | caseno | ?column? | st_isvalid | valid 
+--------+--------+----------+------------+-------
+(0 rows)
+
+SELECT '#1719.1', ST_AsEWKT(ST_MakeValid('POINT(0 0)'));
+ ?column? | st_asewkt  
+----------+------------
+ #1719.1  | POINT(0 0)
+(1 row)
+
+SELECT '#1719.2', ST_AsEWKT(ST_MakeValid('GEOMETRYCOLLECTION(POINT(0 0),MULTIPOINT(3 4,5 2),LINESTRING(4 4, 4 4),POLYGON((0 0,10 10,0 10,10 0,0 0)))'));
+ ?column? |                                                        st_asewkt                                                        
+----------+-------------------------------------------------------------------------------------------------------------------------
+ #1719.2  | GEOMETRYCOLLECTION(POINT(0 0),MULTIPOINT(3 4,5 2),POINT(4 4),MULTIPOLYGON(((0 0,5 5,10 0,0 0)),((5 5,0 10,10 10,5 5))))
+(1 row)
+
+SELECT '#1719.3', ST_AsEWKT(ST_MakeValid('MULTIPOINT(3 4,5 2)'));
+ ?column? |      st_asewkt      
+----------+---------------------
+ #1719.3  | MULTIPOINT(3 4,5 2)
+(1 row)
+
+DROP TABLE clean_cases;

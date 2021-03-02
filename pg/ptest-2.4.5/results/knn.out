@@ -1,0 +1,135 @@
+CREATE OR REPLACE FUNCTION qnodes(q text) RETURNS text
+LANGUAGE 'plpgsql' AS
+$$
+DECLARE
+  exp TEXT;
+  mat TEXT[];
+  ret TEXT[];
+BEGIN
+  FOR exp IN EXECUTE 'EXPLAIN ' || q
+  LOOP
+    --RAISE NOTICE 'EXP: %', exp;
+    mat := regexp_matches(exp, ' *(?:-> *)?(.*Scan)');
+    --RAISE NOTICE 'MAT: %', mat;
+    IF mat IS NOT NULL THEN
+      ret := array_append(ret, mat[1]);
+    END IF;
+    --RAISE NOTICE 'RET: %', ret;
+  END LOOP;
+  RETURN array_to_string(ret,',');
+END;
+$$;
+\i sql/regress_lots_of_points.sql
+-- Selected TOC Entries:
+--
+--\connect - postgres
+--
+-- TOC Entry ID 2 (OID 2231457)
+--
+-- Name: tp Type: TABLE Owner: postgres
+--
+CREATE TABLE "test" (
+	"num" integer,
+	"the_geom" geometry
+);
+select sn_create_distributed_table('test', 'num', 'none');
+psql:sql/regress_lots_of_points.sql:15: ERROR:  type "public.geometry" does not exist
+CONTEXT:  while executing command on localhost:57637
+SQL statement "SELECT pg_catalog.create_distributed_table('test','num','hash','none')"
+PL/pgSQL function sn_create_distributed_table(regclass,text,text) line 58 at EXECUTE
+--
+-- Data for TOC Entry ID 4 (OID 2231457)
+--
+-- Name: test Type: TABLE DATA Owner: postgres
+--
+COPY "test"  FROM stdin;
+-- Index-supported KNN query
+CREATE INDEX test_gist_2d on test using gist (the_geom);
+SELECT '<-> idx', qnodes('select * from test order by the_geom <-> ST_MakePoint(0,0) LIMIT 1');
+ ?column? |   qnodes   
+----------+------------
+ <-> idx  | Index Scan
+(1 row)
+
+SELECT '<-> res1',num,
+  (the_geom <-> 'POINT(2.5 2.5)'::geometry)::numeric(10,2),
+  ST_astext(the_geom) from test
+  order by the_geom <-> 'POINT(2.5 2.5)'::geometry LIMIT 1;
+ ?column? |  num  | numeric |          st_astext           
+----------+-------+---------+------------------------------
+ <-> res1 | 48589 |    0.17 | POINT(2.33793712 2.44566727)
+(1 row)
+
+-- Full table extent: BOX(0.0439142361 0.0197799355,999.955261 999.993652)
+SELECT '<#> idx', qnodes('select * from test order by the_geom <#> ST_MakePoint(0,0) LIMIT 1');
+ ?column? |   qnodes   
+----------+------------
+ <#> idx  | Index Scan
+(1 row)
+
+SELECT '<#> res1',num,
+  (the_geom <#> 'LINESTRING(1000 0,1005 5)'::geometry)::numeric(10,2),
+  ST_astext(the_geom) from test
+  order by the_geom <#> 'LINESTRING(1000 0,1005 5)'::geometry LIMIT 1;
+ ?column? | num  | numeric |          st_astext           
+----------+------+---------+------------------------------
+ <#> res1 | 2057 |    0.83 | POINT(999.173279 3.92185807)
+(1 row)
+
+-- Index-supported nd-KNN query
+DROP INDEX test_gist_2d;
+UPDATE test set the_geom = ST_MakePoint(
+    ST_X(the_geom), ST_Y(the_geom),
+    num, -num);
+SELECT '<<->> seq', qnodes('select * from test order by the_geom <<->> ST_MakePoint(0,0)');
+ ?column?  |  qnodes  
+-----------+----------
+ <<->> seq | Seq Scan
+(1 row)
+
+CREATE INDEX test_gist_nd on test using gist (the_geom gist_geometry_ops_nd);
+ANALYZE test;
+--  EXT       X                Y          Z        M
+-- min    0.0439142361 |   0.0197799355|     1| -50000
+-- max  999.955261     | 999.993652    | 50000|     -1
+--SELECT min(st_x(the_geom)) as minx, min(st_y(the_geom)) as miny,
+--       min(st_z(the_geom)) as minz, min(st_m(the_geom)) as minm,
+--       max(st_x(the_geom)) as maxx, max(st_y(the_geom)) as maxy,
+--       max(st_z(the_geom)) as maxz, max(st_m(the_geom)) as maxm
+--FROM test;
+SELECT '<<->> idx', qnodes('select * from test order by the_geom <<->> ST_MakePoint(0,0) LIMIT 1');
+ ?column?  |   qnodes   
+-----------+------------
+ <<->> idx | Index Scan
+(1 row)
+
+SELECT '<<->> res1',num,
+  (the_geom <<->> 'LINESTRING(0 0,5 5)'::geometry)::numeric(10,2),
+  ST_astext(the_geom) from test
+  order by the_geom <<->> 'LINESTRING(0 0,5 5)'::geometry LIMIT 1;
+  ?column?  |  num  | numeric |                   st_astext                   
+------------+-------+---------+-----------------------------------------------
+ <<->> res1 | 48589 |    0.08 | POINT ZM (2.33793712 2.44566727 48589 -48589)
+(1 row)
+
+SELECT '<<->> res2',num,
+  (the_geom <<->> 'POINT(95 23 25024 -25025)'::geometry)::numeric(10,2),
+  ST_astext(the_geom) from test
+  order by the_geom <<->> 'POINT(95 23 25024 -25025)'::geometry LIMIT 1;
+  ?column?  |  num  | numeric |                   st_astext                   
+------------+-------+---------+-----------------------------------------------
+ <<->> res2 | 25025 |    1.20 | POINT ZM (95.6546249 23.0995369 25025 -25025)
+(1 row)
+
+SELECT '<<->> res3',num,
+  (the_geom <<->> 'POINT(631 729 25023 -25022)'::geometry)::numeric(10,2),
+  ST_astext(the_geom) from test
+  order by the_geom <<->> 'POINT(631 729 25023 -25022)'::geometry LIMIT 1;
+  ?column?  |  num  | numeric |                   st_astext                   
+------------+-------+---------+-----------------------------------------------
+ <<->> res3 | 25023 |    1.27 | POINT ZM (631.060242 729.787354 25023 -25023)
+(1 row)
+
+-- Cleanup
+DROP FUNCTION qnodes(text);
+DROP TABLE test;

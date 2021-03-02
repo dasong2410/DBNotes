@@ -1,0 +1,3 @@
+test: part_citus_init
+test: part_citus_day
+test: part_citus_month

@@ -1,0 +1,26 @@
+while(true); do 
+	psql "service=admin dbname=pgbouncer port=6432" -c "show pools" | tee -a pgb_test.log
+
+	sleep 1
+done
+
+psql "service=admin dbname=pgbouncer port=6432" -c "show pools"
+
+awk -F'Error:' '{print substr($0, 1, 16) " " $2}' pgbouncer_wk1.log | uniq > pgb_w1.txt
+awk -F'Error:' '{print substr($0, 1, 16) " " $2}' pgbouncer_wk5.log | uniq > pgb_w5.txt
+
+grep "ERROR" postgresql_wk1.log | awk -F'ERROR:' '{print substr($0, 1, 16) " " $2}' | uniq > postgresql_w1.txt
+grep "ERROR" postgresql_wk5.log | awk -F'ERROR:' '{print substr($0, 1, 16) " " $2}'| uniq > postgresql_w5.txt
+
+grep "ERROR" postgresql.log | awk -F'ERROR:' '{print substr($0, 1, 16) " " $2}'| uniq > postgresql.txt
+
+
+
+grep "ERROR" postgresql.log_wk1 | awk -F'ERROR:' '{print substr($0, 1, 16) " " $2}' | uniq > postgresql_w1.txt
+grep "ERROR" postgresql.log_wk2 | awk -F'ERROR:' '{print substr($0, 1, 16) " " $2}'| uniq > postgresql_w2.txt
+
+grep "ERROR" postgresql.log-201812111048 | awk -F'ERROR:' '{print substr($0, 1, 16) " " $2}'| uniq > postgresql.txt
+
+
+
+tpc-c 先测的after

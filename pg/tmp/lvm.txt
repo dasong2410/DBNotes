@@ -1,0 +1,18 @@
+### 4. lv 增加空间
+数据库机器空间可能会不够，
+
+	lvremove /dev/mapper/datavg-mysqllv
+	lvextend -L +10G /dev/mapper/datavg-datalv
+	
+	#在线resize分区，不做这个df新加的空间不会加到文件系统中去，df也看不到新加空间
+	resize2fs /dev/mapper/datavg-datalv
+	
+	# 全部的free空间都给lv
+	lvextend -l +100%FREE /dev/mapper/datavg-datalv
+	
+	
+	alter database tpch rename to tpch_pg;
+	
+	work_mem = 1GB
+	archive_mode = off
+	local	all			postgres			trust

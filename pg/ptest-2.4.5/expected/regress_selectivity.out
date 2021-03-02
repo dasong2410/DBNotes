@@ -1,0 +1,146 @@
+-- Make example data
+CREATE TABLE regular_overdots_ab (
+    a integer,
+    b integer
+);
+select sn_create_distributed_table('regular_overdots_ab', 'a', 'none');
+ sn_create_distributed_table 
+-----------------------------
+ 
+(1 row)
+
+COPY regular_overdots_ab (a, b) FROM stdin;
+-- Check for error messages
+create table no_stats ( g geometry, id integer );
+select sn_create_distributed_table('no_stats', 'id', 'none');
+ sn_create_distributed_table 
+-----------------------------
+ 
+(1 row)
+
+create table no_stats_join ( g geometry, id integer );
+select sn_create_distributed_table('no_stats_join', 'id', 'none');
+ sn_create_distributed_table 
+-----------------------------
+ 
+(1 row)
+
+select _postgis_selectivity('no_stats','g', 'LINESTRING(0 0, 1 1)');
+ERROR:  stats for "no_stats.g" do not exist
+select _postgis_stats('no_stats','g');
+ERROR:  stats for "no_stats.g" do not exist
+select _postgis_join_selectivity('no_stats', 'g', 'no_stats_join', 'g');
+ERROR:  stats for "no_stats.g" do not exist
+insert into no_stats (g, id) values ('POINT(0 0)', 0);
+analyze no_stats;
+select _postgis_join_selectivity('no_stats', 'g', 'no_stats_join', 'g');
+ERROR:  stats for "no_stats.g" do not exist
+drop table if exists no_stats;
+drop table if exists no_stats_join;
+-- Table with uniformly variable density, highest at 1,1, lowest at 10,10
+create table regular_overdots as
+  select st_makepoint(a, b) as g, 1 id from regular_overdots_ab;
+select sn_create_distributed_table('regular_overdots', 'id', 'none');
+NOTICE:  Copying data from local table...
+CONTEXT:  SQL statement "SELECT pg_catalog.create_distributed_table('regular_overdots','id','hash','none')"
+PL/pgSQL function sn_create_distributed_table(regclass,text,text) line 58 at EXECUTE
+ sn_create_distributed_table 
+-----------------------------
+ 
+(1 row)
+
+-- Generate the stats
+analyze regular_overdots;
+-- Baseline info
+select 'selectivity_00', count(*) from regular_overdots;
+    ?column?    | count 
+----------------+-------
+ selectivity_00 |  2127
+(1 row)
+
+-- First test
+select 'selectivity_01', count(*) from regular_overdots where g && 'LINESTRING(0 0, 11 3.5)';
+    ?column?    | count 
+----------------+-------
+ selectivity_01 |  1068
+(1 row)
+
+select 'selectivity_02', 'actual', round(1068.0/2127.0,3);
+    ?column?    | ?column? | round 
+----------------+----------+-------
+ selectivity_02 | actual   | 0.502
+(1 row)
+
+select 'selectivity_03', 'estimated', round(_postgis_selectivity('regular_overdots','g','LINESTRING(0 0, 11 3.5)')::numeric,3);
+    ?column?    | ?column?  | round 
+----------------+-----------+-------
+ selectivity_03 | estimated | 0.502
+(1 row)
+
+-- Second test
+select 'selectivity_04', count(*) from regular_overdots where g && 'LINESTRING(5.5 5.5, 11 11)';
+    ?column?    | count 
+----------------+-------
+ selectivity_04 |   161
+(1 row)
+
+select 'selectivity_05', 'actual', round(161.0/2127.0,3);
+    ?column?    | ?column? | round 
+----------------+----------+-------
+ selectivity_05 | actual   | 0.076
+(1 row)
+
+select 'selectivity_06', 'estimated', round(_postgis_selectivity('regular_overdots','g','LINESTRING(5.5 5.5, 11 11)')::numeric,3);
+    ?column?    | ?column?  | round 
+----------------+-----------+-------
+ selectivity_06 | estimated | 0.076
+(1 row)
+
+-- Third test
+select 'selectivity_07', count(*) from regular_overdots where g && 'LINESTRING(1.5 1.5, 2.5 2.5)';
+    ?column?    | count 
+----------------+-------
+ selectivity_07 |    81
+(1 row)
+
+select 'selectivity_08', 'actual', round(81.0/2127.0,3);
+    ?column?    | ?column? | round 
+----------------+----------+-------
+ selectivity_08 | actual   | 0.038
+(1 row)
+
+select 'selectivity_09', 'estimated', round(_postgis_selectivity('regular_overdots','g','LINESTRING(1.5 1.5, 2.5 2.5)')::numeric,3);
+    ?column?    | ?column?  | round 
+----------------+-----------+-------
+ selectivity_09 | estimated | 0.038
+(1 row)
+
+-- Fourth test
+select 'selectivity_10', 'actual', 0;
+    ?column?    | ?column? | ?column? 
+----------------+----------+----------
+ selectivity_10 | actual   |        0
+(1 row)
+
+select 'selectivity_09', 'estimated', _postgis_selectivity('regular_overdots','g','LINESTRING(11 11, 12 12)');
+    ?column?    | ?column?  | _postgis_selectivity 
+----------------+-----------+----------------------
+ selectivity_09 | estimated |                    0
+(1 row)
+
+-- Fifth test
+select 'selectivity_10', 'actual', 1;
+    ?column?    | ?column? | ?column? 
+----------------+----------+----------
+ selectivity_10 | actual   |        1
+(1 row)
+
+select 'selectivity_09', 'estimated', _postgis_selectivity('regular_overdots','g','LINESTRING(0 0, 12 12)');
+    ?column?    | ?column?  | _postgis_selectivity 
+----------------+-----------+----------------------
+ selectivity_09 | estimated |                    1
+(1 row)
+
+-- Clean
+drop table if exists regular_overdots;
+drop table if exists regular_overdots_ab;

@@ -1,0 +1,1085 @@
+SET client_min_messages TO warning;
+\set VERBOSITY terse
+CREATE SCHEMA tm;
+-- Test construction of typed tables
+CREATE TABLE tm.circularstring (id serial, g geometry(circularstring) );
+select sn_create_distributed_table('tm.circularstring', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.circularstring0 (id serial, g geometry(circularstring, 0) );
+select sn_create_distributed_table('tm.circularstring0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.circularstring4326 (id serial, g geometry(circularstring, 4326) );
+select sn_create_distributed_table('tm.circularstring4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.circularstringm (id serial, g geometry(circularstringm) );
+select sn_create_distributed_table('tm.circularstringm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.circularstringm0 (id serial, g geometry(circularstringm, 0) );
+select sn_create_distributed_table('tm.circularstringm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.circularstringm4326 (id serial, g geometry(circularstringm, 4326) );
+select sn_create_distributed_table('tm.circularstringm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.circularstringz (id serial, g geometry(circularstringz) );
+select sn_create_distributed_table('tm.circularstringz', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.circularstringz0 (id serial, g geometry(circularstringz, 0) );
+select sn_create_distributed_table('tm.circularstringz0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.circularstringz4326 (id serial, g geometry(circularstringz, 4326) );
+select sn_create_distributed_table('tm.circularstringz4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.circularstringzm (id serial, g geometry(circularstringzm) );
+select sn_create_distributed_table('tm.circularstringzm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.circularstringzm0 (id serial, g geometry(circularstringzm, 0) );
+select sn_create_distributed_table('tm.circularstringzm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.circularstringzm4326 (id serial, g geometry(circularstringzm, 4326) );
+select sn_create_distributed_table('tm.circularstringzm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.compoundcurve (id serial, g geometry(compoundcurve) );
+select sn_create_distributed_table('tm.compoundcurve', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.compoundcurve0 (id serial, g geometry(compoundcurve, 0) );
+select sn_create_distributed_table('tm.compoundcurve0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.compoundcurve4326 (id serial, g geometry(compoundcurve, 4326) );
+select sn_create_distributed_table('tm.compoundcurve4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.compoundcurvem (id serial, g geometry(compoundcurvem) );
+select sn_create_distributed_table('tm.compoundcurvem', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.compoundcurvem0 (id serial, g geometry(compoundcurvem, 0) );
+select sn_create_distributed_table('tm.compoundcurvem0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.compoundcurvem4326 (id serial, g geometry(compoundcurvem, 4326) );
+select sn_create_distributed_table('tm.compoundcurvem4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.compoundcurvez (id serial, g geometry(compoundcurvez) );
+select sn_create_distributed_table('tm.compoundcurvez', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.compoundcurvez0 (id serial, g geometry(compoundcurvez, 0) );
+select sn_create_distributed_table('tm.compoundcurvez0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.compoundcurvez4326 (id serial, g geometry(compoundcurvez, 4326) );
+select sn_create_distributed_table('tm.compoundcurvez4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.compoundcurvezm (id serial, g geometry(compoundcurvezm) );
+select sn_create_distributed_table('tm.compoundcurvezm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.compoundcurvezm0 (id serial, g geometry(compoundcurvezm, 0) );
+select sn_create_distributed_table('tm.compoundcurvezm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.compoundcurvezm4326 (id serial, g geometry(compoundcurvezm, 4326) );
+select sn_create_distributed_table('tm.compoundcurvezm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.curvepolygon (id serial, g geometry(curvepolygon) );
+select sn_create_distributed_table('tm.curvepolygon', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.curvepolygon0 (id serial, g geometry(curvepolygon, 0) );
+select sn_create_distributed_table('tm.curvepolygon0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.curvepolygon4326 (id serial, g geometry(curvepolygon, 4326) );
+select sn_create_distributed_table('tm.curvepolygon4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.curvepolygonm (id serial, g geometry(curvepolygonm) );
+select sn_create_distributed_table('tm.curvepolygonm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.curvepolygonm0 (id serial, g geometry(curvepolygonm, 0) );
+select sn_create_distributed_table('tm.curvepolygonm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.curvepolygonm4326 (id serial, g geometry(curvepolygonm, 4326) );
+select sn_create_distributed_table('tm.curvepolygonm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.curvepolygonz (id serial, g geometry(curvepolygonz) );
+select sn_create_distributed_table('tm.curvepolygonz', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.curvepolygonz0 (id serial, g geometry(curvepolygonz, 0) );
+select sn_create_distributed_table('tm.curvepolygonz0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.curvepolygonz4326 (id serial, g geometry(curvepolygonz, 4326) );
+select sn_create_distributed_table('tm.curvepolygonz4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.curvepolygonzm (id serial, g geometry(curvepolygonzm) );
+select sn_create_distributed_table('tm.curvepolygonzm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.curvepolygonzm0 (id serial, g geometry(curvepolygonzm, 0) );
+select sn_create_distributed_table('tm.curvepolygonzm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.curvepolygonzm4326 (id serial, g geometry(curvepolygonzm, 4326) );
+select sn_create_distributed_table('tm.curvepolygonzm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometry (id serial, g geometry(geometry), gg geography(geometry) );
+select sn_create_distributed_table('tm.geometry', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometry0 (id serial, g geometry(geometry, 0), gg geography(geometry, 0) );
+select sn_create_distributed_table('tm.geometry0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometry4326 (id serial, g geometry(geometry, 4326), gg geography(geometry, 4326) );
+select sn_create_distributed_table('tm.geometry4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometrym (id serial, g geometry(geometrym), gg geography(geometrym) );
+select sn_create_distributed_table('tm.geometrym', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometrym0 (id serial, g geometry(geometrym, 0), gg geography(geometrym, 0) );
+select sn_create_distributed_table('tm.geometrym0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometrym4326 (id serial, g geometry(geometrym, 4326), gg geography(geometrym, 4326) );
+select sn_create_distributed_table('tm.geometrym4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometryz (id serial, g geometry(geometryz), gg geography(geometryz) );
+select sn_create_distributed_table('tm.geometryz', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometryz0 (id serial, g geometry(geometryz, 0), gg geography(geometryz, 0) );
+select sn_create_distributed_table('tm.geometryz0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometryz4326 (id serial, g geometry(geometryz, 4326), gg geography(geometryz, 4326) );
+select sn_create_distributed_table('tm.geometryz4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometryzm (id serial, g geometry(geometryzm), gg geography(geometryzm) );
+select sn_create_distributed_table('tm.geometryzm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometryzm0 (id serial, g geometry(geometryzm, 0), gg geography(geometryzm, 0) );
+select sn_create_distributed_table('tm.geometryzm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometryzm4326 (id serial, g geometry(geometryzm, 4326), gg geography(geometryzm, 4326) );
+select sn_create_distributed_table('tm.geometryzm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometrycollection (id serial, g geometry(geometrycollection), gg geography(geometrycollection) );
+select sn_create_distributed_table('tm.geometrycollection', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometrycollection0 (id serial, g geometry(geometrycollection, 0), gg geography(geometrycollection, 0) );
+select sn_create_distributed_table('tm.geometrycollection0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometrycollection4326 (id serial, g geometry(geometrycollection, 4326), gg geography(geometrycollection, 4326) );
+select sn_create_distributed_table('tm.geometrycollection4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometrycollectionm (id serial, g geometry(geometrycollectionm), gg geography(geometrycollectionm) );
+select sn_create_distributed_table('tm.geometrycollectionm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometrycollectionm0 (id serial, g geometry(geometrycollectionm, 0), gg geography(geometrycollectionm, 0) );
+select sn_create_distributed_table('tm.geometrycollectionm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometrycollectionm4326 (id serial, g geometry(geometrycollectionm, 4326), gg geography(geometrycollectionm, 4326) );
+select sn_create_distributed_table('tm.geometrycollectionm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometrycollectionz (id serial, g geometry(geometrycollectionz), gg geography(geometrycollectionz) );
+select sn_create_distributed_table('tm.geometrycollectionz', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometrycollectionz0 (id serial, g geometry(geometrycollectionz, 0), gg geography(geometrycollectionz, 0) );
+select sn_create_distributed_table('tm.geometrycollectionz0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometrycollectionz4326 (id serial, g geometry(geometrycollectionz, 4326), gg geography(geometrycollectionz, 4326) );
+select sn_create_distributed_table('tm.geometrycollectionz4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometrycollectionzm (id serial, g geometry(geometrycollectionzm), gg geography(geometrycollectionzm) );
+select sn_create_distributed_table('tm.geometrycollectionzm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometrycollectionzm0 (id serial, g geometry(geometrycollectionzm, 0), gg geography(geometrycollectionzm, 0) );
+select sn_create_distributed_table('tm.geometrycollectionzm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.geometrycollectionzm4326 (id serial, g geometry(geometrycollectionzm, 4326), gg geography(geometrycollectionzm, 4326) );
+select sn_create_distributed_table('tm.geometrycollectionzm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.linestring (id serial, g geometry(linestring), gg geography(linestring) );
+select sn_create_distributed_table('tm.linestring', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.linestring0 (id serial, g geometry(linestring, 0), gg geography(linestring, 0) );
+select sn_create_distributed_table('tm.linestring0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.linestring4326 (id serial, g geometry(linestring, 4326), gg geography(linestring, 4326) );
+select sn_create_distributed_table('tm.linestring4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.linestringm (id serial, g geometry(linestringm), gg geography(linestringm) );
+select sn_create_distributed_table('tm.linestringm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.linestringm0 (id serial, g geometry(linestringm, 0), gg geography(linestringm, 0) );
+select sn_create_distributed_table('tm.linestringm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.linestringm4326 (id serial, g geometry(linestringm, 4326), gg geography(linestringm, 4326) );
+select sn_create_distributed_table('tm.linestringm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.linestringz (id serial, g geometry(linestringz), gg geography(linestringz) );
+select sn_create_distributed_table('tm.linestringz', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.linestringz0 (id serial, g geometry(linestringz, 0), gg geography(linestringz, 0) );
+select sn_create_distributed_table('tm.linestringz0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.linestringz4326 (id serial, g geometry(linestringz, 4326), gg geography(linestringz, 4326) );
+select sn_create_distributed_table('tm.linestringz4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.linestringzm (id serial, g geometry(linestringzm), gg geography(linestringzm) );
+select sn_create_distributed_table('tm.linestringzm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.linestringzm0 (id serial, g geometry(linestringzm, 0), gg geography(linestringzm, 0) );
+select sn_create_distributed_table('tm.linestringzm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.linestringzm4326 (id serial, g geometry(linestringzm, 4326), gg geography(linestringzm, 4326) );
+select sn_create_distributed_table('tm.linestringzm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multicurve (id serial, g geometry(multicurve) );
+select sn_create_distributed_table('tm.multicurve', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multicurve0 (id serial, g geometry(multicurve, 0) );
+select sn_create_distributed_table('tm.multicurve0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multicurve4326 (id serial, g geometry(multicurve, 4326) );
+select sn_create_distributed_table('tm.multicurve4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multicurvem (id serial, g geometry(multicurvem) );
+select sn_create_distributed_table('tm.multicurvem', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multicurvem0 (id serial, g geometry(multicurvem, 0) );
+select sn_create_distributed_table('tm.multicurvem0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multicurvem4326 (id serial, g geometry(multicurvem, 4326) );
+select sn_create_distributed_table('tm.multicurvem4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multicurvez (id serial, g geometry(multicurvez) );
+select sn_create_distributed_table('tm.multicurvez', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multicurvez0 (id serial, g geometry(multicurvez, 0) );
+select sn_create_distributed_table('tm.multicurvez0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multicurvez4326 (id serial, g geometry(multicurvez, 4326) );
+select sn_create_distributed_table('tm.multicurvez4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multicurvezm (id serial, g geometry(multicurvezm) );
+select sn_create_distributed_table('tm.multicurvezm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multicurvezm0 (id serial, g geometry(multicurvezm, 0) );
+select sn_create_distributed_table('tm.multicurvezm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multicurvezm4326 (id serial, g geometry(multicurvezm, 4326) );
+select sn_create_distributed_table('tm.multicurvezm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multilinestring (id serial, g geometry(multilinestring), gg geography(multilinestring) );
+select sn_create_distributed_table('tm.multilinestring', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multilinestring0 (id serial, g geometry(multilinestring, 0), gg geography(multilinestring, 0) );
+select sn_create_distributed_table('tm.multilinestring0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multilinestring4326 (id serial, g geometry(multilinestring, 4326), gg geography(multilinestring, 4326) );
+select sn_create_distributed_table('tm.multilinestring4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multilinestringm (id serial, g geometry(multilinestringm), gg geography(multilinestringm) );
+select sn_create_distributed_table('tm.multilinestringm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multilinestringm0 (id serial, g geometry(multilinestringm, 0), gg geography(multilinestringm, 0) );
+select sn_create_distributed_table('tm.multilinestringm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multilinestringm4326 (id serial, g geometry(multilinestringm, 4326), gg geography(multilinestringm, 4326) );
+select sn_create_distributed_table('tm.multilinestringm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multilinestringz (id serial, g geometry(multilinestringz), gg geography(multilinestringz) );
+select sn_create_distributed_table('tm.multilinestringz', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multilinestringz0 (id serial, g geometry(multilinestringz, 0), gg geography(multilinestringz, 0) );
+select sn_create_distributed_table('tm.multilinestringz0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multilinestringz4326 (id serial, g geometry(multilinestringz, 4326), gg geography(multilinestringz, 4326) );
+select sn_create_distributed_table('tm.multilinestringz4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multilinestringzm (id serial, g geometry(multilinestringzm), gg geography(multilinestringzm) );
+select sn_create_distributed_table('tm.multilinestringzm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multilinestringzm0 (id serial, g geometry(multilinestringzm, 0), gg geography(multilinestringzm, 0) );
+select sn_create_distributed_table('tm.multilinestringzm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multilinestringzm4326 (id serial, g geometry(multilinestringzm, 4326), gg geography(multilinestringzm, 4326) );
+select sn_create_distributed_table('tm.multilinestringzm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipolygon (id serial, g geometry(multipolygon), gg geography(multipolygon) );
+select sn_create_distributed_table('tm.multipolygon', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipolygon0 (id serial, g geometry(multipolygon, 0), gg geography(multipolygon, 0) );
+select sn_create_distributed_table('tm.multipolygon0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipolygon4326 (id serial, g geometry(multipolygon, 4326), gg geography(multipolygon, 4326) );
+select sn_create_distributed_table('tm.multipolygon4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipolygonm (id serial, g geometry(multipolygonm), gg geography(multipolygonm) );
+select sn_create_distributed_table('tm.multipolygonm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipolygonm0 (id serial, g geometry(multipolygonm, 0), gg geography(multipolygonm, 0) );
+select sn_create_distributed_table('tm.multipolygonm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipolygonm4326 (id serial, g geometry(multipolygonm, 4326), gg geography(multipolygonm, 4326) );
+select sn_create_distributed_table('tm.multipolygonm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipolygonz (id serial, g geometry(multipolygonz), gg geography(multipolygonz) );
+select sn_create_distributed_table('tm.multipolygonz', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipolygonz0 (id serial, g geometry(multipolygonz, 0), gg geography(multipolygonz, 0) );
+select sn_create_distributed_table('tm.multipolygonz0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipolygonz4326 (id serial, g geometry(multipolygonz, 4326), gg geography(multipolygonz, 4326) );
+select sn_create_distributed_table('tm.multipolygonz4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipolygonzm (id serial, g geometry(multipolygonzm), gg geography(multipolygonzm) );
+select sn_create_distributed_table('tm.multipolygonzm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipolygonzm0 (id serial, g geometry(multipolygonzm, 0), gg geography(multipolygonzm, 0) );
+select sn_create_distributed_table('tm.multipolygonzm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipolygonzm4326 (id serial, g geometry(multipolygonzm, 4326), gg geography(multipolygonzm, 4326) );
+select sn_create_distributed_table('tm.multipolygonzm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipoint (id serial, g geometry(multipoint), gg geography(multipoint) );
+select sn_create_distributed_table('tm.multipoint', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipoint0 (id serial, g geometry(multipoint, 0), gg geography(multipoint, 0) );
+select sn_create_distributed_table('tm.multipoint0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipoint4326 (id serial, g geometry(multipoint, 4326), gg geography(multipoint, 4326) );
+select sn_create_distributed_table('tm.multipoint4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipointm (id serial, g geometry(multipointm), gg geography(multipointm) );
+select sn_create_distributed_table('tm.multipointm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipointm0 (id serial, g geometry(multipointm, 0), gg geography(multipointm, 0) );
+select sn_create_distributed_table('tm.multipointm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipointm4326 (id serial, g geometry(multipointm, 4326), gg geography(multipointm, 4326) );
+select sn_create_distributed_table('tm.multipointm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipointz (id serial, g geometry(multipointz), gg geography(multipointz) );
+select sn_create_distributed_table('tm.multipointz', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipointz0 (id serial, g geometry(multipointz, 0), gg geography(multipointz, 0) );
+select sn_create_distributed_table('tm.multipointz0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipointz4326 (id serial, g geometry(multipointz, 4326), gg geography(multipointz, 4326) );
+select sn_create_distributed_table('tm.multipointz4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipointzm (id serial, g geometry(multipointzm), gg geography(multipointzm) );
+select sn_create_distributed_table('tm.multipointzm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipointzm0 (id serial, g geometry(multipointzm, 0), gg geography(multipointzm, 0) );
+select sn_create_distributed_table('tm.multipointzm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multipointzm4326 (id serial, g geometry(multipointzm, 4326), gg geography(multipointzm, 4326) );
+select sn_create_distributed_table('tm.multipointzm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multisurface (id serial, g geometry(multisurface) );
+select sn_create_distributed_table('tm.multisurface', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multisurface0 (id serial, g geometry(multisurface, 0) );
+select sn_create_distributed_table('tm.multisurface0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multisurface4326 (id serial, g geometry(multisurface, 4326) );
+select sn_create_distributed_table('tm.multisurface4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multisurfacem (id serial, g geometry(multisurfacem) );
+select sn_create_distributed_table('tm.multisurfacem', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multisurfacem0 (id serial, g geometry(multisurfacem, 0) );
+select sn_create_distributed_table('tm.multisurfacem0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multisurfacem4326 (id serial, g geometry(multisurfacem, 4326) );
+select sn_create_distributed_table('tm.multisurfacem4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multisurfacez (id serial, g geometry(multisurfacez) );
+select sn_create_distributed_table('tm.multisurfacez', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multisurfacez0 (id serial, g geometry(multisurfacez, 0) );
+select sn_create_distributed_table('tm.multisurfacez0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multisurfacez4326 (id serial, g geometry(multisurfacez, 4326) );
+select sn_create_distributed_table('tm.multisurfacez4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multisurfacezm (id serial, g geometry(multisurfacezm) );
+select sn_create_distributed_table('tm.multisurfacezm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multisurfacezm0 (id serial, g geometry(multisurfacezm, 0) );
+select sn_create_distributed_table('tm.multisurfacezm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.multisurfacezm4326 (id serial, g geometry(multisurfacezm, 4326) );
+select sn_create_distributed_table('tm.multisurfacezm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.point (id serial, g geometry(point), gg geography(point) );
+select sn_create_distributed_table('tm.point', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.point0 (id serial, g geometry(point, 0), gg geography(point, 0) );
+select sn_create_distributed_table('tm.point0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.point4326 (id serial, g geometry(point, 4326), gg geography(point, 4326) );
+select sn_create_distributed_table('tm.point4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.pointm (id serial, g geometry(pointm), gg geography(pointm) );
+select sn_create_distributed_table('tm.pointm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.pointm0 (id serial, g geometry(pointm, 0), gg geography(pointm, 0) );
+select sn_create_distributed_table('tm.pointm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.pointm4326 (id serial, g geometry(pointm, 4326), gg geography(pointm, 4326) );
+select sn_create_distributed_table('tm.pointm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.pointz (id serial, g geometry(pointz), gg geography(pointz) );
+select sn_create_distributed_table('tm.pointz', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.pointz0 (id serial, g geometry(pointz, 0), gg geography(pointz, 0) );
+select sn_create_distributed_table('tm.pointz0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.pointz4326 (id serial, g geometry(pointz, 4326), gg geography(pointz, 4326) );
+select sn_create_distributed_table('tm.pointz4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.pointzm (id serial, g geometry(pointzm), gg geography(pointzm) );
+select sn_create_distributed_table('tm.pointzm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.pointzm0 (id serial, g geometry(pointzm, 0), gg geography(pointzm, 0) );
+select sn_create_distributed_table('tm.pointzm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.pointzm4326 (id serial, g geometry(pointzm, 4326), gg geography(pointzm, 4326) );
+select sn_create_distributed_table('tm.pointzm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polygon (id serial, g geometry(polygon), gg geography(polygon) );
+select sn_create_distributed_table('tm.polygon', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polygon0 (id serial, g geometry(polygon, 0), gg geography(polygon, 0) );
+select sn_create_distributed_table('tm.polygon0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polygon4326 (id serial, g geometry(polygon, 4326), gg geography(polygon, 4326) );
+select sn_create_distributed_table('tm.polygon4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polygonm (id serial, g geometry(polygonm), gg geography(polygonm) );
+select sn_create_distributed_table('tm.polygonm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polygonm0 (id serial, g geometry(polygonm, 0), gg geography(polygonm, 0) );
+select sn_create_distributed_table('tm.polygonm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polygonm4326 (id serial, g geometry(polygonm, 4326), gg geography(polygonm, 4326) );
+select sn_create_distributed_table('tm.polygonm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polygonz (id serial, g geometry(polygonz), gg geography(polygonz) );
+select sn_create_distributed_table('tm.polygonz', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polygonz0 (id serial, g geometry(polygonz, 0), gg geography(polygonz, 0) );
+select sn_create_distributed_table('tm.polygonz0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polygonz4326 (id serial, g geometry(polygonz, 4326), gg geography(polygonz, 4326) );
+select sn_create_distributed_table('tm.polygonz4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polygonzm (id serial, g geometry(polygonzm), gg geography(polygonzm) );
+select sn_create_distributed_table('tm.polygonzm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polygonzm0 (id serial, g geometry(polygonzm, 0), gg geography(polygonzm, 0) );
+select sn_create_distributed_table('tm.polygonzm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polygonzm4326 (id serial, g geometry(polygonzm, 4326), gg geography(polygonzm, 4326) );
+select sn_create_distributed_table('tm.polygonzm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polyhedralsurface (id serial, g geometry(polyhedralsurface) );
+select sn_create_distributed_table('tm.polyhedralsurface', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polyhedralsurface0 (id serial, g geometry(polyhedralsurface, 0) );
+select sn_create_distributed_table('tm.polyhedralsurface0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polyhedralsurface4326 (id serial, g geometry(polyhedralsurface, 4326) );
+select sn_create_distributed_table('tm.polyhedralsurface4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polyhedralsurfacem (id serial, g geometry(polyhedralsurfacem) );
+select sn_create_distributed_table('tm.polyhedralsurfacem', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polyhedralsurfacem0 (id serial, g geometry(polyhedralsurfacem, 0) );
+select sn_create_distributed_table('tm.polyhedralsurfacem0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polyhedralsurfacem4326 (id serial, g geometry(polyhedralsurfacem, 4326) );
+select sn_create_distributed_table('tm.polyhedralsurfacem4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polyhedralsurfacez (id serial, g geometry(polyhedralsurfacez) );
+select sn_create_distributed_table('tm.polyhedralsurfacez', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polyhedralsurfacez0 (id serial, g geometry(polyhedralsurfacez, 0) );
+select sn_create_distributed_table('tm.polyhedralsurfacez0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polyhedralsurfacez4326 (id serial, g geometry(polyhedralsurfacez, 4326) );
+select sn_create_distributed_table('tm.polyhedralsurfacez4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polyhedralsurfacezm (id serial, g geometry(polyhedralsurfacezm) );
+select sn_create_distributed_table('tm.polyhedralsurfacezm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polyhedralsurfacezm0 (id serial, g geometry(polyhedralsurfacezm, 0) );
+select sn_create_distributed_table('tm.polyhedralsurfacezm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.polyhedralsurfacezm4326 (id serial, g geometry(polyhedralsurfacezm, 4326) );
+select sn_create_distributed_table('tm.polyhedralsurfacezm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.tin (id serial, g geometry(tin) );
+select sn_create_distributed_table('tm.tin', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.tin0 (id serial, g geometry(tin, 0) );
+select sn_create_distributed_table('tm.tin0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.tin4326 (id serial, g geometry(tin, 4326) );
+select sn_create_distributed_table('tm.tin4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.tinm (id serial, g geometry(tinm) );
+select sn_create_distributed_table('tm.tinm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.tinm0 (id serial, g geometry(tinm, 0) );
+select sn_create_distributed_table('tm.tinm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.tinm4326 (id serial, g geometry(tinm, 4326) );
+select sn_create_distributed_table('tm.tinm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.tinz (id serial, g geometry(tinz) );
+select sn_create_distributed_table('tm.tinz', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.tinz0 (id serial, g geometry(tinz, 0) );
+select sn_create_distributed_table('tm.tinz0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.tinz4326 (id serial, g geometry(tinz, 4326) );
+select sn_create_distributed_table('tm.tinz4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.tinzm (id serial, g geometry(tinzm) );
+select sn_create_distributed_table('tm.tinzm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.tinzm0 (id serial, g geometry(tinzm, 0) );
+select sn_create_distributed_table('tm.tinzm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.tinzm4326 (id serial, g geometry(tinzm, 4326) );
+select sn_create_distributed_table('tm.tinzm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.triangle (id serial, g geometry(triangle) );
+select sn_create_distributed_table('tm.triangle', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.triangle0 (id serial, g geometry(triangle, 0) );
+select sn_create_distributed_table('tm.triangle0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.triangle4326 (id serial, g geometry(triangle, 4326) );
+select sn_create_distributed_table('tm.triangle4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.trianglem (id serial, g geometry(trianglem) );
+select sn_create_distributed_table('tm.trianglem', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.trianglem0 (id serial, g geometry(trianglem, 0) );
+select sn_create_distributed_table('tm.trianglem0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.trianglem4326 (id serial, g geometry(trianglem, 4326) );
+select sn_create_distributed_table('tm.trianglem4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.trianglez (id serial, g geometry(trianglez) );
+select sn_create_distributed_table('tm.trianglez', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.trianglez0 (id serial, g geometry(trianglez, 0) );
+select sn_create_distributed_table('tm.trianglez0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.trianglez4326 (id serial, g geometry(trianglez, 4326) );
+select sn_create_distributed_table('tm.trianglez4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.trianglezm (id serial, g geometry(trianglezm) );
+select sn_create_distributed_table('tm.trianglezm', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.trianglezm0 (id serial, g geometry(trianglezm, 0) );
+select sn_create_distributed_table('tm.trianglezm0', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+CREATE TABLE tm.trianglezm4326 (id serial, g geometry(trianglezm, 4326) );
+select sn_create_distributed_table('tm.trianglezm4326', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+SELECT 'g',
+ f_table_name, f_geometry_column,
+ coord_dimension, srid, type
+from geometry_columns ORDER BY f_table_name;
+ ?column? |       f_table_name       | f_geometry_column | coord_dimension | srid |        type         
+----------+--------------------------+-------------------+-----------------+------+---------------------
+ g        | addrfeat                 | the_geom          |               2 | 4269 | LINESTRING
+ g        | bg                       | the_geom          |               2 | 4269 | MULTIPOLYGON
+ g        | circularstring           | g                 |               2 |    0 | CIRCULARSTRING
+ g        | circularstring0          | g                 |               2 |    0 | CIRCULARSTRING
+ g        | circularstring4326       | g                 |               2 | 4326 | CIRCULARSTRING
+ g        | circularstringm          | g                 |               3 |    0 | CIRCULARSTRINGM
+ g        | circularstringm0         | g                 |               3 |    0 | CIRCULARSTRINGM
+ g        | circularstringm4326      | g                 |               3 | 4326 | CIRCULARSTRINGM
+ g        | circularstringz          | g                 |               3 |    0 | CIRCULARSTRING
+ g        | circularstringz0         | g                 |               3 |    0 | CIRCULARSTRING
+ g        | circularstringz4326      | g                 |               3 | 4326 | CIRCULARSTRING
+ g        | circularstringzm         | g                 |               4 |    0 | CIRCULARSTRING
+ g        | circularstringzm0        | g                 |               4 |    0 | CIRCULARSTRING
+ g        | circularstringzm4326     | g                 |               4 | 4326 | CIRCULARSTRING
+ g        | compoundcurve            | g                 |               2 |    0 | COMPOUNDCURVE
+ g        | compoundcurve0           | g                 |               2 |    0 | COMPOUNDCURVE
+ g        | compoundcurve4326        | g                 |               2 | 4326 | COMPOUNDCURVE
+ g        | compoundcurvem           | g                 |               3 |    0 | COMPOUNDCURVEM
+ g        | compoundcurvem0          | g                 |               3 |    0 | COMPOUNDCURVEM
+ g        | compoundcurvem4326       | g                 |               3 | 4326 | COMPOUNDCURVEM
+ g        | compoundcurvez           | g                 |               3 |    0 | COMPOUNDCURVE
+ g        | compoundcurvez0          | g                 |               3 |    0 | COMPOUNDCURVE
+ g        | compoundcurvez4326       | g                 |               3 | 4326 | COMPOUNDCURVE
+ g        | compoundcurvezm          | g                 |               4 |    0 | COMPOUNDCURVE
+ g        | compoundcurvezm0         | g                 |               4 |    0 | COMPOUNDCURVE
+ g        | compoundcurvezm4326      | g                 |               4 | 4326 | COMPOUNDCURVE
+ g        | county                   | the_geom          |               2 | 4269 | MULTIPOLYGON
+ g        | cousub                   | the_geom          |               2 | 4269 | MULTIPOLYGON
+ g        | curvepolygon             | g                 |               2 |    0 | CURVEPOLYGON
+ g        | curvepolygon0            | g                 |               2 |    0 | CURVEPOLYGON
+ g        | curvepolygon4326         | g                 |               2 | 4326 | CURVEPOLYGON
+ g        | curvepolygonm            | g                 |               3 |    0 | CURVEPOLYGONM
+ g        | curvepolygonm0           | g                 |               3 |    0 | CURVEPOLYGONM
+ g        | curvepolygonm4326        | g                 |               3 | 4326 | CURVEPOLYGONM
+ g        | curvepolygonz            | g                 |               3 |    0 | CURVEPOLYGON
+ g        | curvepolygonz0           | g                 |               3 |    0 | CURVEPOLYGON
+ g        | curvepolygonz4326        | g                 |               3 | 4326 | CURVEPOLYGON
+ g        | curvepolygonzm           | g                 |               4 |    0 | CURVEPOLYGON
+ g        | curvepolygonzm0          | g                 |               4 |    0 | CURVEPOLYGON
+ g        | curvepolygonzm4326       | g                 |               4 | 4326 | CURVEPOLYGON
+ g        | edges                    | the_geom          |               2 | 4269 | MULTILINESTRING
+ g        | faces                    | the_geom          |               2 | 4269 | MULTIPOLYGON
+ g        | geometry                 | g                 |               2 |    0 | GEOMETRY
+ g        | geometry0                | g                 |               2 |    0 | GEOMETRY
+ g        | geometry4326             | g                 |               2 | 4326 | GEOMETRY
+ g        | geometrycollection       | g                 |               2 |    0 | GEOMETRYCOLLECTION
+ g        | geometrycollection0      | g                 |               2 |    0 | GEOMETRYCOLLECTION
+ g        | geometrycollection4326   | g                 |               2 | 4326 | GEOMETRYCOLLECTION
+ g        | geometrycollectionm      | g                 |               3 |    0 | GEOMETRYCOLLECTIONM
+ g        | geometrycollectionm0     | g                 |               3 |    0 | GEOMETRYCOLLECTIONM
+ g        | geometrycollectionm4326  | g                 |               3 | 4326 | GEOMETRYCOLLECTIONM
+ g        | geometrycollectionz      | g                 |               3 |    0 | GEOMETRYCOLLECTION
+ g        | geometrycollectionz0     | g                 |               3 |    0 | GEOMETRYCOLLECTION
+ g        | geometrycollectionz4326  | g                 |               3 | 4326 | GEOMETRYCOLLECTION
+ g        | geometrycollectionzm     | g                 |               4 |    0 | GEOMETRYCOLLECTION
+ g        | geometrycollectionzm0    | g                 |               4 |    0 | GEOMETRYCOLLECTION
+ g        | geometrycollectionzm4326 | g                 |               4 | 4326 | GEOMETRYCOLLECTION
+ g        | geometrym                | g                 |               3 |    0 | GEOMETRYM
+ g        | geometrym0               | g                 |               3 |    0 | GEOMETRYM
+ g        | geometrym4326            | g                 |               3 | 4326 | GEOMETRYM
+ g        | geometryz                | g                 |               3 |    0 | GEOMETRY
+ g        | geometryz0               | g                 |               3 |    0 | GEOMETRY
+ g        | geometryz4326            | g                 |               3 | 4326 | GEOMETRY
+ g        | geometryzm               | g                 |               4 |    0 | GEOMETRY
+ g        | geometryzm0              | g                 |               4 |    0 | GEOMETRY
+ g        | geometryzm4326           | g                 |               4 | 4326 | GEOMETRY
+ g        | linestring               | g                 |               2 |    0 | LINESTRING
+ g        | linestring0              | g                 |               2 |    0 | LINESTRING
+ g        | linestring4326           | g                 |               2 | 4326 | LINESTRING
+ g        | linestringm              | g                 |               3 |    0 | LINESTRINGM
+ g        | linestringm0             | g                 |               3 |    0 | LINESTRINGM
+ g        | linestringm4326          | g                 |               3 | 4326 | LINESTRINGM
+ g        | linestringz              | g                 |               3 |    0 | LINESTRING
+ g        | linestringz0             | g                 |               3 |    0 | LINESTRING
+ g        | linestringz4326          | g                 |               3 | 4326 | LINESTRING
+ g        | linestringzm             | g                 |               4 |    0 | LINESTRING
+ g        | linestringzm0            | g                 |               4 |    0 | LINESTRING
+ g        | linestringzm4326         | g                 |               4 | 4326 | LINESTRING
+ g        | multicurve               | g                 |               2 |    0 | MULTICURVE
+ g        | multicurve0              | g                 |               2 |    0 | MULTICURVE
+ g        | multicurve4326           | g                 |               2 | 4326 | MULTICURVE
+ g        | multicurvem              | g                 |               3 |    0 | MULTICURVEM
+ g        | multicurvem0             | g                 |               3 |    0 | MULTICURVEM
+ g        | multicurvem4326          | g                 |               3 | 4326 | MULTICURVEM
+ g        | multicurvez              | g                 |               3 |    0 | MULTICURVE
+ g        | multicurvez0             | g                 |               3 |    0 | MULTICURVE
+ g        | multicurvez4326          | g                 |               3 | 4326 | MULTICURVE
+ g        | multicurvezm             | g                 |               4 |    0 | MULTICURVE
+ g        | multicurvezm0            | g                 |               4 |    0 | MULTICURVE
+ g        | multicurvezm4326         | g                 |               4 | 4326 | MULTICURVE
+ g        | multilinestring          | g                 |               2 |    0 | MULTILINESTRING
+ g        | multilinestring0         | g                 |               2 |    0 | MULTILINESTRING
+ g        | multilinestring4326      | g                 |               2 | 4326 | MULTILINESTRING
+ g        | multilinestringm         | g                 |               3 |    0 | MULTILINESTRINGM
+ g        | multilinestringm0        | g                 |               3 |    0 | MULTILINESTRINGM
+ g        | multilinestringm4326     | g                 |               3 | 4326 | MULTILINESTRINGM
+ g        | multilinestringz         | g                 |               3 |    0 | MULTILINESTRING
+ g        | multilinestringz0        | g                 |               3 |    0 | MULTILINESTRING
+ g        | multilinestringz4326     | g                 |               3 | 4326 | MULTILINESTRING
+ g        | multilinestringzm        | g                 |               4 |    0 | MULTILINESTRING
+ g        | multilinestringzm0       | g                 |               4 |    0 | MULTILINESTRING
+ g        | multilinestringzm4326    | g                 |               4 | 4326 | MULTILINESTRING
+ g        | multipoint               | g                 |               2 |    0 | MULTIPOINT
+ g        | multipoint0              | g                 |               2 |    0 | MULTIPOINT
+ g        | multipoint4326           | g                 |               2 | 4326 | MULTIPOINT
+ g        | multipointm              | g                 |               3 |    0 | MULTIPOINTM
+ g        | multipointm0             | g                 |               3 |    0 | MULTIPOINTM
+ g        | multipointm4326          | g                 |               3 | 4326 | MULTIPOINTM
+ g        | multipointz              | g                 |               3 |    0 | MULTIPOINT
+ g        | multipointz0             | g                 |               3 |    0 | MULTIPOINT
+ g        | multipointz4326          | g                 |               3 | 4326 | MULTIPOINT
+ g        | multipointzm             | g                 |               4 |    0 | MULTIPOINT
+ g        | multipointzm0            | g                 |               4 |    0 | MULTIPOINT
+ g        | multipointzm4326         | g                 |               4 | 4326 | MULTIPOINT
+ g        | multipolygon             | g                 |               2 |    0 | MULTIPOLYGON
+ g        | multipolygon0            | g                 |               2 |    0 | MULTIPOLYGON
+ g        | multipolygon4326         | g                 |               2 | 4326 | MULTIPOLYGON
+ g        | multipolygonm            | g                 |               3 |    0 | MULTIPOLYGONM
+ g        | multipolygonm0           | g                 |               3 |    0 | MULTIPOLYGONM
+ g        | multipolygonm4326        | g                 |               3 | 4326 | MULTIPOLYGONM
+ g        | multipolygonz            | g                 |               3 |    0 | MULTIPOLYGON
+ g        | multipolygonz0           | g                 |               3 |    0 | MULTIPOLYGON
+ g        | multipolygonz4326        | g                 |               3 | 4326 | MULTIPOLYGON
+ g        | multipolygonzm           | g                 |               4 |    0 | MULTIPOLYGON
+ g        | multipolygonzm0          | g                 |               4 |    0 | MULTIPOLYGON
+ g        | multipolygonzm4326       | g                 |               4 | 4326 | MULTIPOLYGON
+ g        | multisurface             | g                 |               2 |    0 | MULTISURFACE
+ g        | multisurface0            | g                 |               2 |    0 | MULTISURFACE
+ g        | multisurface4326         | g                 |               2 | 4326 | MULTISURFACE
+ g        | multisurfacem            | g                 |               3 |    0 | MULTISURFACEM
+ g        | multisurfacem0           | g                 |               3 |    0 | MULTISURFACEM
+ g        | multisurfacem4326        | g                 |               3 | 4326 | MULTISURFACEM
+ g        | multisurfacez            | g                 |               3 |    0 | MULTISURFACE
+ g        | multisurfacez0           | g                 |               3 |    0 | MULTISURFACE
+ g        | multisurfacez4326        | g                 |               3 | 4326 | MULTISURFACE
+ g        | multisurfacezm           | g                 |               4 |    0 | MULTISURFACE
+ g        | multisurfacezm0          | g                 |               4 |    0 | MULTISURFACE
+ g        | multisurfacezm4326       | g                 |               4 | 4326 | MULTISURFACE
+ g        | place                    | the_geom          |               2 | 4269 | MULTIPOLYGON
+ g        | point                    | g                 |               2 |    0 | POINT
+ g        | point0                   | g                 |               2 |    0 | POINT
+ g        | point4326                | g                 |               2 | 4326 | POINT
+ g        | pointm                   | g                 |               3 |    0 | POINTM
+ g        | pointm0                  | g                 |               3 |    0 | POINTM
+ g        | pointm4326               | g                 |               3 | 4326 | POINTM
+ g        | pointz                   | g                 |               3 |    0 | POINT
+ g        | pointz0                  | g                 |               3 |    0 | POINT
+ g        | pointz4326               | g                 |               3 | 4326 | POINT
+ g        | pointzm                  | g                 |               4 |    0 | POINT
+ g        | pointzm0                 | g                 |               4 |    0 | POINT
+ g        | pointzm4326              | g                 |               4 | 4326 | POINT
+ g        | polygon                  | g                 |               2 |    0 | POLYGON
+ g        | polygon0                 | g                 |               2 |    0 | POLYGON
+ g        | polygon4326              | g                 |               2 | 4326 | POLYGON
+ g        | polygonm                 | g                 |               3 |    0 | POLYGONM
+ g        | polygonm0                | g                 |               3 |    0 | POLYGONM
+ g        | polygonm4326             | g                 |               3 | 4326 | POLYGONM
+ g        | polygonz                 | g                 |               3 |    0 | POLYGON
+ g        | polygonz0                | g                 |               3 |    0 | POLYGON
+ g        | polygonz4326             | g                 |               3 | 4326 | POLYGON
+ g        | polygonzm                | g                 |               4 |    0 | POLYGON
+ g        | polygonzm0               | g                 |               4 |    0 | POLYGON
+ g        | polygonzm4326            | g                 |               4 | 4326 | POLYGON
+ g        | polyhedralsurface        | g                 |               2 |    0 | POLYHEDRALSURFACE
+ g        | polyhedralsurface0       | g                 |               2 |    0 | POLYHEDRALSURFACE
+ g        | polyhedralsurface4326    | g                 |               2 | 4326 | POLYHEDRALSURFACE
+ g        | polyhedralsurfacem       | g                 |               3 |    0 | POLYHEDRALSURFACEM
+ g        | polyhedralsurfacem0      | g                 |               3 |    0 | POLYHEDRALSURFACEM
+ g        | polyhedralsurfacem4326   | g                 |               3 | 4326 | POLYHEDRALSURFACEM
+ g        | polyhedralsurfacez       | g                 |               3 |    0 | POLYHEDRALSURFACE
+ g        | polyhedralsurfacez0      | g                 |               3 |    0 | POLYHEDRALSURFACE
+ g        | polyhedralsurfacez4326   | g                 |               3 | 4326 | POLYHEDRALSURFACE
+ g        | polyhedralsurfacezm      | g                 |               4 |    0 | POLYHEDRALSURFACE
+ g        | polyhedralsurfacezm0     | g                 |               4 |    0 | POLYHEDRALSURFACE
+ g        | polyhedralsurfacezm4326  | g                 |               4 | 4326 | POLYHEDRALSURFACE
+ g        | state                    | the_geom          |               2 | 4269 | MULTIPOLYGON
+ g        | tabblock                 | the_geom          |               2 | 4269 | MULTIPOLYGON
+ g        | tin                      | g                 |               2 |    0 | TIN
+ g        | tin0                     | g                 |               2 |    0 | TIN
+ g        | tin4326                  | g                 |               2 | 4326 | TIN
+ g        | tinm                     | g                 |               3 |    0 | TINM
+ g        | tinm0                    | g                 |               3 |    0 | TINM
+ g        | tinm4326                 | g                 |               3 | 4326 | TINM
+ g        | tinz                     | g                 |               3 |    0 | TIN
+ g        | tinz0                    | g                 |               3 |    0 | TIN
+ g        | tinz4326                 | g                 |               3 | 4326 | TIN
+ g        | tinzm                    | g                 |               4 |    0 | TIN
+ g        | tinzm0                   | g                 |               4 |    0 | TIN
+ g        | tinzm4326                | g                 |               4 | 4326 | TIN
+ g        | tract                    | the_geom          |               2 | 4269 | MULTIPOLYGON
+ g        | triangle                 | g                 |               2 |    0 | TRIANGLE
+ g        | triangle0                | g                 |               2 |    0 | TRIANGLE
+ g        | triangle4326             | g                 |               2 | 4326 | TRIANGLE
+ g        | trianglem                | g                 |               3 |    0 | TRIANGLEM
+ g        | trianglem0               | g                 |               3 |    0 | TRIANGLEM
+ g        | trianglem4326            | g                 |               3 | 4326 | TRIANGLEM
+ g        | trianglez                | g                 |               3 |    0 | TRIANGLE
+ g        | trianglez0               | g                 |               3 |    0 | TRIANGLE
+ g        | trianglez4326            | g                 |               3 | 4326 | TRIANGLE
+ g        | trianglezm               | g                 |               4 |    0 | TRIANGLE
+ g        | trianglezm0              | g                 |               4 |    0 | TRIANGLE
+ g        | trianglezm4326           | g                 |               4 | 4326 | TRIANGLE
+ g        | zcta5                    | the_geom          |               2 | 4269 | MULTIPOLYGON
+(203 rows)
+
+SELECT 'gg',
+ f_table_name, f_geography_column,
+ coord_dimension, srid, type
+from geography_columns ORDER BY f_table_name;
+ ?column? |       f_table_name       | f_geography_column | coord_dimension | srid |         type         
+----------+--------------------------+--------------------+-----------------+------+----------------------
+ gg       | geometry                 | gg                 |               2 | 4326 | Geometry
+ gg       | geometry0                | gg                 |               2 | 4326 | Geometry
+ gg       | geometry4326             | gg                 |               2 | 4326 | Geometry
+ gg       | geometrycollection       | gg                 |               2 | 4326 | GeometryCollection
+ gg       | geometrycollection0      | gg                 |               2 | 4326 | GeometryCollection
+ gg       | geometrycollection4326   | gg                 |               2 | 4326 | GeometryCollection
+ gg       | geometrycollectionm      | gg                 |               3 | 4326 | GeometryCollectionM
+ gg       | geometrycollectionm0     | gg                 |               3 | 4326 | GeometryCollectionM
+ gg       | geometrycollectionm4326  | gg                 |               3 | 4326 | GeometryCollectionM
+ gg       | geometrycollectionz      | gg                 |               3 | 4326 | GeometryCollectionZ
+ gg       | geometrycollectionz0     | gg                 |               3 | 4326 | GeometryCollectionZ
+ gg       | geometrycollectionz4326  | gg                 |               3 | 4326 | GeometryCollectionZ
+ gg       | geometrycollectionzm     | gg                 |               4 | 4326 | GeometryCollectionZM
+ gg       | geometrycollectionzm0    | gg                 |               4 | 4326 | GeometryCollectionZM
+ gg       | geometrycollectionzm4326 | gg                 |               4 | 4326 | GeometryCollectionZM
+ gg       | geometrym                | gg                 |               3 | 4326 | GeometryM
+ gg       | geometrym0               | gg                 |               3 | 4326 | GeometryM
+ gg       | geometrym4326            | gg                 |               3 | 4326 | GeometryM
+ gg       | geometryz                | gg                 |               3 | 4326 | GeometryZ
+ gg       | geometryz0               | gg                 |               3 | 4326 | GeometryZ
+ gg       | geometryz4326            | gg                 |               3 | 4326 | GeometryZ
+ gg       | geometryzm               | gg                 |               4 | 4326 | GeometryZM
+ gg       | geometryzm0              | gg                 |               4 | 4326 | GeometryZM
+ gg       | geometryzm4326           | gg                 |               4 | 4326 | GeometryZM
+ gg       | linestring               | gg                 |               2 | 4326 | LineString
+ gg       | linestring0              | gg                 |               2 | 4326 | LineString
+ gg       | linestring4326           | gg                 |               2 | 4326 | LineString
+ gg       | linestringm              | gg                 |               3 | 4326 | LineStringM
+ gg       | linestringm0             | gg                 |               3 | 4326 | LineStringM
+ gg       | linestringm4326          | gg                 |               3 | 4326 | LineStringM
+ gg       | linestringz              | gg                 |               3 | 4326 | LineStringZ
+ gg       | linestringz0             | gg                 |               3 | 4326 | LineStringZ
+ gg       | linestringz4326          | gg                 |               3 | 4326 | LineStringZ
+ gg       | linestringzm             | gg                 |               4 | 4326 | LineStringZM
+ gg       | linestringzm0            | gg                 |               4 | 4326 | LineStringZM
+ gg       | linestringzm4326         | gg                 |               4 | 4326 | LineStringZM
+ gg       | multilinestring          | gg                 |               2 | 4326 | MultiLineString
+ gg       | multilinestring0         | gg                 |               2 | 4326 | MultiLineString
+ gg       | multilinestring4326      | gg                 |               2 | 4326 | MultiLineString
+ gg       | multilinestringm         | gg                 |               3 | 4326 | MultiLineStringM
+ gg       | multilinestringm0        | gg                 |               3 | 4326 | MultiLineStringM
+ gg       | multilinestringm4326     | gg                 |               3 | 4326 | MultiLineStringM
+ gg       | multilinestringz         | gg                 |               3 | 4326 | MultiLineStringZ
+ gg       | multilinestringz0        | gg                 |               3 | 4326 | MultiLineStringZ
+ gg       | multilinestringz4326     | gg                 |               3 | 4326 | MultiLineStringZ
+ gg       | multilinestringzm        | gg                 |               4 | 4326 | MultiLineStringZM
+ gg       | multilinestringzm0       | gg                 |               4 | 4326 | MultiLineStringZM
+ gg       | multilinestringzm4326    | gg                 |               4 | 4326 | MultiLineStringZM
+ gg       | multipoint               | gg                 |               2 | 4326 | MultiPoint
+ gg       | multipoint0              | gg                 |               2 | 4326 | MultiPoint
+ gg       | multipoint4326           | gg                 |               2 | 4326 | MultiPoint
+ gg       | multipointm              | gg                 |               3 | 4326 | MultiPointM
+ gg       | multipointm0             | gg                 |               3 | 4326 | MultiPointM
+ gg       | multipointm4326          | gg                 |               3 | 4326 | MultiPointM
+ gg       | multipointz              | gg                 |               3 | 4326 | MultiPointZ
+ gg       | multipointz0             | gg                 |               3 | 4326 | MultiPointZ
+ gg       | multipointz4326          | gg                 |               3 | 4326 | MultiPointZ
+ gg       | multipointzm             | gg                 |               4 | 4326 | MultiPointZM
+ gg       | multipointzm0            | gg                 |               4 | 4326 | MultiPointZM
+ gg       | multipointzm4326         | gg                 |               4 | 4326 | MultiPointZM
+ gg       | multipolygon             | gg                 |               2 | 4326 | MultiPolygon
+ gg       | multipolygon0            | gg                 |               2 | 4326 | MultiPolygon
+ gg       | multipolygon4326         | gg                 |               2 | 4326 | MultiPolygon
+ gg       | multipolygonm            | gg                 |               3 | 4326 | MultiPolygonM
+ gg       | multipolygonm0           | gg                 |               3 | 4326 | MultiPolygonM
+ gg       | multipolygonm4326        | gg                 |               3 | 4326 | MultiPolygonM
+ gg       | multipolygonz            | gg                 |               3 | 4326 | MultiPolygonZ
+ gg       | multipolygonz0           | gg                 |               3 | 4326 | MultiPolygonZ
+ gg       | multipolygonz4326        | gg                 |               3 | 4326 | MultiPolygonZ
+ gg       | multipolygonzm           | gg                 |               4 | 4326 | MultiPolygonZM
+ gg       | multipolygonzm0          | gg                 |               4 | 4326 | MultiPolygonZM
+ gg       | multipolygonzm4326       | gg                 |               4 | 4326 | MultiPolygonZM
+ gg       | point                    | gg                 |               2 | 4326 | Point
+ gg       | point0                   | gg                 |               2 | 4326 | Point
+ gg       | point4326                | gg                 |               2 | 4326 | Point
+ gg       | pointm                   | gg                 |               3 | 4326 | PointM
+ gg       | pointm0                  | gg                 |               3 | 4326 | PointM
+ gg       | pointm4326               | gg                 |               3 | 4326 | PointM
+ gg       | pointz                   | gg                 |               3 | 4326 | PointZ
+ gg       | pointz0                  | gg                 |               3 | 4326 | PointZ
+ gg       | pointz4326               | gg                 |               3 | 4326 | PointZ
+ gg       | pointzm                  | gg                 |               4 | 4326 | PointZM
+ gg       | pointzm0                 | gg                 |               4 | 4326 | PointZM
+ gg       | pointzm4326              | gg                 |               4 | 4326 | PointZM
+ gg       | polygon                  | gg                 |               2 | 4326 | Polygon
+ gg       | polygon0                 | gg                 |               2 | 4326 | Polygon
+ gg       | polygon4326              | gg                 |               2 | 4326 | Polygon
+ gg       | polygonm                 | gg                 |               3 | 4326 | PolygonM
+ gg       | polygonm0                | gg                 |               3 | 4326 | PolygonM
+ gg       | polygonm4326             | gg                 |               3 | 4326 | PolygonM
+ gg       | polygonz                 | gg                 |               3 | 4326 | PolygonZ
+ gg       | polygonz0                | gg                 |               3 | 4326 | PolygonZ
+ gg       | polygonz4326             | gg                 |               3 | 4326 | PolygonZ
+ gg       | polygonzm                | gg                 |               4 | 4326 | PolygonZM
+ gg       | polygonzm0               | gg                 |               4 | 4326 | PolygonZM
+ gg       | polygonzm4326            | gg                 |               4 | 4326 | PolygonZM
+(96 rows)
+
+SELECT distinct 'catalog-schema', f_table_catalog = current_database(),f_table_schema FROM geometry_columns
+UNION
+SELECT distinct 'catalog-schema', f_table_catalog = current_database(),f_table_schema FROM geography_columns
+;
+    ?column?    | ?column? | f_table_schema 
+----------------+----------+----------------
+ catalog-schema | t        | tiger
+ catalog-schema | t        | tm
+(2 rows)
+
+CREATE TABLE tm.types (id serial, g geometry);
+select sn_create_distributed_table('tm.types', 'id', 'none');
+ERROR:  type "public.geometry" does not exist
+INSERT INTO tm.types(g) values ('POINT EMPTY');
+INSERT INTO tm.types(g) values ('POINT(0 0)');
+INSERT INTO tm.types(g) values ('LINESTRING EMPTY');
+INSERT INTO tm.types(g) values ('POLYGON EMPTY');
+INSERT INTO tm.types(g) values ('MULTIPOINT EMPTY');
+INSERT INTO tm.types(g) values ('MULTIPOINT(0 0)');
+INSERT INTO tm.types(g) values ('MULTILINESTRING EMPTY');
+INSERT INTO tm.types(g) values ('MULTIPOLYGON EMPTY');
+INSERT INTO tm.types(g) values ('GEOMETRYCOLLECTION EMPTY');
+INSERT INTO tm.types(g) values ('CIRCULARSTRING EMPTY');
+INSERT INTO tm.types(g) values ('COMPOUNDCURVE EMPTY');
+INSERT INTO tm.types(g) values ('CURVEPOLYGON EMPTY');
+INSERT INTO tm.types(g) values ('MULTICURVE EMPTY');
+INSERT INTO tm.types(g) values ('MULTISURFACE EMPTY');
+INSERT INTO tm.types(g) values ('POLYHEDRALSURFACE EMPTY');
+INSERT INTO tm.types(g) values ('TRIANGLE EMPTY');
+INSERT INTO tm.types(g) values ('TIN EMPTY');
+-- all zm flags (17 is the number of base types)
+INSERT INTO tm.types(id, g)
+SELECT id, st_force3dz(g) FROM tm.types WHERE id <= 17 ORDER BY id;
+INSERT INTO tm.types(id, g)
+SELECT id, st_force3dm(g) FROM tm.types WHERE id <= 17 ORDER BY id;
+INSERT INTO tm.types(id, g)
+SELECT id, st_force4d(g) FROM tm.types WHERE id <= 17 ORDER BY id;
+-- known srid
+INSERT INTO tm.types(id, g)
+SELECT id, st_setsrid(g,4326) FROM tm.types ORDER BY id;
+-- Expected: 17 (base count) * 4 (zmflag combinations) * 2 (srids)
+SELECT 'num_types', count(*) from tm.types;
+ ?column?  | count 
+-----------+-------
+ num_types |   272
+(1 row)
+
+-- Now try to insert each type into each table
+CREATE FUNCTION tm.insert_all(tmpfile_prefix text)
+RETURNS TABLE(out_where varchar, out_srid int, out_type varchar, out_flags varchar, out_status text)
+AS
+$$
+DECLARE
+	sql text;
+	rec RECORD;
+	rec2 RECORD;
+	tmpfile text;
+	cnt INT;
+	hasgeog BOOL;
+BEGIN
+
+	tmpfile := tmpfile_prefix;
+
+	FOR rec2 IN SELECT * from tm.types ORDER BY id
+	LOOP
+		tmpfile := tmpfile_prefix || rec2.id;
+		sql := 'COPY ( SELECT g FROM tm.types WHERE id = ' || rec2.id || ') TO '
+			|| quote_literal(tmpfile)
+			|| ' WITH BINARY ';
+		EXECUTE sql;
+	END LOOP;
+
+	FOR rec IN SELECT * from geometry_columns
+		WHERE f_table_name != 'types' ORDER BY 3
+	LOOP
+		out_where := rec.f_table_name;
+
+		hasgeog := rec.type NOT LIKE '%CURVE%'
+  			AND rec.type NOT LIKE '%CIRCULAR%'
+  			AND rec.type NOT LIKE '%SURFACE%'
+  			AND rec.type NOT LIKE 'TRIANGLE%'
+  			AND rec.type NOT LIKE 'TIN%';
+
+		FOR rec2 IN SELECT * from tm.types ORDER BY id
+		LOOP
+			out_srid := ST_Srid(rec2.g);
+			out_type := substr(ST_GeometryType(rec2.g), 4);
+			IF NOT ST_IsEmpty(rec2.g) THEN
+				out_type := out_type || 'NE';
+			END IF;
+			out_flags := ST_zmflag(rec2.g);
+			BEGIN
+				sql := 'INSERT INTO '
+					|| quote_ident(rec.f_table_schema)
+					|| '.' || quote_ident(rec.f_table_name)
+					|| '(g) VALUES ('
+					|| quote_literal(rec2.g::text)
+					|| ');';
+				EXECUTE sql;
+				out_status := 'OK';
+			EXCEPTION
+			WHEN OTHERS THEN
+				out_status := 'KO'; -- || SQLERRM;
+			END;
+
+			-- binary insertion {
+			tmpfile := tmpfile_prefix || rec2.id;
+			sql := 'COPY '
+				|| quote_ident(rec.f_table_schema)
+				|| '.' || quote_ident(rec.f_table_name)
+				|| '(g) FROM '
+				|| quote_literal(tmpfile) || ' WITH BINARY ';
+			BEGIN
+				EXECUTE sql;
+				out_status := out_status || '-BOK';
+			EXCEPTION
+			WHEN OTHERS THEN
+				out_status := out_status || '-BKO';
+			END;
+			-- }
+
+
+			IF NOT hasgeog THEN
+				RETURN NEXT;
+				CONTINUE;
+			END IF;
+
+			BEGIN
+				sql := 'INSERT INTO '
+					|| quote_ident(rec.f_table_schema)
+					|| '.' || quote_ident(rec.f_table_name)
+					|| '(gg) VALUES ('
+					|| quote_literal(rec2.g::text)
+					|| ');';
+				EXECUTE sql;
+				out_status := out_status || '-GOK';
+			EXCEPTION
+			WHEN OTHERS THEN
+				out_status := out_status || '-GKO';
+			END;
+
+			-- binary insertion (geography) {
+			sql := 'COPY '
+				|| quote_ident(rec.f_table_schema)
+				|| '.' || quote_ident(rec.f_table_name)
+				|| '(gg) FROM '
+				|| quote_literal(tmpfile) || ' WITH BINARY ';
+			BEGIN
+				EXECUTE sql;
+				out_status := out_status || '-BGOK';
+			EXCEPTION
+			WHEN OTHERS THEN
+				out_status := out_status || '-BGKO'; -- || SQLERRM;
+			END;
+			-- }
+
+			RETURN NEXT;
+		END LOOP;
+
+		-- Count number of geometries in the table
+		sql := 'SELECT count(g) FROM '
+			|| quote_ident(rec.f_table_schema)
+			|| '.' || quote_ident(rec.f_table_name);
+		EXECUTE sql INTO STRICT cnt;
+
+		out_srid := NULL;
+		out_type := 'COUNT';
+		out_flags := cnt;
+		out_status := NULL;
+		RETURN NEXT;
+
+		IF hasgeog THEN
+			-- Count number of geographies in the table
+			sql := 'SELECT count(gg) FROM '
+				|| quote_ident(rec.f_table_schema)
+				|| '.' || quote_ident(rec.f_table_name);
+			EXECUTE sql INTO STRICT cnt;
+
+			out_srid := NULL;
+			out_type := 'GCOUNT';
+			out_flags := cnt;
+			out_status := NULL;
+			RETURN NEXT;
+		END IF;
+
+	END LOOP;
+END;
+$$ LANGUAGE 'plpgsql';
+-- SELECT * FROM tm.insert_all(:tmpfile);
+DROP SCHEMA tm CASCADE;

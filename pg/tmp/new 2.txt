@@ -1,0 +1,132 @@
+mkdir -p citus/coordinator
+
+mkdir -p citus/worker1 citus/worker2 citus/worker3 citus/worker4 citus/worker5
+mkdir -p citus/worker1 citus/worker2 citus/worker3 citus/worker4 citus/worker5
+
+
+initdb -D citus/worker1
+initdb -D citus/worker2
+initdb -D citus/worker3
+initdb -D citus/worker4
+initdb -D citus/worker5
+
+
+echo "shared_preload_libraries = 'citus'" >> citus/coordinator/postgresql.conf
+echo "shared_preload_libraries = 'citus'" >> citus/worker1/postgresql.conf
+echo "shared_preload_libraries = 'citus'" >> citus/worker2/postgresql.conf
+echo "shared_preload_libraries = 'citus'" >> citus/worker3/postgresql.conf
+echo "shared_preload_libraries = 'citus'" >> citus/worker4/postgresql.conf
+echo "shared_preload_libraries = 'citus'" >> citus/worker5/postgresql.conf
+
+
+pg_ctl -D citus/coordinator -o "-p 9700" -l citus/coordinator_logfile restart
+pg_ctl -D citus/coordinator -o "-p 9700" -l citus/coordinator_logfile stop
+
+pg_ctl -D citus/worker1 -o "-p 9701" -l citus/worker1_logfile restart
+pg_ctl -D citus/worker2 -o "-p 9702" -l citus/worker2_logfile restart
+pg_ctl -D citus/worker3 -o "-p 9703" -l citus/worker3_logfile restart
+pg_ctl -D citus/worker4 -o "-p 9704" -l citus/worker4_logfile restart
+pg_ctl -D citus/worker5 -o "-p 9705" -l citus/worker5_logfile restart
+
+
+pg_ctl -D citus/worker1 -o "-p 9701" -l citus/worker1_logfile start
+pg_ctl -D citus/worker2 -o "-p 9702" -l citus/worker2_logfile start
+pg_ctl -D citus/worker3 -o "-p 9703" -l citus/worker3_logfile start
+pg_ctl -D citus/worker4 -o "-p 9704" -l citus/worker4_logfile start
+pg_ctl -D citus/worker5 -o "-p 9705" -l citus/worker5_logfile start
+
+
+pg_ctl -D citus/worker1 -o "-p 9701" -l citus/worker1_logfile stop
+pg_ctl -D citus/worker2 -o "-p 9702" -l citus/worker2_logfile stop
+pg_ctl -D citus/worker3 -o "-p 9703" -l citus/worker3_logfile stop
+pg_ctl -D citus/worker4 -o "-p 9704" -l citus/worker4_logfile stop
+pg_ctl -D citus/worker5 -o "-p 9705" -l citus/worker5_logfile stop
+
+
+psql -p 9700 -c "create extension citus;"
+psql -p 9701 -c "create extension citus;"
+psql -p 9702 -c "create extension citus;"
+psql -p 9703 -c "create extension citus;"
+psql -p 9704 -c "create extension citus;"
+psql -p 9705 -c "create extension citus;"
+
+psql -p 9700 -c "SELECT * from master_remove_node('localhost', 9701);"
+psql -p 9700 -c "SELECT * from master_remove_node('localhost', 9702);"
+psql -p 9700 -c "SELECT * from master_remove_node('localhost', 9703);"
+psql -p 9700 -c "SELECT * from master_remove_node('localhost', 9704);"
+psql -p 9700 -c "SELECT * from master_remove_node('localhost', 9705);"
+
+
+psql -p 9700 -c "SELECT * from master_add_node('10.37.2.181', 9701);"
+psql -p 9700 -c "SELECT * from master_add_node('10.37.2.181', 9702);"
+psql -p 9700 -c "SELECT * from master_add_node('10.37.2.181', 9703);"
+psql -p 9700 -c "SELECT * from master_add_node('10.37.2.181', 9704);"
+psql -p 9700 -c "SELECT * from master_add_node('10.37.2.181', 9705);"
+
+psql -p 9700 -c "SELECT * from master_add_node('10.37.2.182', 9701);"
+psql -p 9700 -c "SELECT * from master_add_node('10.37.2.182', 9702);"
+psql -p 9700 -c "SELECT * from master_add_node('10.37.2.182', 9703);"
+psql -p 9700 -c "SELECT * from master_add_node('10.37.2.182', 9704);"
+psql -p 9700 -c "SELECT * from master_add_node('10.37.2.182', 9705);"
+
+psql -p 9700 -c "SELECT * from master_remove_node('10.37.2.182', 9701);"
+psql -p 9700 -c "SELECT * from master_remove_node('10.37.2.182', 9702);"
+psql -p 9700 -c "SELECT * from master_remove_node('10.37.2.182', 9703);"
+psql -p 9700 -c "SELECT * from master_remove_node('10.37.2.182', 9704);"
+psql -p 9700 -c "SELECT * from master_remove_node('10.37.2.182', 9705);"
+
+psql -p 9700 -c "select * from master_get_active_worker_nodes();"
+
+drop table tb1 cascade;
+set citus.shard_count=2048;
+create table tb1(c1 int, c2 int, c3 int);
+select create_distributed_table('tb1', 'c1');
+
+select sn_create_distributed_table('tb1', 'c1', 'none');
+
+
+
+pgbench -p 9700 -T 1000 -r -f  t.sql -c 30
+
+pgbench "service=admin dbname=app_db" -T 1000 -r -f  t.sql -c 30
+
+
+SELECT * from master_remove_node('10.47.147.128', 6432);
+SELECT * from master_remove_node('10.47.147.129', 6432);
+SELECT * from master_remove_node('10.47.147.130', 6432);
+SELECT * from master_remove_node('10.47.147.131', 6432);
+
+
+SELECT * from master_add_node('10.47.147.128', 5432);
+SELECT * from master_add_node('10.47.147.129', 5432);
+SELECT * from master_add_node('10.47.147.130', 5432);
+SELECT * from master_add_node('10.47.147.131', 5432);
+
+
+
+
+net.ipv4.ip_local_port_range = 10001 65535
+sunrpc.tcp_fin_timeout = 15
+net.ipv4.tcp_fin_timeout = 60
+net.ipv4.tcp_max_tw_buckets = 16384
+
+net.ipv4.tcp_tw_timeout
+
+cat /proc/sys/net/ipv4/ip_local_port_range
+
+echo "1025 65535" > /proc/sys/net/ipv4/ip_local_port_range
+echo "1000" > /proc/sys/net/ipv4/tcp_max_tw_buckets
+
+TIME_WAIT = 1000，message里面没有报错
+
+echo "2000" > /proc/sys/net/ipv4/tcp_max_tw_buckets
+echo "0" > /proc/sys/net/ipv4/tcp_tw_reuse
+
+TIME_WAIT = 2000，message里面没有报错
+
+
+netstat -nat | grep TIME_WAIT | wc -l
+
+
+net.ipv4.tcp_tw_timeout
+

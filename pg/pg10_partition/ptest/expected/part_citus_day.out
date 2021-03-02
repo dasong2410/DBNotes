@@ -1,0 +1,1387 @@
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+--                             按天建分区 测试
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+set citus.shard_replication_factor=1;
+set citus.next_shard_id to 990000;
+set citus.shard_count=2;
+
+-- 创建分区表
+drop table if exists tb1 cascade;
+NOTICE:  table "tb1" does not exist, skipping
+create table tb1(c1 int, c2 date, c3 int) partition by range (c2);
+select create_distributed_table('tb1', 'c1');
+ create_distributed_table 
+--------------------------
+ 
+(1 row)
+
+
+-- 批量增加分区
+select rds.add_range_partitions('public.tb1', '2019-03-01'::date, '1 day', 10);
+ add_range_partitions 
+----------------------
+ 
+(1 row)
+
+
+-- 验证分区
+select relname, relnamespace::regnamespace::text, pg_get_expr(relpartbound, oid, true) vals
+  from pg_class
+ where relnamespace::regnamespace::text='public' and relname like 'tb1%' and relispartition=true
+ order by relname;
+   relname    | relnamespace |                       vals                       
+--------------+--------------+--------------------------------------------------
+ tb1_20190301 | public       | FOR VALUES FROM ('03-01-2019') TO ('03-02-2019')
+ tb1_20190302 | public       | FOR VALUES FROM ('03-02-2019') TO ('03-03-2019')
+ tb1_20190303 | public       | FOR VALUES FROM ('03-03-2019') TO ('03-04-2019')
+ tb1_20190304 | public       | FOR VALUES FROM ('03-04-2019') TO ('03-05-2019')
+ tb1_20190305 | public       | FOR VALUES FROM ('03-05-2019') TO ('03-06-2019')
+ tb1_20190306 | public       | FOR VALUES FROM ('03-06-2019') TO ('03-07-2019')
+ tb1_20190307 | public       | FOR VALUES FROM ('03-07-2019') TO ('03-08-2019')
+ tb1_20190308 | public       | FOR VALUES FROM ('03-08-2019') TO ('03-09-2019')
+ tb1_20190309 | public       | FOR VALUES FROM ('03-09-2019') TO ('03-10-2019')
+ tb1_20190310 | public       | FOR VALUES FROM ('03-10-2019') TO ('03-11-2019')
+(10 rows)
+
+
+\c - - - :worker_1_port
+select relname, relnamespace::regnamespace::text, pg_get_expr(relpartbound, oid, true) vals
+  from pg_class
+ where relnamespace::regnamespace::text='public' and relname like 'tb1%' and relispartition=true
+ order by relname;
+       relname       | relnamespace |                       vals                       
+---------------------+--------------+--------------------------------------------------
+ tb1_20190301_990002 | public       | FOR VALUES FROM ('03-01-2019') TO ('03-02-2019')
+ tb1_20190302_990004 | public       | FOR VALUES FROM ('03-02-2019') TO ('03-03-2019')
+ tb1_20190303_990006 | public       | FOR VALUES FROM ('03-03-2019') TO ('03-04-2019')
+ tb1_20190304_990008 | public       | FOR VALUES FROM ('03-04-2019') TO ('03-05-2019')
+ tb1_20190305_990010 | public       | FOR VALUES FROM ('03-05-2019') TO ('03-06-2019')
+ tb1_20190306_990012 | public       | FOR VALUES FROM ('03-06-2019') TO ('03-07-2019')
+ tb1_20190307_990014 | public       | FOR VALUES FROM ('03-07-2019') TO ('03-08-2019')
+ tb1_20190308_990016 | public       | FOR VALUES FROM ('03-08-2019') TO ('03-09-2019')
+ tb1_20190309_990018 | public       | FOR VALUES FROM ('03-09-2019') TO ('03-10-2019')
+ tb1_20190310_990020 | public       | FOR VALUES FROM ('03-10-2019') TO ('03-11-2019')
+(10 rows)
+
+
+\c - - - :worker_2_port
+select relname, relnamespace::regnamespace::text, pg_get_expr(relpartbound, oid, true) vals
+  from pg_class
+ where relnamespace::regnamespace::text='public' and relname like 'tb1%' and relispartition=true
+ order by relname;
+       relname       | relnamespace |                       vals                       
+---------------------+--------------+--------------------------------------------------
+ tb1_20190301_990003 | public       | FOR VALUES FROM ('03-01-2019') TO ('03-02-2019')
+ tb1_20190302_990005 | public       | FOR VALUES FROM ('03-02-2019') TO ('03-03-2019')
+ tb1_20190303_990007 | public       | FOR VALUES FROM ('03-03-2019') TO ('03-04-2019')
+ tb1_20190304_990009 | public       | FOR VALUES FROM ('03-04-2019') TO ('03-05-2019')
+ tb1_20190305_990011 | public       | FOR VALUES FROM ('03-05-2019') TO ('03-06-2019')
+ tb1_20190306_990013 | public       | FOR VALUES FROM ('03-06-2019') TO ('03-07-2019')
+ tb1_20190307_990015 | public       | FOR VALUES FROM ('03-07-2019') TO ('03-08-2019')
+ tb1_20190308_990017 | public       | FOR VALUES FROM ('03-08-2019') TO ('03-09-2019')
+ tb1_20190309_990019 | public       | FOR VALUES FROM ('03-09-2019') TO ('03-10-2019')
+ tb1_20190310_990021 | public       | FOR VALUES FROM ('03-10-2019') TO ('03-11-2019')
+(10 rows)
+
+
+\c - - - :master_port
+
+-- 插入数据
+insert into public.tb1 values(1, '20190301'::date, 1);
+insert into public.tb1 values(2, '20190302'::date, 2);
+insert into public.tb1 values(3, '20190303'::date, 3);
+insert into public.tb1 values(4, '20190304'::date, 4);
+insert into public.tb1 values(5, '20190305'::date, 5);
+insert into public.tb1 values(6, '20190306'::date, 6);
+insert into public.tb1 values(7, '20190307'::date, 7);
+insert into public.tb1 values(8, '20190308'::date, 8);
+insert into public.tb1 values(9, '20190309'::date, 9);
+insert into public.tb1 values(10, '20190310'::date, 10);
+
+-- 验证数据
+select * from public.tb1 order by c1;
+ c1 |     c2     | c3 
+----+------------+----
+  1 | 03-01-2019 |  1
+  2 | 03-02-2019 |  2
+  3 | 03-03-2019 |  3
+  4 | 03-04-2019 |  4
+  5 | 03-05-2019 |  5
+  6 | 03-06-2019 |  6
+  7 | 03-07-2019 |  7
+  8 | 03-08-2019 |  8
+  9 | 03-09-2019 |  9
+ 10 | 03-10-2019 | 10
+(10 rows)
+
+select * from public.tb1_20190301 order by c1;
+ c1 |     c2     | c3 
+----+------------+----
+  1 | 03-01-2019 |  1
+(1 row)
+
+select * from public.tb1_20190302 order by c1;
+ c1 |     c2     | c3 
+----+------------+----
+  2 | 03-02-2019 |  2
+(1 row)
+
+select * from public.tb1_20190303 order by c1;
+ c1 |     c2     | c3 
+----+------------+----
+  3 | 03-03-2019 |  3
+(1 row)
+
+select * from public.tb1_20190304 order by c1;
+ c1 |     c2     | c3 
+----+------------+----
+  4 | 03-04-2019 |  4
+(1 row)
+
+select * from public.tb1_20190305 order by c1;
+ c1 |     c2     | c3 
+----+------------+----
+  5 | 03-05-2019 |  5
+(1 row)
+
+select * from public.tb1_20190306 order by c1;
+ c1 |     c2     | c3 
+----+------------+----
+  6 | 03-06-2019 |  6
+(1 row)
+
+select * from public.tb1_20190307 order by c1;
+ c1 |     c2     | c3 
+----+------------+----
+  7 | 03-07-2019 |  7
+(1 row)
+
+select * from public.tb1_20190308 order by c1;
+ c1 |     c2     | c3 
+----+------------+----
+  8 | 03-08-2019 |  8
+(1 row)
+
+select * from public.tb1_20190309 order by c1;
+ c1 |     c2     | c3 
+----+------------+----
+  9 | 03-09-2019 |  9
+(1 row)
+
+select * from public.tb1_20190310 order by c1;
+ c1 |     c2     | c3 
+----+------------+----
+ 10 | 03-10-2019 | 10
+(1 row)
+
+
+-- 分区表添加索引（包含大小写、空格制表符）
+select rds.create_idx_on_parted_table('public.TB1', 'idx_tb1', 'create INDEX 	%i on 	%t(c1)');
+                                                    create_idx_on_parted_table                                                     
+-----------------------------------------------------------------------------------------------------------------------------------
+ ("select rds.func_create_idx_on_paritition('create INDEX        idx_tb1_16821 on        public.tb1_20190301(c1)','')",success,"")
+ ("select rds.func_create_idx_on_paritition('create INDEX        idx_tb1_16825 on        public.tb1_20190302(c1)','')",success,"")
+ ("select rds.func_create_idx_on_paritition('create INDEX        idx_tb1_16829 on        public.tb1_20190303(c1)','')",success,"")
+ ("select rds.func_create_idx_on_paritition('create INDEX        idx_tb1_16833 on        public.tb1_20190304(c1)','')",success,"")
+ ("select rds.func_create_idx_on_paritition('create INDEX        idx_tb1_16837 on        public.tb1_20190305(c1)','')",success,"")
+ ("select rds.func_create_idx_on_paritition('create INDEX        idx_tb1_16841 on        public.tb1_20190306(c1)','')",success,"")
+ ("select rds.func_create_idx_on_paritition('create INDEX        idx_tb1_16845 on        public.tb1_20190307(c1)','')",success,"")
+ ("select rds.func_create_idx_on_paritition('create INDEX        idx_tb1_16849 on        public.tb1_20190308(c1)','')",success,"")
+ ("select rds.func_create_idx_on_paritition('create INDEX        idx_tb1_16853 on        public.tb1_20190309(c1)','')",success,"")
+ ("select rds.func_create_idx_on_paritition('create INDEX        idx_tb1_16857 on        public.tb1_20190310(c1)','')",success,"")
+(10 rows)
+
+
+-- 验证索引
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |  tablename   |   indexname   | tablespace |                          indexdef                           
+------------+--------------+---------------+------------+-------------------------------------------------------------
+ public     | tb1_20190301 | idx_tb1_16821 |            | CREATE INDEX idx_tb1_16821 ON tb1_20190301 USING btree (c1)
+ public     | tb1_20190302 | idx_tb1_16825 |            | CREATE INDEX idx_tb1_16825 ON tb1_20190302 USING btree (c1)
+ public     | tb1_20190303 | idx_tb1_16829 |            | CREATE INDEX idx_tb1_16829 ON tb1_20190303 USING btree (c1)
+ public     | tb1_20190304 | idx_tb1_16833 |            | CREATE INDEX idx_tb1_16833 ON tb1_20190304 USING btree (c1)
+ public     | tb1_20190305 | idx_tb1_16837 |            | CREATE INDEX idx_tb1_16837 ON tb1_20190305 USING btree (c1)
+ public     | tb1_20190306 | idx_tb1_16841 |            | CREATE INDEX idx_tb1_16841 ON tb1_20190306 USING btree (c1)
+ public     | tb1_20190307 | idx_tb1_16845 |            | CREATE INDEX idx_tb1_16845 ON tb1_20190307 USING btree (c1)
+ public     | tb1_20190308 | idx_tb1_16849 |            | CREATE INDEX idx_tb1_16849 ON tb1_20190308 USING btree (c1)
+ public     | tb1_20190309 | idx_tb1_16853 |            | CREATE INDEX idx_tb1_16853 ON tb1_20190309 USING btree (c1)
+ public     | tb1_20190310 | idx_tb1_16857 |            | CREATE INDEX idx_tb1_16857 ON tb1_20190310 USING btree (c1)
+(10 rows)
+
+select * from rds.user_tab_part_indexes_def;
+ tab_name | idx_name |            idx_sql             | is_pkey 
+----------+----------+--------------------------------+---------
+ tb1      | idx_tb1  | create index    %i on   %t(c1) | f
+(1 row)
+
+
+\c - - - :worker_1_port
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |      tablename      |      indexname       | tablespace |                                 indexdef                                  
+------------+---------------------+----------------------+------------+---------------------------------------------------------------------------
+ public     | tb1_20190301_990002 | idx_tb1_16821_990002 |            | CREATE INDEX idx_tb1_16821_990002 ON tb1_20190301_990002 USING btree (c1)
+ public     | tb1_20190302_990004 | idx_tb1_16825_990004 |            | CREATE INDEX idx_tb1_16825_990004 ON tb1_20190302_990004 USING btree (c1)
+ public     | tb1_20190303_990006 | idx_tb1_16829_990006 |            | CREATE INDEX idx_tb1_16829_990006 ON tb1_20190303_990006 USING btree (c1)
+ public     | tb1_20190304_990008 | idx_tb1_16833_990008 |            | CREATE INDEX idx_tb1_16833_990008 ON tb1_20190304_990008 USING btree (c1)
+ public     | tb1_20190305_990010 | idx_tb1_16837_990010 |            | CREATE INDEX idx_tb1_16837_990010 ON tb1_20190305_990010 USING btree (c1)
+ public     | tb1_20190306_990012 | idx_tb1_16841_990012 |            | CREATE INDEX idx_tb1_16841_990012 ON tb1_20190306_990012 USING btree (c1)
+ public     | tb1_20190307_990014 | idx_tb1_16845_990014 |            | CREATE INDEX idx_tb1_16845_990014 ON tb1_20190307_990014 USING btree (c1)
+ public     | tb1_20190308_990016 | idx_tb1_16849_990016 |            | CREATE INDEX idx_tb1_16849_990016 ON tb1_20190308_990016 USING btree (c1)
+ public     | tb1_20190309_990018 | idx_tb1_16853_990018 |            | CREATE INDEX idx_tb1_16853_990018 ON tb1_20190309_990018 USING btree (c1)
+ public     | tb1_20190310_990020 | idx_tb1_16857_990020 |            | CREATE INDEX idx_tb1_16857_990020 ON tb1_20190310_990020 USING btree (c1)
+(10 rows)
+
+
+\c - - - :worker_2_port
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |      tablename      |      indexname       | tablespace |                                 indexdef                                  
+------------+---------------------+----------------------+------------+---------------------------------------------------------------------------
+ public     | tb1_20190301_990003 | idx_tb1_16821_990003 |            | CREATE INDEX idx_tb1_16821_990003 ON tb1_20190301_990003 USING btree (c1)
+ public     | tb1_20190302_990005 | idx_tb1_16825_990005 |            | CREATE INDEX idx_tb1_16825_990005 ON tb1_20190302_990005 USING btree (c1)
+ public     | tb1_20190303_990007 | idx_tb1_16829_990007 |            | CREATE INDEX idx_tb1_16829_990007 ON tb1_20190303_990007 USING btree (c1)
+ public     | tb1_20190304_990009 | idx_tb1_16833_990009 |            | CREATE INDEX idx_tb1_16833_990009 ON tb1_20190304_990009 USING btree (c1)
+ public     | tb1_20190305_990011 | idx_tb1_16837_990011 |            | CREATE INDEX idx_tb1_16837_990011 ON tb1_20190305_990011 USING btree (c1)
+ public     | tb1_20190306_990013 | idx_tb1_16841_990013 |            | CREATE INDEX idx_tb1_16841_990013 ON tb1_20190306_990013 USING btree (c1)
+ public     | tb1_20190307_990015 | idx_tb1_16845_990015 |            | CREATE INDEX idx_tb1_16845_990015 ON tb1_20190307_990015 USING btree (c1)
+ public     | tb1_20190308_990017 | idx_tb1_16849_990017 |            | CREATE INDEX idx_tb1_16849_990017 ON tb1_20190308_990017 USING btree (c1)
+ public     | tb1_20190309_990019 | idx_tb1_16853_990019 |            | CREATE INDEX idx_tb1_16853_990019 ON tb1_20190309_990019 USING btree (c1)
+ public     | tb1_20190310_990021 | idx_tb1_16857_990021 |            | CREATE INDEX idx_tb1_16857_990021 ON tb1_20190310_990021 USING btree (c1)
+(10 rows)
+
+
+\c - - - :master_port
+
+-- 分区表添加索引（语法错误）
+select rds.create_idx_on_parted_table('public.tb1', 'idx_tb1_e', 'create1 index %i on %t(c1)');
+                                                               create_idx_on_parted_table                                                                
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+ ("select rds.func_create_idx_on_paritition('create1 index idx_tb1_e_16821 on public.tb1_20190301(c1)','')",error,"syntax error at or near ""create1""")
+ ("select rds.func_create_idx_on_paritition('create1 index idx_tb1_e_16825 on public.tb1_20190302(c1)','')",error,"syntax error at or near ""create1""")
+ ("select rds.func_create_idx_on_paritition('create1 index idx_tb1_e_16829 on public.tb1_20190303(c1)','')",error,"syntax error at or near ""create1""")
+ ("select rds.func_create_idx_on_paritition('create1 index idx_tb1_e_16833 on public.tb1_20190304(c1)','')",error,"syntax error at or near ""create1""")
+ ("select rds.func_create_idx_on_paritition('create1 index idx_tb1_e_16837 on public.tb1_20190305(c1)','')",error,"syntax error at or near ""create1""")
+ ("select rds.func_create_idx_on_paritition('create1 index idx_tb1_e_16841 on public.tb1_20190306(c1)','')",error,"syntax error at or near ""create1""")
+ ("select rds.func_create_idx_on_paritition('create1 index idx_tb1_e_16845 on public.tb1_20190307(c1)','')",error,"syntax error at or near ""create1""")
+ ("select rds.func_create_idx_on_paritition('create1 index idx_tb1_e_16849 on public.tb1_20190308(c1)','')",error,"syntax error at or near ""create1""")
+ ("select rds.func_create_idx_on_paritition('create1 index idx_tb1_e_16853 on public.tb1_20190309(c1)','')",error,"syntax error at or near ""create1""")
+ ("select rds.func_create_idx_on_paritition('create1 index idx_tb1_e_16857 on public.tb1_20190310(c1)','')",error,"syntax error at or near ""create1""")
+(10 rows)
+
+
+-- 验证索引
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |  tablename   |   indexname   | tablespace |                          indexdef                           
+------------+--------------+---------------+------------+-------------------------------------------------------------
+ public     | tb1_20190301 | idx_tb1_16821 |            | CREATE INDEX idx_tb1_16821 ON tb1_20190301 USING btree (c1)
+ public     | tb1_20190302 | idx_tb1_16825 |            | CREATE INDEX idx_tb1_16825 ON tb1_20190302 USING btree (c1)
+ public     | tb1_20190303 | idx_tb1_16829 |            | CREATE INDEX idx_tb1_16829 ON tb1_20190303 USING btree (c1)
+ public     | tb1_20190304 | idx_tb1_16833 |            | CREATE INDEX idx_tb1_16833 ON tb1_20190304 USING btree (c1)
+ public     | tb1_20190305 | idx_tb1_16837 |            | CREATE INDEX idx_tb1_16837 ON tb1_20190305 USING btree (c1)
+ public     | tb1_20190306 | idx_tb1_16841 |            | CREATE INDEX idx_tb1_16841 ON tb1_20190306 USING btree (c1)
+ public     | tb1_20190307 | idx_tb1_16845 |            | CREATE INDEX idx_tb1_16845 ON tb1_20190307 USING btree (c1)
+ public     | tb1_20190308 | idx_tb1_16849 |            | CREATE INDEX idx_tb1_16849 ON tb1_20190308 USING btree (c1)
+ public     | tb1_20190309 | idx_tb1_16853 |            | CREATE INDEX idx_tb1_16853 ON tb1_20190309 USING btree (c1)
+ public     | tb1_20190310 | idx_tb1_16857 |            | CREATE INDEX idx_tb1_16857 ON tb1_20190310 USING btree (c1)
+(10 rows)
+
+select * from rds.user_tab_part_indexes_def;
+ tab_name | idx_name |            idx_sql             | is_pkey 
+----------+----------+--------------------------------+---------
+ tb1      | idx_tb1  | create index    %i on   %t(c1) | f
+(1 row)
+
+
+\c - - - :worker_1_port
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |      tablename      |      indexname       | tablespace |                                 indexdef                                  
+------------+---------------------+----------------------+------------+---------------------------------------------------------------------------
+ public     | tb1_20190301_990002 | idx_tb1_16821_990002 |            | CREATE INDEX idx_tb1_16821_990002 ON tb1_20190301_990002 USING btree (c1)
+ public     | tb1_20190302_990004 | idx_tb1_16825_990004 |            | CREATE INDEX idx_tb1_16825_990004 ON tb1_20190302_990004 USING btree (c1)
+ public     | tb1_20190303_990006 | idx_tb1_16829_990006 |            | CREATE INDEX idx_tb1_16829_990006 ON tb1_20190303_990006 USING btree (c1)
+ public     | tb1_20190304_990008 | idx_tb1_16833_990008 |            | CREATE INDEX idx_tb1_16833_990008 ON tb1_20190304_990008 USING btree (c1)
+ public     | tb1_20190305_990010 | idx_tb1_16837_990010 |            | CREATE INDEX idx_tb1_16837_990010 ON tb1_20190305_990010 USING btree (c1)
+ public     | tb1_20190306_990012 | idx_tb1_16841_990012 |            | CREATE INDEX idx_tb1_16841_990012 ON tb1_20190306_990012 USING btree (c1)
+ public     | tb1_20190307_990014 | idx_tb1_16845_990014 |            | CREATE INDEX idx_tb1_16845_990014 ON tb1_20190307_990014 USING btree (c1)
+ public     | tb1_20190308_990016 | idx_tb1_16849_990016 |            | CREATE INDEX idx_tb1_16849_990016 ON tb1_20190308_990016 USING btree (c1)
+ public     | tb1_20190309_990018 | idx_tb1_16853_990018 |            | CREATE INDEX idx_tb1_16853_990018 ON tb1_20190309_990018 USING btree (c1)
+ public     | tb1_20190310_990020 | idx_tb1_16857_990020 |            | CREATE INDEX idx_tb1_16857_990020 ON tb1_20190310_990020 USING btree (c1)
+(10 rows)
+
+
+\c - - - :worker_2_port
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |      tablename      |      indexname       | tablespace |                                 indexdef                                  
+------------+---------------------+----------------------+------------+---------------------------------------------------------------------------
+ public     | tb1_20190301_990003 | idx_tb1_16821_990003 |            | CREATE INDEX idx_tb1_16821_990003 ON tb1_20190301_990003 USING btree (c1)
+ public     | tb1_20190302_990005 | idx_tb1_16825_990005 |            | CREATE INDEX idx_tb1_16825_990005 ON tb1_20190302_990005 USING btree (c1)
+ public     | tb1_20190303_990007 | idx_tb1_16829_990007 |            | CREATE INDEX idx_tb1_16829_990007 ON tb1_20190303_990007 USING btree (c1)
+ public     | tb1_20190304_990009 | idx_tb1_16833_990009 |            | CREATE INDEX idx_tb1_16833_990009 ON tb1_20190304_990009 USING btree (c1)
+ public     | tb1_20190305_990011 | idx_tb1_16837_990011 |            | CREATE INDEX idx_tb1_16837_990011 ON tb1_20190305_990011 USING btree (c1)
+ public     | tb1_20190306_990013 | idx_tb1_16841_990013 |            | CREATE INDEX idx_tb1_16841_990013 ON tb1_20190306_990013 USING btree (c1)
+ public     | tb1_20190307_990015 | idx_tb1_16845_990015 |            | CREATE INDEX idx_tb1_16845_990015 ON tb1_20190307_990015 USING btree (c1)
+ public     | tb1_20190308_990017 | idx_tb1_16849_990017 |            | CREATE INDEX idx_tb1_16849_990017 ON tb1_20190308_990017 USING btree (c1)
+ public     | tb1_20190309_990019 | idx_tb1_16853_990019 |            | CREATE INDEX idx_tb1_16853_990019 ON tb1_20190309_990019 USING btree (c1)
+ public     | tb1_20190310_990021 | idx_tb1_16857_990021 |            | CREATE INDEX idx_tb1_16857_990021 ON tb1_20190310_990021 USING btree (c1)
+(10 rows)
+
+
+\c - - - :master_port
+
+-- 分区表添加索引（索引名长度超34bytes）
+select rds.create_idx_on_parted_table('public.tb1', 'idx_tb12345678901234567890123456789', 'create index %i on %t(c1)');
+ERROR:  The length of index name could not be more than 34 bytes, table name: tb1 index name: idx_tb12345678901234567890123456789
+CONTEXT:  PL/pgSQL function rds.create_idx_on_parted_table(regclass,character varying,text,boolean) line 34 at RAISE
+select rds.create_idx_on_parted_table('public.tb1', 'idx_tb1234567890123456789012345678', 'create index %i on %t(c1)');
+                                                           create_idx_on_parted_table                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------
+ ("select rds.func_create_idx_on_paritition('create index idx_tb1234567890123456789012345678_16821 on public.tb1_20190301(c1)','')",success,"")
+ ("select rds.func_create_idx_on_paritition('create index idx_tb1234567890123456789012345678_16825 on public.tb1_20190302(c1)','')",success,"")
+ ("select rds.func_create_idx_on_paritition('create index idx_tb1234567890123456789012345678_16829 on public.tb1_20190303(c1)','')",success,"")
+ ("select rds.func_create_idx_on_paritition('create index idx_tb1234567890123456789012345678_16833 on public.tb1_20190304(c1)','')",success,"")
+ ("select rds.func_create_idx_on_paritition('create index idx_tb1234567890123456789012345678_16837 on public.tb1_20190305(c1)','')",success,"")
+ ("select rds.func_create_idx_on_paritition('create index idx_tb1234567890123456789012345678_16841 on public.tb1_20190306(c1)','')",success,"")
+ ("select rds.func_create_idx_on_paritition('create index idx_tb1234567890123456789012345678_16845 on public.tb1_20190307(c1)','')",success,"")
+ ("select rds.func_create_idx_on_paritition('create index idx_tb1234567890123456789012345678_16849 on public.tb1_20190308(c1)','')",success,"")
+ ("select rds.func_create_idx_on_paritition('create index idx_tb1234567890123456789012345678_16853 on public.tb1_20190309(c1)','')",success,"")
+ ("select rds.func_create_idx_on_paritition('create index idx_tb1234567890123456789012345678_16857 on public.tb1_20190310(c1)','')",success,"")
+(10 rows)
+
+
+-- 验证索引
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |  tablename   |                indexname                 | tablespace |                                        indexdef                                        
+------------+--------------+------------------------------------------+------------+----------------------------------------------------------------------------------------
+ public     | tb1_20190301 | idx_tb1234567890123456789012345678_16821 |            | CREATE INDEX idx_tb1234567890123456789012345678_16821 ON tb1_20190301 USING btree (c1)
+ public     | tb1_20190301 | idx_tb1_16821                            |            | CREATE INDEX idx_tb1_16821 ON tb1_20190301 USING btree (c1)
+ public     | tb1_20190302 | idx_tb1234567890123456789012345678_16825 |            | CREATE INDEX idx_tb1234567890123456789012345678_16825 ON tb1_20190302 USING btree (c1)
+ public     | tb1_20190302 | idx_tb1_16825                            |            | CREATE INDEX idx_tb1_16825 ON tb1_20190302 USING btree (c1)
+ public     | tb1_20190303 | idx_tb1234567890123456789012345678_16829 |            | CREATE INDEX idx_tb1234567890123456789012345678_16829 ON tb1_20190303 USING btree (c1)
+ public     | tb1_20190303 | idx_tb1_16829                            |            | CREATE INDEX idx_tb1_16829 ON tb1_20190303 USING btree (c1)
+ public     | tb1_20190304 | idx_tb1234567890123456789012345678_16833 |            | CREATE INDEX idx_tb1234567890123456789012345678_16833 ON tb1_20190304 USING btree (c1)
+ public     | tb1_20190304 | idx_tb1_16833                            |            | CREATE INDEX idx_tb1_16833 ON tb1_20190304 USING btree (c1)
+ public     | tb1_20190305 | idx_tb1234567890123456789012345678_16837 |            | CREATE INDEX idx_tb1234567890123456789012345678_16837 ON tb1_20190305 USING btree (c1)
+ public     | tb1_20190305 | idx_tb1_16837                            |            | CREATE INDEX idx_tb1_16837 ON tb1_20190305 USING btree (c1)
+ public     | tb1_20190306 | idx_tb1234567890123456789012345678_16841 |            | CREATE INDEX idx_tb1234567890123456789012345678_16841 ON tb1_20190306 USING btree (c1)
+ public     | tb1_20190306 | idx_tb1_16841                            |            | CREATE INDEX idx_tb1_16841 ON tb1_20190306 USING btree (c1)
+ public     | tb1_20190307 | idx_tb1234567890123456789012345678_16845 |            | CREATE INDEX idx_tb1234567890123456789012345678_16845 ON tb1_20190307 USING btree (c1)
+ public     | tb1_20190307 | idx_tb1_16845                            |            | CREATE INDEX idx_tb1_16845 ON tb1_20190307 USING btree (c1)
+ public     | tb1_20190308 | idx_tb1234567890123456789012345678_16849 |            | CREATE INDEX idx_tb1234567890123456789012345678_16849 ON tb1_20190308 USING btree (c1)
+ public     | tb1_20190308 | idx_tb1_16849                            |            | CREATE INDEX idx_tb1_16849 ON tb1_20190308 USING btree (c1)
+ public     | tb1_20190309 | idx_tb1234567890123456789012345678_16853 |            | CREATE INDEX idx_tb1234567890123456789012345678_16853 ON tb1_20190309 USING btree (c1)
+ public     | tb1_20190309 | idx_tb1_16853                            |            | CREATE INDEX idx_tb1_16853 ON tb1_20190309 USING btree (c1)
+ public     | tb1_20190310 | idx_tb1234567890123456789012345678_16857 |            | CREATE INDEX idx_tb1234567890123456789012345678_16857 ON tb1_20190310 USING btree (c1)
+ public     | tb1_20190310 | idx_tb1_16857                            |            | CREATE INDEX idx_tb1_16857 ON tb1_20190310 USING btree (c1)
+(20 rows)
+
+select * from rds.user_tab_part_indexes_def;
+ tab_name |              idx_name              |            idx_sql             | is_pkey 
+----------+------------------------------------+--------------------------------+---------
+ tb1      | idx_tb1                            | create index    %i on   %t(c1) | f
+ tb1      | idx_tb1234567890123456789012345678 | create index %i on %t(c1)      | f
+(2 rows)
+
+
+\c - - - :worker_1_port
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |      tablename      |                    indexname                    | tablespace |                                               indexdef                                               
+------------+---------------------+-------------------------------------------------+------------+------------------------------------------------------------------------------------------------------
+ public     | tb1_20190301_990002 | idx_tb1234567890123456789012345678_16821_990002 |            | CREATE INDEX idx_tb1234567890123456789012345678_16821_990002 ON tb1_20190301_990002 USING btree (c1)
+ public     | tb1_20190301_990002 | idx_tb1_16821_990002                            |            | CREATE INDEX idx_tb1_16821_990002 ON tb1_20190301_990002 USING btree (c1)
+ public     | tb1_20190302_990004 | idx_tb1234567890123456789012345678_16825_990004 |            | CREATE INDEX idx_tb1234567890123456789012345678_16825_990004 ON tb1_20190302_990004 USING btree (c1)
+ public     | tb1_20190302_990004 | idx_tb1_16825_990004                            |            | CREATE INDEX idx_tb1_16825_990004 ON tb1_20190302_990004 USING btree (c1)
+ public     | tb1_20190303_990006 | idx_tb1234567890123456789012345678_16829_990006 |            | CREATE INDEX idx_tb1234567890123456789012345678_16829_990006 ON tb1_20190303_990006 USING btree (c1)
+ public     | tb1_20190303_990006 | idx_tb1_16829_990006                            |            | CREATE INDEX idx_tb1_16829_990006 ON tb1_20190303_990006 USING btree (c1)
+ public     | tb1_20190304_990008 | idx_tb1234567890123456789012345678_16833_990008 |            | CREATE INDEX idx_tb1234567890123456789012345678_16833_990008 ON tb1_20190304_990008 USING btree (c1)
+ public     | tb1_20190304_990008 | idx_tb1_16833_990008                            |            | CREATE INDEX idx_tb1_16833_990008 ON tb1_20190304_990008 USING btree (c1)
+ public     | tb1_20190305_990010 | idx_tb1234567890123456789012345678_16837_990010 |            | CREATE INDEX idx_tb1234567890123456789012345678_16837_990010 ON tb1_20190305_990010 USING btree (c1)
+ public     | tb1_20190305_990010 | idx_tb1_16837_990010                            |            | CREATE INDEX idx_tb1_16837_990010 ON tb1_20190305_990010 USING btree (c1)
+ public     | tb1_20190306_990012 | idx_tb1234567890123456789012345678_16841_990012 |            | CREATE INDEX idx_tb1234567890123456789012345678_16841_990012 ON tb1_20190306_990012 USING btree (c1)
+ public     | tb1_20190306_990012 | idx_tb1_16841_990012                            |            | CREATE INDEX idx_tb1_16841_990012 ON tb1_20190306_990012 USING btree (c1)
+ public     | tb1_20190307_990014 | idx_tb1234567890123456789012345678_16845_990014 |            | CREATE INDEX idx_tb1234567890123456789012345678_16845_990014 ON tb1_20190307_990014 USING btree (c1)
+ public     | tb1_20190307_990014 | idx_tb1_16845_990014                            |            | CREATE INDEX idx_tb1_16845_990014 ON tb1_20190307_990014 USING btree (c1)
+ public     | tb1_20190308_990016 | idx_tb1234567890123456789012345678_16849_990016 |            | CREATE INDEX idx_tb1234567890123456789012345678_16849_990016 ON tb1_20190308_990016 USING btree (c1)
+ public     | tb1_20190308_990016 | idx_tb1_16849_990016                            |            | CREATE INDEX idx_tb1_16849_990016 ON tb1_20190308_990016 USING btree (c1)
+ public     | tb1_20190309_990018 | idx_tb1234567890123456789012345678_16853_990018 |            | CREATE INDEX idx_tb1234567890123456789012345678_16853_990018 ON tb1_20190309_990018 USING btree (c1)
+ public     | tb1_20190309_990018 | idx_tb1_16853_990018                            |            | CREATE INDEX idx_tb1_16853_990018 ON tb1_20190309_990018 USING btree (c1)
+ public     | tb1_20190310_990020 | idx_tb1234567890123456789012345678_16857_990020 |            | CREATE INDEX idx_tb1234567890123456789012345678_16857_990020 ON tb1_20190310_990020 USING btree (c1)
+ public     | tb1_20190310_990020 | idx_tb1_16857_990020                            |            | CREATE INDEX idx_tb1_16857_990020 ON tb1_20190310_990020 USING btree (c1)
+(20 rows)
+
+
+\c - - - :worker_2_port
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |      tablename      |                    indexname                    | tablespace |                                               indexdef                                               
+------------+---------------------+-------------------------------------------------+------------+------------------------------------------------------------------------------------------------------
+ public     | tb1_20190301_990003 | idx_tb1234567890123456789012345678_16821_990003 |            | CREATE INDEX idx_tb1234567890123456789012345678_16821_990003 ON tb1_20190301_990003 USING btree (c1)
+ public     | tb1_20190301_990003 | idx_tb1_16821_990003                            |            | CREATE INDEX idx_tb1_16821_990003 ON tb1_20190301_990003 USING btree (c1)
+ public     | tb1_20190302_990005 | idx_tb1234567890123456789012345678_16825_990005 |            | CREATE INDEX idx_tb1234567890123456789012345678_16825_990005 ON tb1_20190302_990005 USING btree (c1)
+ public     | tb1_20190302_990005 | idx_tb1_16825_990005                            |            | CREATE INDEX idx_tb1_16825_990005 ON tb1_20190302_990005 USING btree (c1)
+ public     | tb1_20190303_990007 | idx_tb1234567890123456789012345678_16829_990007 |            | CREATE INDEX idx_tb1234567890123456789012345678_16829_990007 ON tb1_20190303_990007 USING btree (c1)
+ public     | tb1_20190303_990007 | idx_tb1_16829_990007                            |            | CREATE INDEX idx_tb1_16829_990007 ON tb1_20190303_990007 USING btree (c1)
+ public     | tb1_20190304_990009 | idx_tb1234567890123456789012345678_16833_990009 |            | CREATE INDEX idx_tb1234567890123456789012345678_16833_990009 ON tb1_20190304_990009 USING btree (c1)
+ public     | tb1_20190304_990009 | idx_tb1_16833_990009                            |            | CREATE INDEX idx_tb1_16833_990009 ON tb1_20190304_990009 USING btree (c1)
+ public     | tb1_20190305_990011 | idx_tb1234567890123456789012345678_16837_990011 |            | CREATE INDEX idx_tb1234567890123456789012345678_16837_990011 ON tb1_20190305_990011 USING btree (c1)
+ public     | tb1_20190305_990011 | idx_tb1_16837_990011                            |            | CREATE INDEX idx_tb1_16837_990011 ON tb1_20190305_990011 USING btree (c1)
+ public     | tb1_20190306_990013 | idx_tb1234567890123456789012345678_16841_990013 |            | CREATE INDEX idx_tb1234567890123456789012345678_16841_990013 ON tb1_20190306_990013 USING btree (c1)
+ public     | tb1_20190306_990013 | idx_tb1_16841_990013                            |            | CREATE INDEX idx_tb1_16841_990013 ON tb1_20190306_990013 USING btree (c1)
+ public     | tb1_20190307_990015 | idx_tb1234567890123456789012345678_16845_990015 |            | CREATE INDEX idx_tb1234567890123456789012345678_16845_990015 ON tb1_20190307_990015 USING btree (c1)
+ public     | tb1_20190307_990015 | idx_tb1_16845_990015                            |            | CREATE INDEX idx_tb1_16845_990015 ON tb1_20190307_990015 USING btree (c1)
+ public     | tb1_20190308_990017 | idx_tb1234567890123456789012345678_16849_990017 |            | CREATE INDEX idx_tb1234567890123456789012345678_16849_990017 ON tb1_20190308_990017 USING btree (c1)
+ public     | tb1_20190308_990017 | idx_tb1_16849_990017                            |            | CREATE INDEX idx_tb1_16849_990017 ON tb1_20190308_990017 USING btree (c1)
+ public     | tb1_20190309_990019 | idx_tb1234567890123456789012345678_16853_990019 |            | CREATE INDEX idx_tb1234567890123456789012345678_16853_990019 ON tb1_20190309_990019 USING btree (c1)
+ public     | tb1_20190309_990019 | idx_tb1_16853_990019                            |            | CREATE INDEX idx_tb1_16853_990019 ON tb1_20190309_990019 USING btree (c1)
+ public     | tb1_20190310_990021 | idx_tb1234567890123456789012345678_16857_990021 |            | CREATE INDEX idx_tb1234567890123456789012345678_16857_990021 ON tb1_20190310_990021 USING btree (c1)
+ public     | tb1_20190310_990021 | idx_tb1_16857_990021                            |            | CREATE INDEX idx_tb1_16857_990021 ON tb1_20190310_990021 USING btree (c1)
+(20 rows)
+
+
+\c - - - :master_port
+
+-- 分区表添加索引（主键）
+select rds.create_idx_on_parted_table('public.tb1', 'pk_idx_tb1', 'create unique index %i on %t(c1)', true);
+                                                                                                      create_idx_on_parted_table                                                                                                       
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ ("select rds.func_create_idx_on_paritition('create unique index pk_idx_tb1_16821 on public.tb1_20190301(c1)','alter table public.tb1_20190301 add constraint pk_idx_tb1_16821 primary key using index pk_idx_tb1_16821')",success,"")
+ ("select rds.func_create_idx_on_paritition('create unique index pk_idx_tb1_16825 on public.tb1_20190302(c1)','alter table public.tb1_20190302 add constraint pk_idx_tb1_16825 primary key using index pk_idx_tb1_16825')",success,"")
+ ("select rds.func_create_idx_on_paritition('create unique index pk_idx_tb1_16829 on public.tb1_20190303(c1)','alter table public.tb1_20190303 add constraint pk_idx_tb1_16829 primary key using index pk_idx_tb1_16829')",success,"")
+ ("select rds.func_create_idx_on_paritition('create unique index pk_idx_tb1_16833 on public.tb1_20190304(c1)','alter table public.tb1_20190304 add constraint pk_idx_tb1_16833 primary key using index pk_idx_tb1_16833')",success,"")
+ ("select rds.func_create_idx_on_paritition('create unique index pk_idx_tb1_16837 on public.tb1_20190305(c1)','alter table public.tb1_20190305 add constraint pk_idx_tb1_16837 primary key using index pk_idx_tb1_16837')",success,"")
+ ("select rds.func_create_idx_on_paritition('create unique index pk_idx_tb1_16841 on public.tb1_20190306(c1)','alter table public.tb1_20190306 add constraint pk_idx_tb1_16841 primary key using index pk_idx_tb1_16841')",success,"")
+ ("select rds.func_create_idx_on_paritition('create unique index pk_idx_tb1_16845 on public.tb1_20190307(c1)','alter table public.tb1_20190307 add constraint pk_idx_tb1_16845 primary key using index pk_idx_tb1_16845')",success,"")
+ ("select rds.func_create_idx_on_paritition('create unique index pk_idx_tb1_16849 on public.tb1_20190308(c1)','alter table public.tb1_20190308 add constraint pk_idx_tb1_16849 primary key using index pk_idx_tb1_16849')",success,"")
+ ("select rds.func_create_idx_on_paritition('create unique index pk_idx_tb1_16853 on public.tb1_20190309(c1)','alter table public.tb1_20190309 add constraint pk_idx_tb1_16853 primary key using index pk_idx_tb1_16853')",success,"")
+ ("select rds.func_create_idx_on_paritition('create unique index pk_idx_tb1_16857 on public.tb1_20190310(c1)','alter table public.tb1_20190310 add constraint pk_idx_tb1_16857 primary key using index pk_idx_tb1_16857')",success,"")
+(10 rows)
+
+
+-- 验证索引、主键
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |  tablename   |                indexname                 | tablespace |                                        indexdef                                        
+------------+--------------+------------------------------------------+------------+----------------------------------------------------------------------------------------
+ public     | tb1_20190301 | idx_tb1234567890123456789012345678_16821 |            | CREATE INDEX idx_tb1234567890123456789012345678_16821 ON tb1_20190301 USING btree (c1)
+ public     | tb1_20190301 | idx_tb1_16821                            |            | CREATE INDEX idx_tb1_16821 ON tb1_20190301 USING btree (c1)
+ public     | tb1_20190301 | pk_idx_tb1_16821                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16821 ON tb1_20190301 USING btree (c1)
+ public     | tb1_20190302 | idx_tb1234567890123456789012345678_16825 |            | CREATE INDEX idx_tb1234567890123456789012345678_16825 ON tb1_20190302 USING btree (c1)
+ public     | tb1_20190302 | idx_tb1_16825                            |            | CREATE INDEX idx_tb1_16825 ON tb1_20190302 USING btree (c1)
+ public     | tb1_20190302 | pk_idx_tb1_16825                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16825 ON tb1_20190302 USING btree (c1)
+ public     | tb1_20190303 | idx_tb1234567890123456789012345678_16829 |            | CREATE INDEX idx_tb1234567890123456789012345678_16829 ON tb1_20190303 USING btree (c1)
+ public     | tb1_20190303 | idx_tb1_16829                            |            | CREATE INDEX idx_tb1_16829 ON tb1_20190303 USING btree (c1)
+ public     | tb1_20190303 | pk_idx_tb1_16829                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16829 ON tb1_20190303 USING btree (c1)
+ public     | tb1_20190304 | idx_tb1234567890123456789012345678_16833 |            | CREATE INDEX idx_tb1234567890123456789012345678_16833 ON tb1_20190304 USING btree (c1)
+ public     | tb1_20190304 | idx_tb1_16833                            |            | CREATE INDEX idx_tb1_16833 ON tb1_20190304 USING btree (c1)
+ public     | tb1_20190304 | pk_idx_tb1_16833                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16833 ON tb1_20190304 USING btree (c1)
+ public     | tb1_20190305 | idx_tb1234567890123456789012345678_16837 |            | CREATE INDEX idx_tb1234567890123456789012345678_16837 ON tb1_20190305 USING btree (c1)
+ public     | tb1_20190305 | idx_tb1_16837                            |            | CREATE INDEX idx_tb1_16837 ON tb1_20190305 USING btree (c1)
+ public     | tb1_20190305 | pk_idx_tb1_16837                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16837 ON tb1_20190305 USING btree (c1)
+ public     | tb1_20190306 | idx_tb1234567890123456789012345678_16841 |            | CREATE INDEX idx_tb1234567890123456789012345678_16841 ON tb1_20190306 USING btree (c1)
+ public     | tb1_20190306 | idx_tb1_16841                            |            | CREATE INDEX idx_tb1_16841 ON tb1_20190306 USING btree (c1)
+ public     | tb1_20190306 | pk_idx_tb1_16841                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16841 ON tb1_20190306 USING btree (c1)
+ public     | tb1_20190307 | idx_tb1234567890123456789012345678_16845 |            | CREATE INDEX idx_tb1234567890123456789012345678_16845 ON tb1_20190307 USING btree (c1)
+ public     | tb1_20190307 | idx_tb1_16845                            |            | CREATE INDEX idx_tb1_16845 ON tb1_20190307 USING btree (c1)
+ public     | tb1_20190307 | pk_idx_tb1_16845                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16845 ON tb1_20190307 USING btree (c1)
+ public     | tb1_20190308 | idx_tb1234567890123456789012345678_16849 |            | CREATE INDEX idx_tb1234567890123456789012345678_16849 ON tb1_20190308 USING btree (c1)
+ public     | tb1_20190308 | idx_tb1_16849                            |            | CREATE INDEX idx_tb1_16849 ON tb1_20190308 USING btree (c1)
+ public     | tb1_20190308 | pk_idx_tb1_16849                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16849 ON tb1_20190308 USING btree (c1)
+ public     | tb1_20190309 | idx_tb1234567890123456789012345678_16853 |            | CREATE INDEX idx_tb1234567890123456789012345678_16853 ON tb1_20190309 USING btree (c1)
+ public     | tb1_20190309 | idx_tb1_16853                            |            | CREATE INDEX idx_tb1_16853 ON tb1_20190309 USING btree (c1)
+ public     | tb1_20190309 | pk_idx_tb1_16853                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16853 ON tb1_20190309 USING btree (c1)
+ public     | tb1_20190310 | idx_tb1234567890123456789012345678_16857 |            | CREATE INDEX idx_tb1234567890123456789012345678_16857 ON tb1_20190310 USING btree (c1)
+ public     | tb1_20190310 | idx_tb1_16857                            |            | CREATE INDEX idx_tb1_16857 ON tb1_20190310 USING btree (c1)
+ public     | tb1_20190310 | pk_idx_tb1_16857                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16857 ON tb1_20190310 USING btree (c1)
+(30 rows)
+
+select * from rds.user_tab_part_indexes_def;
+ tab_name |              idx_name              |             idx_sql              | is_pkey 
+----------+------------------------------------+----------------------------------+---------
+ tb1      | idx_tb1                            | create index    %i on   %t(c1)   | f
+ tb1      | idx_tb1234567890123456789012345678 | create index %i on %t(c1)        | f
+ tb1      | pk_idx_tb1                         | create unique index %i on %t(c1) | t
+(3 rows)
+
+select * from pg_constraint where conname like 'pk_idx_tb1%' order by conname;
+     conname      | connamespace | contype | condeferrable | condeferred | convalidated | conrelid | contypid | conindid | confrelid | confupdtype | confdeltype | confmatchtype | conislocal | coninhcount | connoinherit | conkey | confkey | conpfeqop | conppeqop | conffeqop | conexclop | conbin | consrc 
+------------------+--------------+---------+---------------+-------------+--------------+----------+----------+----------+-----------+-------------+-------------+---------------+------------+-------------+--------------+--------+---------+-----------+-----------+-----------+-----------+--------+--------
+ pk_idx_tb1_16821 |         2200 | p       | f             | f           | t            |    16821 |        0 |    16881 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16825 |         2200 | p       | f             | f           | t            |    16825 |        0 |    16883 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16829 |         2200 | p       | f             | f           | t            |    16829 |        0 |    16885 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16833 |         2200 | p       | f             | f           | t            |    16833 |        0 |    16887 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16837 |         2200 | p       | f             | f           | t            |    16837 |        0 |    16889 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16841 |         2200 | p       | f             | f           | t            |    16841 |        0 |    16891 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16845 |         2200 | p       | f             | f           | t            |    16845 |        0 |    16893 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16849 |         2200 | p       | f             | f           | t            |    16849 |        0 |    16895 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16853 |         2200 | p       | f             | f           | t            |    16853 |        0 |    16897 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16857 |         2200 | p       | f             | f           | t            |    16857 |        0 |    16899 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+(10 rows)
+
+
+\c - - - :worker_1_port
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |      tablename      |                    indexname                    | tablespace |                                               indexdef                                               
+------------+---------------------+-------------------------------------------------+------------+------------------------------------------------------------------------------------------------------
+ public     | tb1_20190301_990002 | idx_tb1234567890123456789012345678_16821_990002 |            | CREATE INDEX idx_tb1234567890123456789012345678_16821_990002 ON tb1_20190301_990002 USING btree (c1)
+ public     | tb1_20190301_990002 | idx_tb1_16821_990002                            |            | CREATE INDEX idx_tb1_16821_990002 ON tb1_20190301_990002 USING btree (c1)
+ public     | tb1_20190301_990002 | pk_idx_tb1_16821_990002                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16821_990002 ON tb1_20190301_990002 USING btree (c1)
+ public     | tb1_20190302_990004 | idx_tb1234567890123456789012345678_16825_990004 |            | CREATE INDEX idx_tb1234567890123456789012345678_16825_990004 ON tb1_20190302_990004 USING btree (c1)
+ public     | tb1_20190302_990004 | idx_tb1_16825_990004                            |            | CREATE INDEX idx_tb1_16825_990004 ON tb1_20190302_990004 USING btree (c1)
+ public     | tb1_20190302_990004 | pk_idx_tb1_16825_990004                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16825_990004 ON tb1_20190302_990004 USING btree (c1)
+ public     | tb1_20190303_990006 | idx_tb1234567890123456789012345678_16829_990006 |            | CREATE INDEX idx_tb1234567890123456789012345678_16829_990006 ON tb1_20190303_990006 USING btree (c1)
+ public     | tb1_20190303_990006 | idx_tb1_16829_990006                            |            | CREATE INDEX idx_tb1_16829_990006 ON tb1_20190303_990006 USING btree (c1)
+ public     | tb1_20190303_990006 | pk_idx_tb1_16829_990006                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16829_990006 ON tb1_20190303_990006 USING btree (c1)
+ public     | tb1_20190304_990008 | idx_tb1234567890123456789012345678_16833_990008 |            | CREATE INDEX idx_tb1234567890123456789012345678_16833_990008 ON tb1_20190304_990008 USING btree (c1)
+ public     | tb1_20190304_990008 | idx_tb1_16833_990008                            |            | CREATE INDEX idx_tb1_16833_990008 ON tb1_20190304_990008 USING btree (c1)
+ public     | tb1_20190304_990008 | pk_idx_tb1_16833_990008                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16833_990008 ON tb1_20190304_990008 USING btree (c1)
+ public     | tb1_20190305_990010 | idx_tb1234567890123456789012345678_16837_990010 |            | CREATE INDEX idx_tb1234567890123456789012345678_16837_990010 ON tb1_20190305_990010 USING btree (c1)
+ public     | tb1_20190305_990010 | idx_tb1_16837_990010                            |            | CREATE INDEX idx_tb1_16837_990010 ON tb1_20190305_990010 USING btree (c1)
+ public     | tb1_20190305_990010 | pk_idx_tb1_16837_990010                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16837_990010 ON tb1_20190305_990010 USING btree (c1)
+ public     | tb1_20190306_990012 | idx_tb1234567890123456789012345678_16841_990012 |            | CREATE INDEX idx_tb1234567890123456789012345678_16841_990012 ON tb1_20190306_990012 USING btree (c1)
+ public     | tb1_20190306_990012 | idx_tb1_16841_990012                            |            | CREATE INDEX idx_tb1_16841_990012 ON tb1_20190306_990012 USING btree (c1)
+ public     | tb1_20190306_990012 | pk_idx_tb1_16841_990012                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16841_990012 ON tb1_20190306_990012 USING btree (c1)
+ public     | tb1_20190307_990014 | idx_tb1234567890123456789012345678_16845_990014 |            | CREATE INDEX idx_tb1234567890123456789012345678_16845_990014 ON tb1_20190307_990014 USING btree (c1)
+ public     | tb1_20190307_990014 | idx_tb1_16845_990014                            |            | CREATE INDEX idx_tb1_16845_990014 ON tb1_20190307_990014 USING btree (c1)
+ public     | tb1_20190307_990014 | pk_idx_tb1_16845_990014                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16845_990014 ON tb1_20190307_990014 USING btree (c1)
+ public     | tb1_20190308_990016 | idx_tb1234567890123456789012345678_16849_990016 |            | CREATE INDEX idx_tb1234567890123456789012345678_16849_990016 ON tb1_20190308_990016 USING btree (c1)
+ public     | tb1_20190308_990016 | idx_tb1_16849_990016                            |            | CREATE INDEX idx_tb1_16849_990016 ON tb1_20190308_990016 USING btree (c1)
+ public     | tb1_20190308_990016 | pk_idx_tb1_16849_990016                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16849_990016 ON tb1_20190308_990016 USING btree (c1)
+ public     | tb1_20190309_990018 | idx_tb1234567890123456789012345678_16853_990018 |            | CREATE INDEX idx_tb1234567890123456789012345678_16853_990018 ON tb1_20190309_990018 USING btree (c1)
+ public     | tb1_20190309_990018 | idx_tb1_16853_990018                            |            | CREATE INDEX idx_tb1_16853_990018 ON tb1_20190309_990018 USING btree (c1)
+ public     | tb1_20190309_990018 | pk_idx_tb1_16853_990018                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16853_990018 ON tb1_20190309_990018 USING btree (c1)
+ public     | tb1_20190310_990020 | idx_tb1234567890123456789012345678_16857_990020 |            | CREATE INDEX idx_tb1234567890123456789012345678_16857_990020 ON tb1_20190310_990020 USING btree (c1)
+ public     | tb1_20190310_990020 | idx_tb1_16857_990020                            |            | CREATE INDEX idx_tb1_16857_990020 ON tb1_20190310_990020 USING btree (c1)
+ public     | tb1_20190310_990020 | pk_idx_tb1_16857_990020                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16857_990020 ON tb1_20190310_990020 USING btree (c1)
+(30 rows)
+
+select * from pg_constraint where conname like 'pk_idx_tb1%' order by conname;
+         conname         | connamespace | contype | condeferrable | condeferred | convalidated | conrelid | contypid | conindid | confrelid | confupdtype | confdeltype | confmatchtype | conislocal | coninhcount | connoinherit | conkey | confkey | conpfeqop | conppeqop | conffeqop | conexclop | conbin | consrc 
+-------------------------+--------------+---------+---------------+-------------+--------------+----------+----------+----------+-----------+-------------+-------------+---------------+------------+-------------+--------------+--------+---------+-----------+-----------+-----------+-----------+--------+--------
+ pk_idx_tb1_16821_990002 |         2200 | p       | f             | f           | t            |    16767 |        0 |    16817 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16825_990004 |         2200 | p       | f             | f           | t            |    16770 |        0 |    16819 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16829_990006 |         2200 | p       | f             | f           | t            |    16773 |        0 |    16821 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16833_990008 |         2200 | p       | f             | f           | t            |    16776 |        0 |    16823 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16837_990010 |         2200 | p       | f             | f           | t            |    16779 |        0 |    16825 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16841_990012 |         2200 | p       | f             | f           | t            |    16782 |        0 |    16827 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16845_990014 |         2200 | p       | f             | f           | t            |    16785 |        0 |    16829 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16849_990016 |         2200 | p       | f             | f           | t            |    16788 |        0 |    16831 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16853_990018 |         2200 | p       | f             | f           | t            |    16791 |        0 |    16833 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16857_990020 |         2200 | p       | f             | f           | t            |    16794 |        0 |    16835 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+(10 rows)
+
+
+\c - - - :worker_2_port
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |      tablename      |                    indexname                    | tablespace |                                               indexdef                                               
+------------+---------------------+-------------------------------------------------+------------+------------------------------------------------------------------------------------------------------
+ public     | tb1_20190301_990003 | idx_tb1234567890123456789012345678_16821_990003 |            | CREATE INDEX idx_tb1234567890123456789012345678_16821_990003 ON tb1_20190301_990003 USING btree (c1)
+ public     | tb1_20190301_990003 | idx_tb1_16821_990003                            |            | CREATE INDEX idx_tb1_16821_990003 ON tb1_20190301_990003 USING btree (c1)
+ public     | tb1_20190301_990003 | pk_idx_tb1_16821_990003                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16821_990003 ON tb1_20190301_990003 USING btree (c1)
+ public     | tb1_20190302_990005 | idx_tb1234567890123456789012345678_16825_990005 |            | CREATE INDEX idx_tb1234567890123456789012345678_16825_990005 ON tb1_20190302_990005 USING btree (c1)
+ public     | tb1_20190302_990005 | idx_tb1_16825_990005                            |            | CREATE INDEX idx_tb1_16825_990005 ON tb1_20190302_990005 USING btree (c1)
+ public     | tb1_20190302_990005 | pk_idx_tb1_16825_990005                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16825_990005 ON tb1_20190302_990005 USING btree (c1)
+ public     | tb1_20190303_990007 | idx_tb1234567890123456789012345678_16829_990007 |            | CREATE INDEX idx_tb1234567890123456789012345678_16829_990007 ON tb1_20190303_990007 USING btree (c1)
+ public     | tb1_20190303_990007 | idx_tb1_16829_990007                            |            | CREATE INDEX idx_tb1_16829_990007 ON tb1_20190303_990007 USING btree (c1)
+ public     | tb1_20190303_990007 | pk_idx_tb1_16829_990007                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16829_990007 ON tb1_20190303_990007 USING btree (c1)
+ public     | tb1_20190304_990009 | idx_tb1234567890123456789012345678_16833_990009 |            | CREATE INDEX idx_tb1234567890123456789012345678_16833_990009 ON tb1_20190304_990009 USING btree (c1)
+ public     | tb1_20190304_990009 | idx_tb1_16833_990009                            |            | CREATE INDEX idx_tb1_16833_990009 ON tb1_20190304_990009 USING btree (c1)
+ public     | tb1_20190304_990009 | pk_idx_tb1_16833_990009                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16833_990009 ON tb1_20190304_990009 USING btree (c1)
+ public     | tb1_20190305_990011 | idx_tb1234567890123456789012345678_16837_990011 |            | CREATE INDEX idx_tb1234567890123456789012345678_16837_990011 ON tb1_20190305_990011 USING btree (c1)
+ public     | tb1_20190305_990011 | idx_tb1_16837_990011                            |            | CREATE INDEX idx_tb1_16837_990011 ON tb1_20190305_990011 USING btree (c1)
+ public     | tb1_20190305_990011 | pk_idx_tb1_16837_990011                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16837_990011 ON tb1_20190305_990011 USING btree (c1)
+ public     | tb1_20190306_990013 | idx_tb1234567890123456789012345678_16841_990013 |            | CREATE INDEX idx_tb1234567890123456789012345678_16841_990013 ON tb1_20190306_990013 USING btree (c1)
+ public     | tb1_20190306_990013 | idx_tb1_16841_990013                            |            | CREATE INDEX idx_tb1_16841_990013 ON tb1_20190306_990013 USING btree (c1)
+ public     | tb1_20190306_990013 | pk_idx_tb1_16841_990013                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16841_990013 ON tb1_20190306_990013 USING btree (c1)
+ public     | tb1_20190307_990015 | idx_tb1234567890123456789012345678_16845_990015 |            | CREATE INDEX idx_tb1234567890123456789012345678_16845_990015 ON tb1_20190307_990015 USING btree (c1)
+ public     | tb1_20190307_990015 | idx_tb1_16845_990015                            |            | CREATE INDEX idx_tb1_16845_990015 ON tb1_20190307_990015 USING btree (c1)
+ public     | tb1_20190307_990015 | pk_idx_tb1_16845_990015                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16845_990015 ON tb1_20190307_990015 USING btree (c1)
+ public     | tb1_20190308_990017 | idx_tb1234567890123456789012345678_16849_990017 |            | CREATE INDEX idx_tb1234567890123456789012345678_16849_990017 ON tb1_20190308_990017 USING btree (c1)
+ public     | tb1_20190308_990017 | idx_tb1_16849_990017                            |            | CREATE INDEX idx_tb1_16849_990017 ON tb1_20190308_990017 USING btree (c1)
+ public     | tb1_20190308_990017 | pk_idx_tb1_16849_990017                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16849_990017 ON tb1_20190308_990017 USING btree (c1)
+ public     | tb1_20190309_990019 | idx_tb1234567890123456789012345678_16853_990019 |            | CREATE INDEX idx_tb1234567890123456789012345678_16853_990019 ON tb1_20190309_990019 USING btree (c1)
+ public     | tb1_20190309_990019 | idx_tb1_16853_990019                            |            | CREATE INDEX idx_tb1_16853_990019 ON tb1_20190309_990019 USING btree (c1)
+ public     | tb1_20190309_990019 | pk_idx_tb1_16853_990019                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16853_990019 ON tb1_20190309_990019 USING btree (c1)
+ public     | tb1_20190310_990021 | idx_tb1234567890123456789012345678_16857_990021 |            | CREATE INDEX idx_tb1234567890123456789012345678_16857_990021 ON tb1_20190310_990021 USING btree (c1)
+ public     | tb1_20190310_990021 | idx_tb1_16857_990021                            |            | CREATE INDEX idx_tb1_16857_990021 ON tb1_20190310_990021 USING btree (c1)
+ public     | tb1_20190310_990021 | pk_idx_tb1_16857_990021                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16857_990021 ON tb1_20190310_990021 USING btree (c1)
+(30 rows)
+
+select * from pg_constraint where conname like 'pk_idx_tb1%' order by conname;
+         conname         | connamespace | contype | condeferrable | condeferred | convalidated | conrelid | contypid | conindid | confrelid | confupdtype | confdeltype | confmatchtype | conislocal | coninhcount | connoinherit | conkey | confkey | conpfeqop | conppeqop | conffeqop | conexclop | conbin | consrc 
+-------------------------+--------------+---------+---------------+-------------+--------------+----------+----------+----------+-----------+-------------+-------------+---------------+------------+-------------+--------------+--------+---------+-----------+-----------+-----------+-----------+--------+--------
+ pk_idx_tb1_16821_990003 |         2200 | p       | f             | f           | t            |    16767 |        0 |    16817 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16825_990005 |         2200 | p       | f             | f           | t            |    16770 |        0 |    16819 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16829_990007 |         2200 | p       | f             | f           | t            |    16773 |        0 |    16821 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16833_990009 |         2200 | p       | f             | f           | t            |    16776 |        0 |    16823 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16837_990011 |         2200 | p       | f             | f           | t            |    16779 |        0 |    16825 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16841_990013 |         2200 | p       | f             | f           | t            |    16782 |        0 |    16827 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16845_990015 |         2200 | p       | f             | f           | t            |    16785 |        0 |    16829 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16849_990017 |         2200 | p       | f             | f           | t            |    16788 |        0 |    16831 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16853_990019 |         2200 | p       | f             | f           | t            |    16791 |        0 |    16833 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+ pk_idx_tb1_16857_990021 |         2200 | p       | f             | f           | t            |    16794 |        0 |    16835 |         0 |             |             |               | t          |           0 | t            | {1}    |         |           |           |           |           |        | 
+(10 rows)
+
+
+\c - - - :master_port
+
+-- 分区单独添加索引
+create index idx_tb1_test on public.tb1_20190303(c1);
+ERROR:  Creating an index directly on a table partition is not allowed, please invoke create_idx_on_parted_table to do this.
+CONTEXT:  PL/pgSQL function rds.func_ddl_command_start() line 75 at RAISE
+
+-- 验证索引
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |  tablename   |                indexname                 | tablespace |                                        indexdef                                        
+------------+--------------+------------------------------------------+------------+----------------------------------------------------------------------------------------
+ public     | tb1_20190301 | idx_tb1234567890123456789012345678_16821 |            | CREATE INDEX idx_tb1234567890123456789012345678_16821 ON tb1_20190301 USING btree (c1)
+ public     | tb1_20190301 | idx_tb1_16821                            |            | CREATE INDEX idx_tb1_16821 ON tb1_20190301 USING btree (c1)
+ public     | tb1_20190301 | pk_idx_tb1_16821                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16821 ON tb1_20190301 USING btree (c1)
+ public     | tb1_20190302 | idx_tb1234567890123456789012345678_16825 |            | CREATE INDEX idx_tb1234567890123456789012345678_16825 ON tb1_20190302 USING btree (c1)
+ public     | tb1_20190302 | idx_tb1_16825                            |            | CREATE INDEX idx_tb1_16825 ON tb1_20190302 USING btree (c1)
+ public     | tb1_20190302 | pk_idx_tb1_16825                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16825 ON tb1_20190302 USING btree (c1)
+ public     | tb1_20190303 | idx_tb1234567890123456789012345678_16829 |            | CREATE INDEX idx_tb1234567890123456789012345678_16829 ON tb1_20190303 USING btree (c1)
+ public     | tb1_20190303 | idx_tb1_16829                            |            | CREATE INDEX idx_tb1_16829 ON tb1_20190303 USING btree (c1)
+ public     | tb1_20190303 | pk_idx_tb1_16829                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16829 ON tb1_20190303 USING btree (c1)
+ public     | tb1_20190304 | idx_tb1234567890123456789012345678_16833 |            | CREATE INDEX idx_tb1234567890123456789012345678_16833 ON tb1_20190304 USING btree (c1)
+ public     | tb1_20190304 | idx_tb1_16833                            |            | CREATE INDEX idx_tb1_16833 ON tb1_20190304 USING btree (c1)
+ public     | tb1_20190304 | pk_idx_tb1_16833                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16833 ON tb1_20190304 USING btree (c1)
+ public     | tb1_20190305 | idx_tb1234567890123456789012345678_16837 |            | CREATE INDEX idx_tb1234567890123456789012345678_16837 ON tb1_20190305 USING btree (c1)
+ public     | tb1_20190305 | idx_tb1_16837                            |            | CREATE INDEX idx_tb1_16837 ON tb1_20190305 USING btree (c1)
+ public     | tb1_20190305 | pk_idx_tb1_16837                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16837 ON tb1_20190305 USING btree (c1)
+ public     | tb1_20190306 | idx_tb1234567890123456789012345678_16841 |            | CREATE INDEX idx_tb1234567890123456789012345678_16841 ON tb1_20190306 USING btree (c1)
+ public     | tb1_20190306 | idx_tb1_16841                            |            | CREATE INDEX idx_tb1_16841 ON tb1_20190306 USING btree (c1)
+ public     | tb1_20190306 | pk_idx_tb1_16841                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16841 ON tb1_20190306 USING btree (c1)
+ public     | tb1_20190307 | idx_tb1234567890123456789012345678_16845 |            | CREATE INDEX idx_tb1234567890123456789012345678_16845 ON tb1_20190307 USING btree (c1)
+ public     | tb1_20190307 | idx_tb1_16845                            |            | CREATE INDEX idx_tb1_16845 ON tb1_20190307 USING btree (c1)
+ public     | tb1_20190307 | pk_idx_tb1_16845                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16845 ON tb1_20190307 USING btree (c1)
+ public     | tb1_20190308 | idx_tb1234567890123456789012345678_16849 |            | CREATE INDEX idx_tb1234567890123456789012345678_16849 ON tb1_20190308 USING btree (c1)
+ public     | tb1_20190308 | idx_tb1_16849                            |            | CREATE INDEX idx_tb1_16849 ON tb1_20190308 USING btree (c1)
+ public     | tb1_20190308 | pk_idx_tb1_16849                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16849 ON tb1_20190308 USING btree (c1)
+ public     | tb1_20190309 | idx_tb1234567890123456789012345678_16853 |            | CREATE INDEX idx_tb1234567890123456789012345678_16853 ON tb1_20190309 USING btree (c1)
+ public     | tb1_20190309 | idx_tb1_16853                            |            | CREATE INDEX idx_tb1_16853 ON tb1_20190309 USING btree (c1)
+ public     | tb1_20190309 | pk_idx_tb1_16853                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16853 ON tb1_20190309 USING btree (c1)
+ public     | tb1_20190310 | idx_tb1234567890123456789012345678_16857 |            | CREATE INDEX idx_tb1234567890123456789012345678_16857 ON tb1_20190310 USING btree (c1)
+ public     | tb1_20190310 | idx_tb1_16857                            |            | CREATE INDEX idx_tb1_16857 ON tb1_20190310 USING btree (c1)
+ public     | tb1_20190310 | pk_idx_tb1_16857                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16857 ON tb1_20190310 USING btree (c1)
+(30 rows)
+
+select * from rds.user_tab_part_indexes_def;
+ tab_name |              idx_name              |             idx_sql              | is_pkey 
+----------+------------------------------------+----------------------------------+---------
+ tb1      | idx_tb1                            | create index    %i on   %t(c1)   | f
+ tb1      | idx_tb1234567890123456789012345678 | create index %i on %t(c1)        | f
+ tb1      | pk_idx_tb1                         | create unique index %i on %t(c1) | t
+(3 rows)
+
+
+\c - - - :worker_1_port
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |      tablename      |                    indexname                    | tablespace |                                               indexdef                                               
+------------+---------------------+-------------------------------------------------+------------+------------------------------------------------------------------------------------------------------
+ public     | tb1_20190301_990002 | idx_tb1234567890123456789012345678_16821_990002 |            | CREATE INDEX idx_tb1234567890123456789012345678_16821_990002 ON tb1_20190301_990002 USING btree (c1)
+ public     | tb1_20190301_990002 | idx_tb1_16821_990002                            |            | CREATE INDEX idx_tb1_16821_990002 ON tb1_20190301_990002 USING btree (c1)
+ public     | tb1_20190301_990002 | pk_idx_tb1_16821_990002                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16821_990002 ON tb1_20190301_990002 USING btree (c1)
+ public     | tb1_20190302_990004 | idx_tb1234567890123456789012345678_16825_990004 |            | CREATE INDEX idx_tb1234567890123456789012345678_16825_990004 ON tb1_20190302_990004 USING btree (c1)
+ public     | tb1_20190302_990004 | idx_tb1_16825_990004                            |            | CREATE INDEX idx_tb1_16825_990004 ON tb1_20190302_990004 USING btree (c1)
+ public     | tb1_20190302_990004 | pk_idx_tb1_16825_990004                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16825_990004 ON tb1_20190302_990004 USING btree (c1)
+ public     | tb1_20190303_990006 | idx_tb1234567890123456789012345678_16829_990006 |            | CREATE INDEX idx_tb1234567890123456789012345678_16829_990006 ON tb1_20190303_990006 USING btree (c1)
+ public     | tb1_20190303_990006 | idx_tb1_16829_990006                            |            | CREATE INDEX idx_tb1_16829_990006 ON tb1_20190303_990006 USING btree (c1)
+ public     | tb1_20190303_990006 | pk_idx_tb1_16829_990006                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16829_990006 ON tb1_20190303_990006 USING btree (c1)
+ public     | tb1_20190304_990008 | idx_tb1234567890123456789012345678_16833_990008 |            | CREATE INDEX idx_tb1234567890123456789012345678_16833_990008 ON tb1_20190304_990008 USING btree (c1)
+ public     | tb1_20190304_990008 | idx_tb1_16833_990008                            |            | CREATE INDEX idx_tb1_16833_990008 ON tb1_20190304_990008 USING btree (c1)
+ public     | tb1_20190304_990008 | pk_idx_tb1_16833_990008                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16833_990008 ON tb1_20190304_990008 USING btree (c1)
+ public     | tb1_20190305_990010 | idx_tb1234567890123456789012345678_16837_990010 |            | CREATE INDEX idx_tb1234567890123456789012345678_16837_990010 ON tb1_20190305_990010 USING btree (c1)
+ public     | tb1_20190305_990010 | idx_tb1_16837_990010                            |            | CREATE INDEX idx_tb1_16837_990010 ON tb1_20190305_990010 USING btree (c1)
+ public     | tb1_20190305_990010 | pk_idx_tb1_16837_990010                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16837_990010 ON tb1_20190305_990010 USING btree (c1)
+ public     | tb1_20190306_990012 | idx_tb1234567890123456789012345678_16841_990012 |            | CREATE INDEX idx_tb1234567890123456789012345678_16841_990012 ON tb1_20190306_990012 USING btree (c1)
+ public     | tb1_20190306_990012 | idx_tb1_16841_990012                            |            | CREATE INDEX idx_tb1_16841_990012 ON tb1_20190306_990012 USING btree (c1)
+ public     | tb1_20190306_990012 | pk_idx_tb1_16841_990012                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16841_990012 ON tb1_20190306_990012 USING btree (c1)
+ public     | tb1_20190307_990014 | idx_tb1234567890123456789012345678_16845_990014 |            | CREATE INDEX idx_tb1234567890123456789012345678_16845_990014 ON tb1_20190307_990014 USING btree (c1)
+ public     | tb1_20190307_990014 | idx_tb1_16845_990014                            |            | CREATE INDEX idx_tb1_16845_990014 ON tb1_20190307_990014 USING btree (c1)
+ public     | tb1_20190307_990014 | pk_idx_tb1_16845_990014                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16845_990014 ON tb1_20190307_990014 USING btree (c1)
+ public     | tb1_20190308_990016 | idx_tb1234567890123456789012345678_16849_990016 |            | CREATE INDEX idx_tb1234567890123456789012345678_16849_990016 ON tb1_20190308_990016 USING btree (c1)
+ public     | tb1_20190308_990016 | idx_tb1_16849_990016                            |            | CREATE INDEX idx_tb1_16849_990016 ON tb1_20190308_990016 USING btree (c1)
+ public     | tb1_20190308_990016 | pk_idx_tb1_16849_990016                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16849_990016 ON tb1_20190308_990016 USING btree (c1)
+ public     | tb1_20190309_990018 | idx_tb1234567890123456789012345678_16853_990018 |            | CREATE INDEX idx_tb1234567890123456789012345678_16853_990018 ON tb1_20190309_990018 USING btree (c1)
+ public     | tb1_20190309_990018 | idx_tb1_16853_990018                            |            | CREATE INDEX idx_tb1_16853_990018 ON tb1_20190309_990018 USING btree (c1)
+ public     | tb1_20190309_990018 | pk_idx_tb1_16853_990018                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16853_990018 ON tb1_20190309_990018 USING btree (c1)
+ public     | tb1_20190310_990020 | idx_tb1234567890123456789012345678_16857_990020 |            | CREATE INDEX idx_tb1234567890123456789012345678_16857_990020 ON tb1_20190310_990020 USING btree (c1)
+ public     | tb1_20190310_990020 | idx_tb1_16857_990020                            |            | CREATE INDEX idx_tb1_16857_990020 ON tb1_20190310_990020 USING btree (c1)
+ public     | tb1_20190310_990020 | pk_idx_tb1_16857_990020                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16857_990020 ON tb1_20190310_990020 USING btree (c1)
+(30 rows)
+
+
+\c - - - :worker_2_port
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |      tablename      |                    indexname                    | tablespace |                                               indexdef                                               
+------------+---------------------+-------------------------------------------------+------------+------------------------------------------------------------------------------------------------------
+ public     | tb1_20190301_990003 | idx_tb1234567890123456789012345678_16821_990003 |            | CREATE INDEX idx_tb1234567890123456789012345678_16821_990003 ON tb1_20190301_990003 USING btree (c1)
+ public     | tb1_20190301_990003 | idx_tb1_16821_990003                            |            | CREATE INDEX idx_tb1_16821_990003 ON tb1_20190301_990003 USING btree (c1)
+ public     | tb1_20190301_990003 | pk_idx_tb1_16821_990003                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16821_990003 ON tb1_20190301_990003 USING btree (c1)
+ public     | tb1_20190302_990005 | idx_tb1234567890123456789012345678_16825_990005 |            | CREATE INDEX idx_tb1234567890123456789012345678_16825_990005 ON tb1_20190302_990005 USING btree (c1)
+ public     | tb1_20190302_990005 | idx_tb1_16825_990005                            |            | CREATE INDEX idx_tb1_16825_990005 ON tb1_20190302_990005 USING btree (c1)
+ public     | tb1_20190302_990005 | pk_idx_tb1_16825_990005                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16825_990005 ON tb1_20190302_990005 USING btree (c1)
+ public     | tb1_20190303_990007 | idx_tb1234567890123456789012345678_16829_990007 |            | CREATE INDEX idx_tb1234567890123456789012345678_16829_990007 ON tb1_20190303_990007 USING btree (c1)
+ public     | tb1_20190303_990007 | idx_tb1_16829_990007                            |            | CREATE INDEX idx_tb1_16829_990007 ON tb1_20190303_990007 USING btree (c1)
+ public     | tb1_20190303_990007 | pk_idx_tb1_16829_990007                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16829_990007 ON tb1_20190303_990007 USING btree (c1)
+ public     | tb1_20190304_990009 | idx_tb1234567890123456789012345678_16833_990009 |            | CREATE INDEX idx_tb1234567890123456789012345678_16833_990009 ON tb1_20190304_990009 USING btree (c1)
+ public     | tb1_20190304_990009 | idx_tb1_16833_990009                            |            | CREATE INDEX idx_tb1_16833_990009 ON tb1_20190304_990009 USING btree (c1)
+ public     | tb1_20190304_990009 | pk_idx_tb1_16833_990009                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16833_990009 ON tb1_20190304_990009 USING btree (c1)
+ public     | tb1_20190305_990011 | idx_tb1234567890123456789012345678_16837_990011 |            | CREATE INDEX idx_tb1234567890123456789012345678_16837_990011 ON tb1_20190305_990011 USING btree (c1)
+ public     | tb1_20190305_990011 | idx_tb1_16837_990011                            |            | CREATE INDEX idx_tb1_16837_990011 ON tb1_20190305_990011 USING btree (c1)
+ public     | tb1_20190305_990011 | pk_idx_tb1_16837_990011                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16837_990011 ON tb1_20190305_990011 USING btree (c1)
+ public     | tb1_20190306_990013 | idx_tb1234567890123456789012345678_16841_990013 |            | CREATE INDEX idx_tb1234567890123456789012345678_16841_990013 ON tb1_20190306_990013 USING btree (c1)
+ public     | tb1_20190306_990013 | idx_tb1_16841_990013                            |            | CREATE INDEX idx_tb1_16841_990013 ON tb1_20190306_990013 USING btree (c1)
+ public     | tb1_20190306_990013 | pk_idx_tb1_16841_990013                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16841_990013 ON tb1_20190306_990013 USING btree (c1)
+ public     | tb1_20190307_990015 | idx_tb1234567890123456789012345678_16845_990015 |            | CREATE INDEX idx_tb1234567890123456789012345678_16845_990015 ON tb1_20190307_990015 USING btree (c1)
+ public     | tb1_20190307_990015 | idx_tb1_16845_990015                            |            | CREATE INDEX idx_tb1_16845_990015 ON tb1_20190307_990015 USING btree (c1)
+ public     | tb1_20190307_990015 | pk_idx_tb1_16845_990015                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16845_990015 ON tb1_20190307_990015 USING btree (c1)
+ public     | tb1_20190308_990017 | idx_tb1234567890123456789012345678_16849_990017 |            | CREATE INDEX idx_tb1234567890123456789012345678_16849_990017 ON tb1_20190308_990017 USING btree (c1)
+ public     | tb1_20190308_990017 | idx_tb1_16849_990017                            |            | CREATE INDEX idx_tb1_16849_990017 ON tb1_20190308_990017 USING btree (c1)
+ public     | tb1_20190308_990017 | pk_idx_tb1_16849_990017                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16849_990017 ON tb1_20190308_990017 USING btree (c1)
+ public     | tb1_20190309_990019 | idx_tb1234567890123456789012345678_16853_990019 |            | CREATE INDEX idx_tb1234567890123456789012345678_16853_990019 ON tb1_20190309_990019 USING btree (c1)
+ public     | tb1_20190309_990019 | idx_tb1_16853_990019                            |            | CREATE INDEX idx_tb1_16853_990019 ON tb1_20190309_990019 USING btree (c1)
+ public     | tb1_20190309_990019 | pk_idx_tb1_16853_990019                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16853_990019 ON tb1_20190309_990019 USING btree (c1)
+ public     | tb1_20190310_990021 | idx_tb1234567890123456789012345678_16857_990021 |            | CREATE INDEX idx_tb1234567890123456789012345678_16857_990021 ON tb1_20190310_990021 USING btree (c1)
+ public     | tb1_20190310_990021 | idx_tb1_16857_990021                            |            | CREATE INDEX idx_tb1_16857_990021 ON tb1_20190310_990021 USING btree (c1)
+ public     | tb1_20190310_990021 | pk_idx_tb1_16857_990021                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16857_990021 ON tb1_20190310_990021 USING btree (c1)
+(30 rows)
+
+
+\c - - - :master_port
+
+-- 新增分区补建索引
+select rds.add_range_partitions('public.tb1', '2019-03-11'::date, '1 day', 3);
+ERROR:  type "create_idx_on_parted_table" does not exist
+LINE 1: SELECT create_idx_on_parted_table 'alter table ' || l_part_n...
+               ^
+QUERY:  SELECT create_idx_on_parted_table 'alter table ' || l_part_name || ' add constraint ' || l_idx_name || ' primary key using index ' || l_idx_name
+CONTEXT:  PL/pgSQL function rds.func_ddl_command_end() line 63 at assignment
+SQL statement "create table tb1_20190311 partition of tb1 for values from ('20190311') to ('20190312')"
+PL/pgSQL function rds.add_range_partitions(regclass,date,character varying,integer) line 38 at EXECUTE
+
+-- 验证分区
+select relname, relnamespace::regnamespace::text, pg_get_expr(relpartbound, oid, true) vals
+  from pg_class
+ where relnamespace::regnamespace::text='public' and relname like 'tb1%' and relispartition=true
+ order by relname;
+   relname    | relnamespace |                       vals                       
+--------------+--------------+--------------------------------------------------
+ tb1_20190301 | public       | FOR VALUES FROM ('03-01-2019') TO ('03-02-2019')
+ tb1_20190302 | public       | FOR VALUES FROM ('03-02-2019') TO ('03-03-2019')
+ tb1_20190303 | public       | FOR VALUES FROM ('03-03-2019') TO ('03-04-2019')
+ tb1_20190304 | public       | FOR VALUES FROM ('03-04-2019') TO ('03-05-2019')
+ tb1_20190305 | public       | FOR VALUES FROM ('03-05-2019') TO ('03-06-2019')
+ tb1_20190306 | public       | FOR VALUES FROM ('03-06-2019') TO ('03-07-2019')
+ tb1_20190307 | public       | FOR VALUES FROM ('03-07-2019') TO ('03-08-2019')
+ tb1_20190308 | public       | FOR VALUES FROM ('03-08-2019') TO ('03-09-2019')
+ tb1_20190309 | public       | FOR VALUES FROM ('03-09-2019') TO ('03-10-2019')
+ tb1_20190310 | public       | FOR VALUES FROM ('03-10-2019') TO ('03-11-2019')
+(10 rows)
+
+
+\c - - - :worker_1_port
+select relname, relnamespace::regnamespace::text, pg_get_expr(relpartbound, oid, true) vals
+  from pg_class
+ where relnamespace::regnamespace::text='public' and relname like 'tb1%' and relispartition=true
+ order by relname;
+       relname       | relnamespace |                       vals                       
+---------------------+--------------+--------------------------------------------------
+ tb1_20190301_990002 | public       | FOR VALUES FROM ('03-01-2019') TO ('03-02-2019')
+ tb1_20190302_990004 | public       | FOR VALUES FROM ('03-02-2019') TO ('03-03-2019')
+ tb1_20190303_990006 | public       | FOR VALUES FROM ('03-03-2019') TO ('03-04-2019')
+ tb1_20190304_990008 | public       | FOR VALUES FROM ('03-04-2019') TO ('03-05-2019')
+ tb1_20190305_990010 | public       | FOR VALUES FROM ('03-05-2019') TO ('03-06-2019')
+ tb1_20190306_990012 | public       | FOR VALUES FROM ('03-06-2019') TO ('03-07-2019')
+ tb1_20190307_990014 | public       | FOR VALUES FROM ('03-07-2019') TO ('03-08-2019')
+ tb1_20190308_990016 | public       | FOR VALUES FROM ('03-08-2019') TO ('03-09-2019')
+ tb1_20190309_990018 | public       | FOR VALUES FROM ('03-09-2019') TO ('03-10-2019')
+ tb1_20190310_990020 | public       | FOR VALUES FROM ('03-10-2019') TO ('03-11-2019')
+(10 rows)
+
+
+\c - - - :worker_2_port
+select relname, relnamespace::regnamespace::text, pg_get_expr(relpartbound, oid, true) vals
+  from pg_class
+ where relnamespace::regnamespace::text='public' and relname like 'tb1%' and relispartition=true
+ order by relname;
+       relname       | relnamespace |                       vals                       
+---------------------+--------------+--------------------------------------------------
+ tb1_20190301_990003 | public       | FOR VALUES FROM ('03-01-2019') TO ('03-02-2019')
+ tb1_20190302_990005 | public       | FOR VALUES FROM ('03-02-2019') TO ('03-03-2019')
+ tb1_20190303_990007 | public       | FOR VALUES FROM ('03-03-2019') TO ('03-04-2019')
+ tb1_20190304_990009 | public       | FOR VALUES FROM ('03-04-2019') TO ('03-05-2019')
+ tb1_20190305_990011 | public       | FOR VALUES FROM ('03-05-2019') TO ('03-06-2019')
+ tb1_20190306_990013 | public       | FOR VALUES FROM ('03-06-2019') TO ('03-07-2019')
+ tb1_20190307_990015 | public       | FOR VALUES FROM ('03-07-2019') TO ('03-08-2019')
+ tb1_20190308_990017 | public       | FOR VALUES FROM ('03-08-2019') TO ('03-09-2019')
+ tb1_20190309_990019 | public       | FOR VALUES FROM ('03-09-2019') TO ('03-10-2019')
+ tb1_20190310_990021 | public       | FOR VALUES FROM ('03-10-2019') TO ('03-11-2019')
+(10 rows)
+
+
+\c - - - :master_port
+
+-- 验证索引
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |  tablename   |                indexname                 | tablespace |                                        indexdef                                        
+------------+--------------+------------------------------------------+------------+----------------------------------------------------------------------------------------
+ public     | tb1_20190301 | idx_tb1234567890123456789012345678_16821 |            | CREATE INDEX idx_tb1234567890123456789012345678_16821 ON tb1_20190301 USING btree (c1)
+ public     | tb1_20190301 | idx_tb1_16821                            |            | CREATE INDEX idx_tb1_16821 ON tb1_20190301 USING btree (c1)
+ public     | tb1_20190301 | pk_idx_tb1_16821                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16821 ON tb1_20190301 USING btree (c1)
+ public     | tb1_20190302 | idx_tb1234567890123456789012345678_16825 |            | CREATE INDEX idx_tb1234567890123456789012345678_16825 ON tb1_20190302 USING btree (c1)
+ public     | tb1_20190302 | idx_tb1_16825                            |            | CREATE INDEX idx_tb1_16825 ON tb1_20190302 USING btree (c1)
+ public     | tb1_20190302 | pk_idx_tb1_16825                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16825 ON tb1_20190302 USING btree (c1)
+ public     | tb1_20190303 | idx_tb1234567890123456789012345678_16829 |            | CREATE INDEX idx_tb1234567890123456789012345678_16829 ON tb1_20190303 USING btree (c1)
+ public     | tb1_20190303 | idx_tb1_16829                            |            | CREATE INDEX idx_tb1_16829 ON tb1_20190303 USING btree (c1)
+ public     | tb1_20190303 | pk_idx_tb1_16829                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16829 ON tb1_20190303 USING btree (c1)
+ public     | tb1_20190304 | idx_tb1234567890123456789012345678_16833 |            | CREATE INDEX idx_tb1234567890123456789012345678_16833 ON tb1_20190304 USING btree (c1)
+ public     | tb1_20190304 | idx_tb1_16833                            |            | CREATE INDEX idx_tb1_16833 ON tb1_20190304 USING btree (c1)
+ public     | tb1_20190304 | pk_idx_tb1_16833                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16833 ON tb1_20190304 USING btree (c1)
+ public     | tb1_20190305 | idx_tb1234567890123456789012345678_16837 |            | CREATE INDEX idx_tb1234567890123456789012345678_16837 ON tb1_20190305 USING btree (c1)
+ public     | tb1_20190305 | idx_tb1_16837                            |            | CREATE INDEX idx_tb1_16837 ON tb1_20190305 USING btree (c1)
+ public     | tb1_20190305 | pk_idx_tb1_16837                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16837 ON tb1_20190305 USING btree (c1)
+ public     | tb1_20190306 | idx_tb1234567890123456789012345678_16841 |            | CREATE INDEX idx_tb1234567890123456789012345678_16841 ON tb1_20190306 USING btree (c1)
+ public     | tb1_20190306 | idx_tb1_16841                            |            | CREATE INDEX idx_tb1_16841 ON tb1_20190306 USING btree (c1)
+ public     | tb1_20190306 | pk_idx_tb1_16841                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16841 ON tb1_20190306 USING btree (c1)
+ public     | tb1_20190307 | idx_tb1234567890123456789012345678_16845 |            | CREATE INDEX idx_tb1234567890123456789012345678_16845 ON tb1_20190307 USING btree (c1)
+ public     | tb1_20190307 | idx_tb1_16845                            |            | CREATE INDEX idx_tb1_16845 ON tb1_20190307 USING btree (c1)
+ public     | tb1_20190307 | pk_idx_tb1_16845                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16845 ON tb1_20190307 USING btree (c1)
+ public     | tb1_20190308 | idx_tb1234567890123456789012345678_16849 |            | CREATE INDEX idx_tb1234567890123456789012345678_16849 ON tb1_20190308 USING btree (c1)
+ public     | tb1_20190308 | idx_tb1_16849                            |            | CREATE INDEX idx_tb1_16849 ON tb1_20190308 USING btree (c1)
+ public     | tb1_20190308 | pk_idx_tb1_16849                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16849 ON tb1_20190308 USING btree (c1)
+ public     | tb1_20190309 | idx_tb1234567890123456789012345678_16853 |            | CREATE INDEX idx_tb1234567890123456789012345678_16853 ON tb1_20190309 USING btree (c1)
+ public     | tb1_20190309 | idx_tb1_16853                            |            | CREATE INDEX idx_tb1_16853 ON tb1_20190309 USING btree (c1)
+ public     | tb1_20190309 | pk_idx_tb1_16853                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16853 ON tb1_20190309 USING btree (c1)
+ public     | tb1_20190310 | idx_tb1234567890123456789012345678_16857 |            | CREATE INDEX idx_tb1234567890123456789012345678_16857 ON tb1_20190310 USING btree (c1)
+ public     | tb1_20190310 | idx_tb1_16857                            |            | CREATE INDEX idx_tb1_16857 ON tb1_20190310 USING btree (c1)
+ public     | tb1_20190310 | pk_idx_tb1_16857                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16857 ON tb1_20190310 USING btree (c1)
+(30 rows)
+
+select * from rds.user_tab_part_indexes_def;
+ tab_name |              idx_name              |             idx_sql              | is_pkey 
+----------+------------------------------------+----------------------------------+---------
+ tb1      | idx_tb1                            | create index    %i on   %t(c1)   | f
+ tb1      | idx_tb1234567890123456789012345678 | create index %i on %t(c1)        | f
+ tb1      | pk_idx_tb1                         | create unique index %i on %t(c1) | t
+(3 rows)
+
+
+\c - - - :worker_1_port
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |      tablename      |                    indexname                    | tablespace |                                               indexdef                                               
+------------+---------------------+-------------------------------------------------+------------+------------------------------------------------------------------------------------------------------
+ public     | tb1_20190301_990002 | idx_tb1234567890123456789012345678_16821_990002 |            | CREATE INDEX idx_tb1234567890123456789012345678_16821_990002 ON tb1_20190301_990002 USING btree (c1)
+ public     | tb1_20190301_990002 | idx_tb1_16821_990002                            |            | CREATE INDEX idx_tb1_16821_990002 ON tb1_20190301_990002 USING btree (c1)
+ public     | tb1_20190301_990002 | pk_idx_tb1_16821_990002                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16821_990002 ON tb1_20190301_990002 USING btree (c1)
+ public     | tb1_20190302_990004 | idx_tb1234567890123456789012345678_16825_990004 |            | CREATE INDEX idx_tb1234567890123456789012345678_16825_990004 ON tb1_20190302_990004 USING btree (c1)
+ public     | tb1_20190302_990004 | idx_tb1_16825_990004                            |            | CREATE INDEX idx_tb1_16825_990004 ON tb1_20190302_990004 USING btree (c1)
+ public     | tb1_20190302_990004 | pk_idx_tb1_16825_990004                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16825_990004 ON tb1_20190302_990004 USING btree (c1)
+ public     | tb1_20190303_990006 | idx_tb1234567890123456789012345678_16829_990006 |            | CREATE INDEX idx_tb1234567890123456789012345678_16829_990006 ON tb1_20190303_990006 USING btree (c1)
+ public     | tb1_20190303_990006 | idx_tb1_16829_990006                            |            | CREATE INDEX idx_tb1_16829_990006 ON tb1_20190303_990006 USING btree (c1)
+ public     | tb1_20190303_990006 | pk_idx_tb1_16829_990006                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16829_990006 ON tb1_20190303_990006 USING btree (c1)
+ public     | tb1_20190304_990008 | idx_tb1234567890123456789012345678_16833_990008 |            | CREATE INDEX idx_tb1234567890123456789012345678_16833_990008 ON tb1_20190304_990008 USING btree (c1)
+ public     | tb1_20190304_990008 | idx_tb1_16833_990008                            |            | CREATE INDEX idx_tb1_16833_990008 ON tb1_20190304_990008 USING btree (c1)
+ public     | tb1_20190304_990008 | pk_idx_tb1_16833_990008                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16833_990008 ON tb1_20190304_990008 USING btree (c1)
+ public     | tb1_20190305_990010 | idx_tb1234567890123456789012345678_16837_990010 |            | CREATE INDEX idx_tb1234567890123456789012345678_16837_990010 ON tb1_20190305_990010 USING btree (c1)
+ public     | tb1_20190305_990010 | idx_tb1_16837_990010                            |            | CREATE INDEX idx_tb1_16837_990010 ON tb1_20190305_990010 USING btree (c1)
+ public     | tb1_20190305_990010 | pk_idx_tb1_16837_990010                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16837_990010 ON tb1_20190305_990010 USING btree (c1)
+ public     | tb1_20190306_990012 | idx_tb1234567890123456789012345678_16841_990012 |            | CREATE INDEX idx_tb1234567890123456789012345678_16841_990012 ON tb1_20190306_990012 USING btree (c1)
+ public     | tb1_20190306_990012 | idx_tb1_16841_990012                            |            | CREATE INDEX idx_tb1_16841_990012 ON tb1_20190306_990012 USING btree (c1)
+ public     | tb1_20190306_990012 | pk_idx_tb1_16841_990012                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16841_990012 ON tb1_20190306_990012 USING btree (c1)
+ public     | tb1_20190307_990014 | idx_tb1234567890123456789012345678_16845_990014 |            | CREATE INDEX idx_tb1234567890123456789012345678_16845_990014 ON tb1_20190307_990014 USING btree (c1)
+ public     | tb1_20190307_990014 | idx_tb1_16845_990014                            |            | CREATE INDEX idx_tb1_16845_990014 ON tb1_20190307_990014 USING btree (c1)
+ public     | tb1_20190307_990014 | pk_idx_tb1_16845_990014                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16845_990014 ON tb1_20190307_990014 USING btree (c1)
+ public     | tb1_20190308_990016 | idx_tb1234567890123456789012345678_16849_990016 |            | CREATE INDEX idx_tb1234567890123456789012345678_16849_990016 ON tb1_20190308_990016 USING btree (c1)
+ public     | tb1_20190308_990016 | idx_tb1_16849_990016                            |            | CREATE INDEX idx_tb1_16849_990016 ON tb1_20190308_990016 USING btree (c1)
+ public     | tb1_20190308_990016 | pk_idx_tb1_16849_990016                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16849_990016 ON tb1_20190308_990016 USING btree (c1)
+ public     | tb1_20190309_990018 | idx_tb1234567890123456789012345678_16853_990018 |            | CREATE INDEX idx_tb1234567890123456789012345678_16853_990018 ON tb1_20190309_990018 USING btree (c1)
+ public     | tb1_20190309_990018 | idx_tb1_16853_990018                            |            | CREATE INDEX idx_tb1_16853_990018 ON tb1_20190309_990018 USING btree (c1)
+ public     | tb1_20190309_990018 | pk_idx_tb1_16853_990018                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16853_990018 ON tb1_20190309_990018 USING btree (c1)
+ public     | tb1_20190310_990020 | idx_tb1234567890123456789012345678_16857_990020 |            | CREATE INDEX idx_tb1234567890123456789012345678_16857_990020 ON tb1_20190310_990020 USING btree (c1)
+ public     | tb1_20190310_990020 | idx_tb1_16857_990020                            |            | CREATE INDEX idx_tb1_16857_990020 ON tb1_20190310_990020 USING btree (c1)
+ public     | tb1_20190310_990020 | pk_idx_tb1_16857_990020                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16857_990020 ON tb1_20190310_990020 USING btree (c1)
+(30 rows)
+
+
+\c - - - :worker_2_port
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |      tablename      |                    indexname                    | tablespace |                                               indexdef                                               
+------------+---------------------+-------------------------------------------------+------------+------------------------------------------------------------------------------------------------------
+ public     | tb1_20190301_990003 | idx_tb1234567890123456789012345678_16821_990003 |            | CREATE INDEX idx_tb1234567890123456789012345678_16821_990003 ON tb1_20190301_990003 USING btree (c1)
+ public     | tb1_20190301_990003 | idx_tb1_16821_990003                            |            | CREATE INDEX idx_tb1_16821_990003 ON tb1_20190301_990003 USING btree (c1)
+ public     | tb1_20190301_990003 | pk_idx_tb1_16821_990003                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16821_990003 ON tb1_20190301_990003 USING btree (c1)
+ public     | tb1_20190302_990005 | idx_tb1234567890123456789012345678_16825_990005 |            | CREATE INDEX idx_tb1234567890123456789012345678_16825_990005 ON tb1_20190302_990005 USING btree (c1)
+ public     | tb1_20190302_990005 | idx_tb1_16825_990005                            |            | CREATE INDEX idx_tb1_16825_990005 ON tb1_20190302_990005 USING btree (c1)
+ public     | tb1_20190302_990005 | pk_idx_tb1_16825_990005                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16825_990005 ON tb1_20190302_990005 USING btree (c1)
+ public     | tb1_20190303_990007 | idx_tb1234567890123456789012345678_16829_990007 |            | CREATE INDEX idx_tb1234567890123456789012345678_16829_990007 ON tb1_20190303_990007 USING btree (c1)
+ public     | tb1_20190303_990007 | idx_tb1_16829_990007                            |            | CREATE INDEX idx_tb1_16829_990007 ON tb1_20190303_990007 USING btree (c1)
+ public     | tb1_20190303_990007 | pk_idx_tb1_16829_990007                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16829_990007 ON tb1_20190303_990007 USING btree (c1)
+ public     | tb1_20190304_990009 | idx_tb1234567890123456789012345678_16833_990009 |            | CREATE INDEX idx_tb1234567890123456789012345678_16833_990009 ON tb1_20190304_990009 USING btree (c1)
+ public     | tb1_20190304_990009 | idx_tb1_16833_990009                            |            | CREATE INDEX idx_tb1_16833_990009 ON tb1_20190304_990009 USING btree (c1)
+ public     | tb1_20190304_990009 | pk_idx_tb1_16833_990009                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16833_990009 ON tb1_20190304_990009 USING btree (c1)
+ public     | tb1_20190305_990011 | idx_tb1234567890123456789012345678_16837_990011 |            | CREATE INDEX idx_tb1234567890123456789012345678_16837_990011 ON tb1_20190305_990011 USING btree (c1)
+ public     | tb1_20190305_990011 | idx_tb1_16837_990011                            |            | CREATE INDEX idx_tb1_16837_990011 ON tb1_20190305_990011 USING btree (c1)
+ public     | tb1_20190305_990011 | pk_idx_tb1_16837_990011                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16837_990011 ON tb1_20190305_990011 USING btree (c1)
+ public     | tb1_20190306_990013 | idx_tb1234567890123456789012345678_16841_990013 |            | CREATE INDEX idx_tb1234567890123456789012345678_16841_990013 ON tb1_20190306_990013 USING btree (c1)
+ public     | tb1_20190306_990013 | idx_tb1_16841_990013                            |            | CREATE INDEX idx_tb1_16841_990013 ON tb1_20190306_990013 USING btree (c1)
+ public     | tb1_20190306_990013 | pk_idx_tb1_16841_990013                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16841_990013 ON tb1_20190306_990013 USING btree (c1)
+ public     | tb1_20190307_990015 | idx_tb1234567890123456789012345678_16845_990015 |            | CREATE INDEX idx_tb1234567890123456789012345678_16845_990015 ON tb1_20190307_990015 USING btree (c1)
+ public     | tb1_20190307_990015 | idx_tb1_16845_990015                            |            | CREATE INDEX idx_tb1_16845_990015 ON tb1_20190307_990015 USING btree (c1)
+ public     | tb1_20190307_990015 | pk_idx_tb1_16845_990015                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16845_990015 ON tb1_20190307_990015 USING btree (c1)
+ public     | tb1_20190308_990017 | idx_tb1234567890123456789012345678_16849_990017 |            | CREATE INDEX idx_tb1234567890123456789012345678_16849_990017 ON tb1_20190308_990017 USING btree (c1)
+ public     | tb1_20190308_990017 | idx_tb1_16849_990017                            |            | CREATE INDEX idx_tb1_16849_990017 ON tb1_20190308_990017 USING btree (c1)
+ public     | tb1_20190308_990017 | pk_idx_tb1_16849_990017                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16849_990017 ON tb1_20190308_990017 USING btree (c1)
+ public     | tb1_20190309_990019 | idx_tb1234567890123456789012345678_16853_990019 |            | CREATE INDEX idx_tb1234567890123456789012345678_16853_990019 ON tb1_20190309_990019 USING btree (c1)
+ public     | tb1_20190309_990019 | idx_tb1_16853_990019                            |            | CREATE INDEX idx_tb1_16853_990019 ON tb1_20190309_990019 USING btree (c1)
+ public     | tb1_20190309_990019 | pk_idx_tb1_16853_990019                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16853_990019 ON tb1_20190309_990019 USING btree (c1)
+ public     | tb1_20190310_990021 | idx_tb1234567890123456789012345678_16857_990021 |            | CREATE INDEX idx_tb1234567890123456789012345678_16857_990021 ON tb1_20190310_990021 USING btree (c1)
+ public     | tb1_20190310_990021 | idx_tb1_16857_990021                            |            | CREATE INDEX idx_tb1_16857_990021 ON tb1_20190310_990021 USING btree (c1)
+ public     | tb1_20190310_990021 | pk_idx_tb1_16857_990021                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16857_990021 ON tb1_20190310_990021 USING btree (c1)
+(30 rows)
+
+
+\c - - - :master_port
+
+-- 分区单独删除索引
+drop index idx_tb1_16849;
+ERROR:  Dropping an index on a table partition directly is not allowed, please invoke drop_idx_on_parted_table to do this.
+CONTEXT:  PL/pgSQL function rds.func_ddl_command_start() line 135 at RAISE
+
+-- 验证索引
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |  tablename   |                indexname                 | tablespace |                                        indexdef                                        
+------------+--------------+------------------------------------------+------------+----------------------------------------------------------------------------------------
+ public     | tb1_20190301 | idx_tb1234567890123456789012345678_16821 |            | CREATE INDEX idx_tb1234567890123456789012345678_16821 ON tb1_20190301 USING btree (c1)
+ public     | tb1_20190301 | idx_tb1_16821                            |            | CREATE INDEX idx_tb1_16821 ON tb1_20190301 USING btree (c1)
+ public     | tb1_20190301 | pk_idx_tb1_16821                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16821 ON tb1_20190301 USING btree (c1)
+ public     | tb1_20190302 | idx_tb1234567890123456789012345678_16825 |            | CREATE INDEX idx_tb1234567890123456789012345678_16825 ON tb1_20190302 USING btree (c1)
+ public     | tb1_20190302 | idx_tb1_16825                            |            | CREATE INDEX idx_tb1_16825 ON tb1_20190302 USING btree (c1)
+ public     | tb1_20190302 | pk_idx_tb1_16825                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16825 ON tb1_20190302 USING btree (c1)
+ public     | tb1_20190303 | idx_tb1234567890123456789012345678_16829 |            | CREATE INDEX idx_tb1234567890123456789012345678_16829 ON tb1_20190303 USING btree (c1)
+ public     | tb1_20190303 | idx_tb1_16829                            |            | CREATE INDEX idx_tb1_16829 ON tb1_20190303 USING btree (c1)
+ public     | tb1_20190303 | pk_idx_tb1_16829                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16829 ON tb1_20190303 USING btree (c1)
+ public     | tb1_20190304 | idx_tb1234567890123456789012345678_16833 |            | CREATE INDEX idx_tb1234567890123456789012345678_16833 ON tb1_20190304 USING btree (c1)
+ public     | tb1_20190304 | idx_tb1_16833                            |            | CREATE INDEX idx_tb1_16833 ON tb1_20190304 USING btree (c1)
+ public     | tb1_20190304 | pk_idx_tb1_16833                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16833 ON tb1_20190304 USING btree (c1)
+ public     | tb1_20190305 | idx_tb1234567890123456789012345678_16837 |            | CREATE INDEX idx_tb1234567890123456789012345678_16837 ON tb1_20190305 USING btree (c1)
+ public     | tb1_20190305 | idx_tb1_16837                            |            | CREATE INDEX idx_tb1_16837 ON tb1_20190305 USING btree (c1)
+ public     | tb1_20190305 | pk_idx_tb1_16837                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16837 ON tb1_20190305 USING btree (c1)
+ public     | tb1_20190306 | idx_tb1234567890123456789012345678_16841 |            | CREATE INDEX idx_tb1234567890123456789012345678_16841 ON tb1_20190306 USING btree (c1)
+ public     | tb1_20190306 | idx_tb1_16841                            |            | CREATE INDEX idx_tb1_16841 ON tb1_20190306 USING btree (c1)
+ public     | tb1_20190306 | pk_idx_tb1_16841                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16841 ON tb1_20190306 USING btree (c1)
+ public     | tb1_20190307 | idx_tb1234567890123456789012345678_16845 |            | CREATE INDEX idx_tb1234567890123456789012345678_16845 ON tb1_20190307 USING btree (c1)
+ public     | tb1_20190307 | idx_tb1_16845                            |            | CREATE INDEX idx_tb1_16845 ON tb1_20190307 USING btree (c1)
+ public     | tb1_20190307 | pk_idx_tb1_16845                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16845 ON tb1_20190307 USING btree (c1)
+ public     | tb1_20190308 | idx_tb1234567890123456789012345678_16849 |            | CREATE INDEX idx_tb1234567890123456789012345678_16849 ON tb1_20190308 USING btree (c1)
+ public     | tb1_20190308 | idx_tb1_16849                            |            | CREATE INDEX idx_tb1_16849 ON tb1_20190308 USING btree (c1)
+ public     | tb1_20190308 | pk_idx_tb1_16849                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16849 ON tb1_20190308 USING btree (c1)
+ public     | tb1_20190309 | idx_tb1234567890123456789012345678_16853 |            | CREATE INDEX idx_tb1234567890123456789012345678_16853 ON tb1_20190309 USING btree (c1)
+ public     | tb1_20190309 | idx_tb1_16853                            |            | CREATE INDEX idx_tb1_16853 ON tb1_20190309 USING btree (c1)
+ public     | tb1_20190309 | pk_idx_tb1_16853                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16853 ON tb1_20190309 USING btree (c1)
+ public     | tb1_20190310 | idx_tb1234567890123456789012345678_16857 |            | CREATE INDEX idx_tb1234567890123456789012345678_16857 ON tb1_20190310 USING btree (c1)
+ public     | tb1_20190310 | idx_tb1_16857                            |            | CREATE INDEX idx_tb1_16857 ON tb1_20190310 USING btree (c1)
+ public     | tb1_20190310 | pk_idx_tb1_16857                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16857 ON tb1_20190310 USING btree (c1)
+(30 rows)
+
+select * from rds.user_tab_part_indexes_def;
+ tab_name |              idx_name              |             idx_sql              | is_pkey 
+----------+------------------------------------+----------------------------------+---------
+ tb1      | idx_tb1                            | create index    %i on   %t(c1)   | f
+ tb1      | idx_tb1234567890123456789012345678 | create index %i on %t(c1)        | f
+ tb1      | pk_idx_tb1                         | create unique index %i on %t(c1) | t
+(3 rows)
+
+
+\c - - - :worker_1_port
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |      tablename      |                    indexname                    | tablespace |                                               indexdef                                               
+------------+---------------------+-------------------------------------------------+------------+------------------------------------------------------------------------------------------------------
+ public     | tb1_20190301_990002 | idx_tb1234567890123456789012345678_16821_990002 |            | CREATE INDEX idx_tb1234567890123456789012345678_16821_990002 ON tb1_20190301_990002 USING btree (c1)
+ public     | tb1_20190301_990002 | idx_tb1_16821_990002                            |            | CREATE INDEX idx_tb1_16821_990002 ON tb1_20190301_990002 USING btree (c1)
+ public     | tb1_20190301_990002 | pk_idx_tb1_16821_990002                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16821_990002 ON tb1_20190301_990002 USING btree (c1)
+ public     | tb1_20190302_990004 | idx_tb1234567890123456789012345678_16825_990004 |            | CREATE INDEX idx_tb1234567890123456789012345678_16825_990004 ON tb1_20190302_990004 USING btree (c1)
+ public     | tb1_20190302_990004 | idx_tb1_16825_990004                            |            | CREATE INDEX idx_tb1_16825_990004 ON tb1_20190302_990004 USING btree (c1)
+ public     | tb1_20190302_990004 | pk_idx_tb1_16825_990004                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16825_990004 ON tb1_20190302_990004 USING btree (c1)
+ public     | tb1_20190303_990006 | idx_tb1234567890123456789012345678_16829_990006 |            | CREATE INDEX idx_tb1234567890123456789012345678_16829_990006 ON tb1_20190303_990006 USING btree (c1)
+ public     | tb1_20190303_990006 | idx_tb1_16829_990006                            |            | CREATE INDEX idx_tb1_16829_990006 ON tb1_20190303_990006 USING btree (c1)
+ public     | tb1_20190303_990006 | pk_idx_tb1_16829_990006                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16829_990006 ON tb1_20190303_990006 USING btree (c1)
+ public     | tb1_20190304_990008 | idx_tb1234567890123456789012345678_16833_990008 |            | CREATE INDEX idx_tb1234567890123456789012345678_16833_990008 ON tb1_20190304_990008 USING btree (c1)
+ public     | tb1_20190304_990008 | idx_tb1_16833_990008                            |            | CREATE INDEX idx_tb1_16833_990008 ON tb1_20190304_990008 USING btree (c1)
+ public     | tb1_20190304_990008 | pk_idx_tb1_16833_990008                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16833_990008 ON tb1_20190304_990008 USING btree (c1)
+ public     | tb1_20190305_990010 | idx_tb1234567890123456789012345678_16837_990010 |            | CREATE INDEX idx_tb1234567890123456789012345678_16837_990010 ON tb1_20190305_990010 USING btree (c1)
+ public     | tb1_20190305_990010 | idx_tb1_16837_990010                            |            | CREATE INDEX idx_tb1_16837_990010 ON tb1_20190305_990010 USING btree (c1)
+ public     | tb1_20190305_990010 | pk_idx_tb1_16837_990010                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16837_990010 ON tb1_20190305_990010 USING btree (c1)
+ public     | tb1_20190306_990012 | idx_tb1234567890123456789012345678_16841_990012 |            | CREATE INDEX idx_tb1234567890123456789012345678_16841_990012 ON tb1_20190306_990012 USING btree (c1)
+ public     | tb1_20190306_990012 | idx_tb1_16841_990012                            |            | CREATE INDEX idx_tb1_16841_990012 ON tb1_20190306_990012 USING btree (c1)
+ public     | tb1_20190306_990012 | pk_idx_tb1_16841_990012                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16841_990012 ON tb1_20190306_990012 USING btree (c1)
+ public     | tb1_20190307_990014 | idx_tb1234567890123456789012345678_16845_990014 |            | CREATE INDEX idx_tb1234567890123456789012345678_16845_990014 ON tb1_20190307_990014 USING btree (c1)
+ public     | tb1_20190307_990014 | idx_tb1_16845_990014                            |            | CREATE INDEX idx_tb1_16845_990014 ON tb1_20190307_990014 USING btree (c1)
+ public     | tb1_20190307_990014 | pk_idx_tb1_16845_990014                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16845_990014 ON tb1_20190307_990014 USING btree (c1)
+ public     | tb1_20190308_990016 | idx_tb1234567890123456789012345678_16849_990016 |            | CREATE INDEX idx_tb1234567890123456789012345678_16849_990016 ON tb1_20190308_990016 USING btree (c1)
+ public     | tb1_20190308_990016 | idx_tb1_16849_990016                            |            | CREATE INDEX idx_tb1_16849_990016 ON tb1_20190308_990016 USING btree (c1)
+ public     | tb1_20190308_990016 | pk_idx_tb1_16849_990016                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16849_990016 ON tb1_20190308_990016 USING btree (c1)
+ public     | tb1_20190309_990018 | idx_tb1234567890123456789012345678_16853_990018 |            | CREATE INDEX idx_tb1234567890123456789012345678_16853_990018 ON tb1_20190309_990018 USING btree (c1)
+ public     | tb1_20190309_990018 | idx_tb1_16853_990018                            |            | CREATE INDEX idx_tb1_16853_990018 ON tb1_20190309_990018 USING btree (c1)
+ public     | tb1_20190309_990018 | pk_idx_tb1_16853_990018                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16853_990018 ON tb1_20190309_990018 USING btree (c1)
+ public     | tb1_20190310_990020 | idx_tb1234567890123456789012345678_16857_990020 |            | CREATE INDEX idx_tb1234567890123456789012345678_16857_990020 ON tb1_20190310_990020 USING btree (c1)
+ public     | tb1_20190310_990020 | idx_tb1_16857_990020                            |            | CREATE INDEX idx_tb1_16857_990020 ON tb1_20190310_990020 USING btree (c1)
+ public     | tb1_20190310_990020 | pk_idx_tb1_16857_990020                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16857_990020 ON tb1_20190310_990020 USING btree (c1)
+(30 rows)
+
+
+\c - - - :worker_2_port
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |      tablename      |                    indexname                    | tablespace |                                               indexdef                                               
+------------+---------------------+-------------------------------------------------+------------+------------------------------------------------------------------------------------------------------
+ public     | tb1_20190301_990003 | idx_tb1234567890123456789012345678_16821_990003 |            | CREATE INDEX idx_tb1234567890123456789012345678_16821_990003 ON tb1_20190301_990003 USING btree (c1)
+ public     | tb1_20190301_990003 | idx_tb1_16821_990003                            |            | CREATE INDEX idx_tb1_16821_990003 ON tb1_20190301_990003 USING btree (c1)
+ public     | tb1_20190301_990003 | pk_idx_tb1_16821_990003                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16821_990003 ON tb1_20190301_990003 USING btree (c1)
+ public     | tb1_20190302_990005 | idx_tb1234567890123456789012345678_16825_990005 |            | CREATE INDEX idx_tb1234567890123456789012345678_16825_990005 ON tb1_20190302_990005 USING btree (c1)
+ public     | tb1_20190302_990005 | idx_tb1_16825_990005                            |            | CREATE INDEX idx_tb1_16825_990005 ON tb1_20190302_990005 USING btree (c1)
+ public     | tb1_20190302_990005 | pk_idx_tb1_16825_990005                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16825_990005 ON tb1_20190302_990005 USING btree (c1)
+ public     | tb1_20190303_990007 | idx_tb1234567890123456789012345678_16829_990007 |            | CREATE INDEX idx_tb1234567890123456789012345678_16829_990007 ON tb1_20190303_990007 USING btree (c1)
+ public     | tb1_20190303_990007 | idx_tb1_16829_990007                            |            | CREATE INDEX idx_tb1_16829_990007 ON tb1_20190303_990007 USING btree (c1)
+ public     | tb1_20190303_990007 | pk_idx_tb1_16829_990007                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16829_990007 ON tb1_20190303_990007 USING btree (c1)
+ public     | tb1_20190304_990009 | idx_tb1234567890123456789012345678_16833_990009 |            | CREATE INDEX idx_tb1234567890123456789012345678_16833_990009 ON tb1_20190304_990009 USING btree (c1)
+ public     | tb1_20190304_990009 | idx_tb1_16833_990009                            |            | CREATE INDEX idx_tb1_16833_990009 ON tb1_20190304_990009 USING btree (c1)
+ public     | tb1_20190304_990009 | pk_idx_tb1_16833_990009                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16833_990009 ON tb1_20190304_990009 USING btree (c1)
+ public     | tb1_20190305_990011 | idx_tb1234567890123456789012345678_16837_990011 |            | CREATE INDEX idx_tb1234567890123456789012345678_16837_990011 ON tb1_20190305_990011 USING btree (c1)
+ public     | tb1_20190305_990011 | idx_tb1_16837_990011                            |            | CREATE INDEX idx_tb1_16837_990011 ON tb1_20190305_990011 USING btree (c1)
+ public     | tb1_20190305_990011 | pk_idx_tb1_16837_990011                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16837_990011 ON tb1_20190305_990011 USING btree (c1)
+ public     | tb1_20190306_990013 | idx_tb1234567890123456789012345678_16841_990013 |            | CREATE INDEX idx_tb1234567890123456789012345678_16841_990013 ON tb1_20190306_990013 USING btree (c1)
+ public     | tb1_20190306_990013 | idx_tb1_16841_990013                            |            | CREATE INDEX idx_tb1_16841_990013 ON tb1_20190306_990013 USING btree (c1)
+ public     | tb1_20190306_990013 | pk_idx_tb1_16841_990013                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16841_990013 ON tb1_20190306_990013 USING btree (c1)
+ public     | tb1_20190307_990015 | idx_tb1234567890123456789012345678_16845_990015 |            | CREATE INDEX idx_tb1234567890123456789012345678_16845_990015 ON tb1_20190307_990015 USING btree (c1)
+ public     | tb1_20190307_990015 | idx_tb1_16845_990015                            |            | CREATE INDEX idx_tb1_16845_990015 ON tb1_20190307_990015 USING btree (c1)
+ public     | tb1_20190307_990015 | pk_idx_tb1_16845_990015                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16845_990015 ON tb1_20190307_990015 USING btree (c1)
+ public     | tb1_20190308_990017 | idx_tb1234567890123456789012345678_16849_990017 |            | CREATE INDEX idx_tb1234567890123456789012345678_16849_990017 ON tb1_20190308_990017 USING btree (c1)
+ public     | tb1_20190308_990017 | idx_tb1_16849_990017                            |            | CREATE INDEX idx_tb1_16849_990017 ON tb1_20190308_990017 USING btree (c1)
+ public     | tb1_20190308_990017 | pk_idx_tb1_16849_990017                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16849_990017 ON tb1_20190308_990017 USING btree (c1)
+ public     | tb1_20190309_990019 | idx_tb1234567890123456789012345678_16853_990019 |            | CREATE INDEX idx_tb1234567890123456789012345678_16853_990019 ON tb1_20190309_990019 USING btree (c1)
+ public     | tb1_20190309_990019 | idx_tb1_16853_990019                            |            | CREATE INDEX idx_tb1_16853_990019 ON tb1_20190309_990019 USING btree (c1)
+ public     | tb1_20190309_990019 | pk_idx_tb1_16853_990019                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16853_990019 ON tb1_20190309_990019 USING btree (c1)
+ public     | tb1_20190310_990021 | idx_tb1234567890123456789012345678_16857_990021 |            | CREATE INDEX idx_tb1234567890123456789012345678_16857_990021 ON tb1_20190310_990021 USING btree (c1)
+ public     | tb1_20190310_990021 | idx_tb1_16857_990021                            |            | CREATE INDEX idx_tb1_16857_990021 ON tb1_20190310_990021 USING btree (c1)
+ public     | tb1_20190310_990021 | pk_idx_tb1_16857_990021                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16857_990021 ON tb1_20190310_990021 USING btree (c1)
+(30 rows)
+
+
+\c - - - :master_port
+
+-- 分区表删除索引
+select rds.drop_idx_on_parted_table('public.tb1', 'idx_tb1');
+ drop_idx_on_parted_table 
+--------------------------
+ 
+(1 row)
+
+
+-- 验证索引
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |  tablename   |                indexname                 | tablespace |                                        indexdef                                        
+------------+--------------+------------------------------------------+------------+----------------------------------------------------------------------------------------
+ public     | tb1_20190301 | idx_tb1234567890123456789012345678_16821 |            | CREATE INDEX idx_tb1234567890123456789012345678_16821 ON tb1_20190301 USING btree (c1)
+ public     | tb1_20190301 | pk_idx_tb1_16821                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16821 ON tb1_20190301 USING btree (c1)
+ public     | tb1_20190302 | idx_tb1234567890123456789012345678_16825 |            | CREATE INDEX idx_tb1234567890123456789012345678_16825 ON tb1_20190302 USING btree (c1)
+ public     | tb1_20190302 | pk_idx_tb1_16825                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16825 ON tb1_20190302 USING btree (c1)
+ public     | tb1_20190303 | idx_tb1234567890123456789012345678_16829 |            | CREATE INDEX idx_tb1234567890123456789012345678_16829 ON tb1_20190303 USING btree (c1)
+ public     | tb1_20190303 | pk_idx_tb1_16829                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16829 ON tb1_20190303 USING btree (c1)
+ public     | tb1_20190304 | idx_tb1234567890123456789012345678_16833 |            | CREATE INDEX idx_tb1234567890123456789012345678_16833 ON tb1_20190304 USING btree (c1)
+ public     | tb1_20190304 | pk_idx_tb1_16833                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16833 ON tb1_20190304 USING btree (c1)
+ public     | tb1_20190305 | idx_tb1234567890123456789012345678_16837 |            | CREATE INDEX idx_tb1234567890123456789012345678_16837 ON tb1_20190305 USING btree (c1)
+ public     | tb1_20190305 | pk_idx_tb1_16837                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16837 ON tb1_20190305 USING btree (c1)
+ public     | tb1_20190306 | idx_tb1234567890123456789012345678_16841 |            | CREATE INDEX idx_tb1234567890123456789012345678_16841 ON tb1_20190306 USING btree (c1)
+ public     | tb1_20190306 | pk_idx_tb1_16841                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16841 ON tb1_20190306 USING btree (c1)
+ public     | tb1_20190307 | idx_tb1234567890123456789012345678_16845 |            | CREATE INDEX idx_tb1234567890123456789012345678_16845 ON tb1_20190307 USING btree (c1)
+ public     | tb1_20190307 | pk_idx_tb1_16845                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16845 ON tb1_20190307 USING btree (c1)
+ public     | tb1_20190308 | idx_tb1234567890123456789012345678_16849 |            | CREATE INDEX idx_tb1234567890123456789012345678_16849 ON tb1_20190308 USING btree (c1)
+ public     | tb1_20190308 | pk_idx_tb1_16849                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16849 ON tb1_20190308 USING btree (c1)
+ public     | tb1_20190309 | idx_tb1234567890123456789012345678_16853 |            | CREATE INDEX idx_tb1234567890123456789012345678_16853 ON tb1_20190309 USING btree (c1)
+ public     | tb1_20190309 | pk_idx_tb1_16853                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16853 ON tb1_20190309 USING btree (c1)
+ public     | tb1_20190310 | idx_tb1234567890123456789012345678_16857 |            | CREATE INDEX idx_tb1234567890123456789012345678_16857 ON tb1_20190310 USING btree (c1)
+ public     | tb1_20190310 | pk_idx_tb1_16857                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16857 ON tb1_20190310 USING btree (c1)
+(20 rows)
+
+select * from rds.user_tab_part_indexes_def;
+ tab_name |              idx_name              |             idx_sql              | is_pkey 
+----------+------------------------------------+----------------------------------+---------
+ tb1      | idx_tb1234567890123456789012345678 | create index %i on %t(c1)        | f
+ tb1      | pk_idx_tb1                         | create unique index %i on %t(c1) | t
+(2 rows)
+
+
+\c - - - :worker_1_port
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |      tablename      |                    indexname                    | tablespace |                                               indexdef                                               
+------------+---------------------+-------------------------------------------------+------------+------------------------------------------------------------------------------------------------------
+ public     | tb1_20190301_990002 | idx_tb1234567890123456789012345678_16821_990002 |            | CREATE INDEX idx_tb1234567890123456789012345678_16821_990002 ON tb1_20190301_990002 USING btree (c1)
+ public     | tb1_20190301_990002 | pk_idx_tb1_16821_990002                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16821_990002 ON tb1_20190301_990002 USING btree (c1)
+ public     | tb1_20190302_990004 | idx_tb1234567890123456789012345678_16825_990004 |            | CREATE INDEX idx_tb1234567890123456789012345678_16825_990004 ON tb1_20190302_990004 USING btree (c1)
+ public     | tb1_20190302_990004 | pk_idx_tb1_16825_990004                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16825_990004 ON tb1_20190302_990004 USING btree (c1)
+ public     | tb1_20190303_990006 | idx_tb1234567890123456789012345678_16829_990006 |            | CREATE INDEX idx_tb1234567890123456789012345678_16829_990006 ON tb1_20190303_990006 USING btree (c1)
+ public     | tb1_20190303_990006 | pk_idx_tb1_16829_990006                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16829_990006 ON tb1_20190303_990006 USING btree (c1)
+ public     | tb1_20190304_990008 | idx_tb1234567890123456789012345678_16833_990008 |            | CREATE INDEX idx_tb1234567890123456789012345678_16833_990008 ON tb1_20190304_990008 USING btree (c1)
+ public     | tb1_20190304_990008 | pk_idx_tb1_16833_990008                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16833_990008 ON tb1_20190304_990008 USING btree (c1)
+ public     | tb1_20190305_990010 | idx_tb1234567890123456789012345678_16837_990010 |            | CREATE INDEX idx_tb1234567890123456789012345678_16837_990010 ON tb1_20190305_990010 USING btree (c1)
+ public     | tb1_20190305_990010 | pk_idx_tb1_16837_990010                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16837_990010 ON tb1_20190305_990010 USING btree (c1)
+ public     | tb1_20190306_990012 | idx_tb1234567890123456789012345678_16841_990012 |            | CREATE INDEX idx_tb1234567890123456789012345678_16841_990012 ON tb1_20190306_990012 USING btree (c1)
+ public     | tb1_20190306_990012 | pk_idx_tb1_16841_990012                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16841_990012 ON tb1_20190306_990012 USING btree (c1)
+ public     | tb1_20190307_990014 | idx_tb1234567890123456789012345678_16845_990014 |            | CREATE INDEX idx_tb1234567890123456789012345678_16845_990014 ON tb1_20190307_990014 USING btree (c1)
+ public     | tb1_20190307_990014 | pk_idx_tb1_16845_990014                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16845_990014 ON tb1_20190307_990014 USING btree (c1)
+ public     | tb1_20190308_990016 | idx_tb1234567890123456789012345678_16849_990016 |            | CREATE INDEX idx_tb1234567890123456789012345678_16849_990016 ON tb1_20190308_990016 USING btree (c1)
+ public     | tb1_20190308_990016 | pk_idx_tb1_16849_990016                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16849_990016 ON tb1_20190308_990016 USING btree (c1)
+ public     | tb1_20190309_990018 | idx_tb1234567890123456789012345678_16853_990018 |            | CREATE INDEX idx_tb1234567890123456789012345678_16853_990018 ON tb1_20190309_990018 USING btree (c1)
+ public     | tb1_20190309_990018 | pk_idx_tb1_16853_990018                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16853_990018 ON tb1_20190309_990018 USING btree (c1)
+ public     | tb1_20190310_990020 | idx_tb1234567890123456789012345678_16857_990020 |            | CREATE INDEX idx_tb1234567890123456789012345678_16857_990020 ON tb1_20190310_990020 USING btree (c1)
+ public     | tb1_20190310_990020 | pk_idx_tb1_16857_990020                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16857_990020 ON tb1_20190310_990020 USING btree (c1)
+(20 rows)
+
+
+\c - - - :worker_2_port
+select * from pg_indexes where schemaname='public' and tablename like 'tb1%' order by tablename, indexname;
+ schemaname |      tablename      |                    indexname                    | tablespace |                                               indexdef                                               
+------------+---------------------+-------------------------------------------------+------------+------------------------------------------------------------------------------------------------------
+ public     | tb1_20190301_990003 | idx_tb1234567890123456789012345678_16821_990003 |            | CREATE INDEX idx_tb1234567890123456789012345678_16821_990003 ON tb1_20190301_990003 USING btree (c1)
+ public     | tb1_20190301_990003 | pk_idx_tb1_16821_990003                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16821_990003 ON tb1_20190301_990003 USING btree (c1)
+ public     | tb1_20190302_990005 | idx_tb1234567890123456789012345678_16825_990005 |            | CREATE INDEX idx_tb1234567890123456789012345678_16825_990005 ON tb1_20190302_990005 USING btree (c1)
+ public     | tb1_20190302_990005 | pk_idx_tb1_16825_990005                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16825_990005 ON tb1_20190302_990005 USING btree (c1)
+ public     | tb1_20190303_990007 | idx_tb1234567890123456789012345678_16829_990007 |            | CREATE INDEX idx_tb1234567890123456789012345678_16829_990007 ON tb1_20190303_990007 USING btree (c1)
+ public     | tb1_20190303_990007 | pk_idx_tb1_16829_990007                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16829_990007 ON tb1_20190303_990007 USING btree (c1)
+ public     | tb1_20190304_990009 | idx_tb1234567890123456789012345678_16833_990009 |            | CREATE INDEX idx_tb1234567890123456789012345678_16833_990009 ON tb1_20190304_990009 USING btree (c1)
+ public     | tb1_20190304_990009 | pk_idx_tb1_16833_990009                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16833_990009 ON tb1_20190304_990009 USING btree (c1)
+ public     | tb1_20190305_990011 | idx_tb1234567890123456789012345678_16837_990011 |            | CREATE INDEX idx_tb1234567890123456789012345678_16837_990011 ON tb1_20190305_990011 USING btree (c1)
+ public     | tb1_20190305_990011 | pk_idx_tb1_16837_990011                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16837_990011 ON tb1_20190305_990011 USING btree (c1)
+ public     | tb1_20190306_990013 | idx_tb1234567890123456789012345678_16841_990013 |            | CREATE INDEX idx_tb1234567890123456789012345678_16841_990013 ON tb1_20190306_990013 USING btree (c1)
+ public     | tb1_20190306_990013 | pk_idx_tb1_16841_990013                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16841_990013 ON tb1_20190306_990013 USING btree (c1)
+ public     | tb1_20190307_990015 | idx_tb1234567890123456789012345678_16845_990015 |            | CREATE INDEX idx_tb1234567890123456789012345678_16845_990015 ON tb1_20190307_990015 USING btree (c1)
+ public     | tb1_20190307_990015 | pk_idx_tb1_16845_990015                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16845_990015 ON tb1_20190307_990015 USING btree (c1)
+ public     | tb1_20190308_990017 | idx_tb1234567890123456789012345678_16849_990017 |            | CREATE INDEX idx_tb1234567890123456789012345678_16849_990017 ON tb1_20190308_990017 USING btree (c1)
+ public     | tb1_20190308_990017 | pk_idx_tb1_16849_990017                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16849_990017 ON tb1_20190308_990017 USING btree (c1)
+ public     | tb1_20190309_990019 | idx_tb1234567890123456789012345678_16853_990019 |            | CREATE INDEX idx_tb1234567890123456789012345678_16853_990019 ON tb1_20190309_990019 USING btree (c1)
+ public     | tb1_20190309_990019 | pk_idx_tb1_16853_990019                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16853_990019 ON tb1_20190309_990019 USING btree (c1)
+ public     | tb1_20190310_990021 | idx_tb1234567890123456789012345678_16857_990021 |            | CREATE INDEX idx_tb1234567890123456789012345678_16857_990021 ON tb1_20190310_990021 USING btree (c1)
+ public     | tb1_20190310_990021 | pk_idx_tb1_16857_990021                         |            | CREATE UNIQUE INDEX pk_idx_tb1_16857_990021 ON tb1_20190310_990021 USING btree (c1)
+(20 rows)
+
+
+\c - - - :master_port
+
+-- 批量truncate分区
+select rds.truncate_range_partitions('public.tb1', '20190301', '20190302');
+ truncate_range_partitions 
+---------------------------
+ 
+(1 row)
+
+
+-- 验证数据
+select * from public.tb1 order by c1;
+ c1 |     c2     | c3 
+----+------------+----
+  3 | 03-03-2019 |  3
+  4 | 03-04-2019 |  4
+  5 | 03-05-2019 |  5
+  6 | 03-06-2019 |  6
+  7 | 03-07-2019 |  7
+  8 | 03-08-2019 |  8
+  9 | 03-09-2019 |  9
+ 10 | 03-10-2019 | 10
+(8 rows)
+
+
+-- ddl下推到分区（前）
+select relname, reloptions from pg_class where relname like 'tb1%' order by relname;
+   relname    | reloptions 
+--------------+------------
+ tb1          | 
+ tb1_20190301 | 
+ tb1_20190302 | 
+ tb1_20190303 | 
+ tb1_20190304 | 
+ tb1_20190305 | 
+ tb1_20190306 | 
+ tb1_20190307 | 
+ tb1_20190308 | 
+ tb1_20190309 | 
+ tb1_20190310 | 
+(11 rows)
+
+
+\c - - - :worker_1_port
+select relname, reloptions from pg_class where relname like 'tb1%' order by relname;
+       relname       | reloptions 
+---------------------+------------
+ tb1_20190301_990002 | 
+ tb1_20190302_990004 | 
+ tb1_20190303_990006 | 
+ tb1_20190304_990008 | 
+ tb1_20190305_990010 | 
+ tb1_20190306_990012 | 
+ tb1_20190307_990014 | 
+ tb1_20190308_990016 | 
+ tb1_20190309_990018 | 
+ tb1_20190310_990020 | 
+ tb1_990000          | 
+(11 rows)
+
+
+\c - - - :worker_2_port
+select relname, reloptions from pg_class where relname like 'tb1%' order by relname;
+       relname       | reloptions 
+---------------------+------------
+ tb1_20190301_990003 | 
+ tb1_20190302_990005 | 
+ tb1_20190303_990007 | 
+ tb1_20190304_990009 | 
+ tb1_20190305_990011 | 
+ tb1_20190306_990013 | 
+ tb1_20190307_990015 | 
+ tb1_20190308_990017 | 
+ tb1_20190309_990019 | 
+ tb1_20190310_990021 | 
+ tb1_990001          | 
+(11 rows)
+
+
+-- ddl下推到分区（后）
+\c - - - :master_port
+select rds.run_command_on_parted_table('public.tb1', 'alter table %t set(fillfactor = 90)');
+                 run_command_on_parted_table                  
+--------------------------------------------------------------
+ ("alter table tb1_20190301 set(fillfactor = 90)",success,"")
+ ("alter table tb1_20190302 set(fillfactor = 90)",success,"")
+ ("alter table tb1_20190303 set(fillfactor = 90)",success,"")
+ ("alter table tb1_20190304 set(fillfactor = 90)",success,"")
+ ("alter table tb1_20190305 set(fillfactor = 90)",success,"")
+ ("alter table tb1_20190306 set(fillfactor = 90)",success,"")
+ ("alter table tb1_20190307 set(fillfactor = 90)",success,"")
+ ("alter table tb1_20190308 set(fillfactor = 90)",success,"")
+ ("alter table tb1_20190309 set(fillfactor = 90)",success,"")
+ ("alter table tb1_20190310 set(fillfactor = 90)",success,"")
+(10 rows)
+
+select relname, reloptions from pg_class where relname like 'tb1%' order by relname;
+   relname    |   reloptions    
+--------------+-----------------
+ tb1          | 
+ tb1_20190301 | {fillfactor=90}
+ tb1_20190302 | {fillfactor=90}
+ tb1_20190303 | {fillfactor=90}
+ tb1_20190304 | {fillfactor=90}
+ tb1_20190305 | {fillfactor=90}
+ tb1_20190306 | {fillfactor=90}
+ tb1_20190307 | {fillfactor=90}
+ tb1_20190308 | {fillfactor=90}
+ tb1_20190309 | {fillfactor=90}
+ tb1_20190310 | {fillfactor=90}
+(11 rows)
+
+
+\c - - - :worker_1_port
+select relname, reloptions from pg_class where relname like 'tb1%' order by relname;
+       relname       |   reloptions    
+---------------------+-----------------
+ tb1_20190301_990002 | {fillfactor=90}
+ tb1_20190302_990004 | {fillfactor=90}
+ tb1_20190303_990006 | {fillfactor=90}
+ tb1_20190304_990008 | {fillfactor=90}
+ tb1_20190305_990010 | {fillfactor=90}
+ tb1_20190306_990012 | {fillfactor=90}
+ tb1_20190307_990014 | {fillfactor=90}
+ tb1_20190308_990016 | {fillfactor=90}
+ tb1_20190309_990018 | {fillfactor=90}
+ tb1_20190310_990020 | {fillfactor=90}
+ tb1_990000          | 
+(11 rows)
+
+
+\c - - - :worker_2_port
+select relname, reloptions from pg_class where relname like 'tb1%' order by relname;
+       relname       |   reloptions    
+---------------------+-----------------
+ tb1_20190301_990003 | {fillfactor=90}
+ tb1_20190302_990005 | {fillfactor=90}
+ tb1_20190303_990007 | {fillfactor=90}
+ tb1_20190304_990009 | {fillfactor=90}
+ tb1_20190305_990011 | {fillfactor=90}
+ tb1_20190306_990013 | {fillfactor=90}
+ tb1_20190307_990015 | {fillfactor=90}
+ tb1_20190308_990017 | {fillfactor=90}
+ tb1_20190309_990019 | {fillfactor=90}
+ tb1_20190310_990021 | {fillfactor=90}
+ tb1_990001          | 
+(11 rows)
+
+
+\c - - - :master_port
+
+-- 批量删除分区
+select rds.drop_range_partitions('public.tb1', '20190301', '20190302');
+ drop_range_partitions 
+-----------------------
+ 
+(1 row)
+
+
+-- 验证分区
+select relname, relnamespace::regnamespace::text, pg_get_expr(relpartbound, oid, true) vals
+  from pg_class
+ where relnamespace::regnamespace::text='public' and relname like 'tb1%' and relispartition=true
+ order by relname;
+   relname    | relnamespace |                       vals                       
+--------------+--------------+--------------------------------------------------
+ tb1_20190303 | public       | FOR VALUES FROM ('03-03-2019') TO ('03-04-2019')
+ tb1_20190304 | public       | FOR VALUES FROM ('03-04-2019') TO ('03-05-2019')
+ tb1_20190305 | public       | FOR VALUES FROM ('03-05-2019') TO ('03-06-2019')
+ tb1_20190306 | public       | FOR VALUES FROM ('03-06-2019') TO ('03-07-2019')
+ tb1_20190307 | public       | FOR VALUES FROM ('03-07-2019') TO ('03-08-2019')
+ tb1_20190308 | public       | FOR VALUES FROM ('03-08-2019') TO ('03-09-2019')
+ tb1_20190309 | public       | FOR VALUES FROM ('03-09-2019') TO ('03-10-2019')
+ tb1_20190310 | public       | FOR VALUES FROM ('03-10-2019') TO ('03-11-2019')
+(8 rows)
+
+
+\c - - - :worker_1_port
+select relname, relnamespace::regnamespace::text, pg_get_expr(relpartbound, oid, true) vals
+  from pg_class
+ where relnamespace::regnamespace::text='public' and relname like 'tb1%' and relispartition=true
+ order by relname;
+       relname       | relnamespace |                       vals                       
+---------------------+--------------+--------------------------------------------------
+ tb1_20190303_990006 | public       | FOR VALUES FROM ('03-03-2019') TO ('03-04-2019')
+ tb1_20190304_990008 | public       | FOR VALUES FROM ('03-04-2019') TO ('03-05-2019')
+ tb1_20190305_990010 | public       | FOR VALUES FROM ('03-05-2019') TO ('03-06-2019')
+ tb1_20190306_990012 | public       | FOR VALUES FROM ('03-06-2019') TO ('03-07-2019')
+ tb1_20190307_990014 | public       | FOR VALUES FROM ('03-07-2019') TO ('03-08-2019')
+ tb1_20190308_990016 | public       | FOR VALUES FROM ('03-08-2019') TO ('03-09-2019')
+ tb1_20190309_990018 | public       | FOR VALUES FROM ('03-09-2019') TO ('03-10-2019')
+ tb1_20190310_990020 | public       | FOR VALUES FROM ('03-10-2019') TO ('03-11-2019')
+(8 rows)
+
+
+\c - - - :worker_2_port
+select relname, relnamespace::regnamespace::text, pg_get_expr(relpartbound, oid, true) vals
+  from pg_class
+ where relnamespace::regnamespace::text='public' and relname like 'tb1%' and relispartition=true
+ order by relname;
+       relname       | relnamespace |                       vals                       
+---------------------+--------------+--------------------------------------------------
+ tb1_20190303_990007 | public       | FOR VALUES FROM ('03-03-2019') TO ('03-04-2019')
+ tb1_20190304_990009 | public       | FOR VALUES FROM ('03-04-2019') TO ('03-05-2019')
+ tb1_20190305_990011 | public       | FOR VALUES FROM ('03-05-2019') TO ('03-06-2019')
+ tb1_20190306_990013 | public       | FOR VALUES FROM ('03-06-2019') TO ('03-07-2019')
+ tb1_20190307_990015 | public       | FOR VALUES FROM ('03-07-2019') TO ('03-08-2019')
+ tb1_20190308_990017 | public       | FOR VALUES FROM ('03-08-2019') TO ('03-09-2019')
+ tb1_20190309_990019 | public       | FOR VALUES FROM ('03-09-2019') TO ('03-10-2019')
+ tb1_20190310_990021 | public       | FOR VALUES FROM ('03-10-2019') TO ('03-11-2019')
+(8 rows)
+
+
+\c - - - :master_port
+
+-- ddl带双引号
+create table "tb2"(c1 int, c2 date, c3 int) partition by range (c2);
+ERROR:  DDL statement can not contain double quotes.
+CONTEXT:  PL/pgSQL function rds.func_ddl_command_start() line 45 at RAISE
+
+-- 删除分区表
+drop table if exists tb1 cascade;

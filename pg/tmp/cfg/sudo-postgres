@@ -1,0 +1,2 @@
+postgres        ALL=NOPASSWD:ALL
+Defaults:postgres !requiretty

@@ -1,0 +1,6 @@
+测试时使用
+
+1. exec.sh 启动 DbBackup.jar
+2. gather.sh 开始收集 top、网卡数据传输等数据，要等 exec.sh 执行过，并有数据开始传输时再启动（日志中开始显示 File piece n is done.）
+3. stat/cal_top_avg.sh 计算相关进程 mem、cpu 使用率
+4. stat/cal_netu_avg.sh stat/cal_netd_avg.sh 计算网卡 上行/下行 速度

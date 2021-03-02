@@ -1,0 +1,21 @@
+SELECT CASE WHEN pg_last_wal_replay_lsn() is null or pg_last_wal_receive_lsn() is null or not pg_is_in_recovery() THEN 0 ELSE pg_wal_lsn_diff(pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn()) END AS replication_lag_size;
+
+select pg_last_wal_replay_lsn(), pg_last_wal_receive_lsn(), pg_is_in_recovery();
+
+
+CREATE PUBLICATION percpub FOR ALL TABLES;
+CREATE SUBSCRIPTION percsub CONNECTION 'host=10.37.64.53 dbname=postgres user=admin password=pgsql@SuningRds port=5432' PUBLICATION percpub WITH (copy_data = false);
+
+drop PUBLICATION percpub;
+drop SUBSCRIPTION percsub;
+
+insert into t_test select generate_series, generate_series x from generate_series(50001, 100000);
+
+
+select * from pg_replication_slots;
+select * from pg_stat_replication;
+
+
+
+ALTER DATABASE postgres SET default_transaction_read_only = true;
+select pg_reload_conf();

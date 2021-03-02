@@ -1,0 +1,3 @@
+test: part_init
+test: part_day
+test: part_month

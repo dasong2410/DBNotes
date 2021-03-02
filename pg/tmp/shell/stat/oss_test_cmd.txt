@@ -1,0 +1,12 @@
+PG_BACKUP_CMD = cat /pgsql/data.tar.gz
+PG_BACKUP_CMD = su - postgres -c "pg_basebackup -d 'service=repl' -F t -X f -c fast -D -"
+PG_BACKUP_CMD = su - postgres -c "pg_basebackup -d 'service=repl' -F t -X f -c fast -D - | zstd -T2 -"
+
+PG_RESTORE_CMD = dd of=/bak/tmp/data.tar.gz
+PG_RESTORE_CMD = tar x -C /bak/tmp/data
+PG_RESTORE_CMD = zstd -T2 -d | tar x -C /bak/tmp/data
+
+time java -Xmx4096m -jar DbBackup.jar u
+
+
+ll | awk -F' ' 'BEGIN{sum=0}{sum=sum+$5}END{print sum}'

@@ -1,0 +1,30 @@
+psql "service=admin dbname=app_db" -f binary.sql
+psql "service=admin dbname=app_db" -f clean.sql
+psql "service=admin dbname=app_db" -f geography.sql
+psql "service=admin dbname=app_db" -f knn_recheck.sql
+psql "service=admin dbname=app_db" -f knn.sql
+psql "service=admin dbname=app_db" -f long_xact.sql
+psql "service=admin dbname=app_db" -f lwgeom_regress.sql
+psql "service=admin dbname=app_db" -f regress_brin_index_3d.sql
+psql "service=admin dbname=app_db" -f regress_brin_index_geography.sql
+psql "service=admin dbname=app_db" -f regress_brin_index.sql
+psql "service=admin dbname=app_db" -f regress_index_nulls.sql
+psql "service=admin dbname=app_db" -f regress_index.sql
+psql "service=admin dbname=app_db" -f regress_management.sql
+psql "service=admin dbname=app_db" -f regress_selectivity.sql
+psql "service=admin dbname=app_db" -f regress.sql
+psql "service=admin dbname=app_db" -f sql-mm-circularstring.sql
+psql "service=admin dbname=app_db" -f sql-mm-compoundcurve.sql
+psql "service=admin dbname=app_db" -f sql-mm-curvepoly.sql
+psql "service=admin dbname=app_db" -f sql-mm-multicurve.sql
+psql "service=admin dbname=app_db" -f sql-mm-multisurface.sql
+psql "service=admin dbname=app_db" -f sql-mm-serialize.sql
+psql "service=admin dbname=app_db" -f temporal_knn.sql
+psql "service=admin dbname=app_db" -f tickets.sql
+psql "service=admin dbname=app_db" -f typmod.sql
+psql "service=admin dbname=app_db" -f wmsservers.sql
+
+
+
+-- 旧版本的兼容，可以不测
+-- psql "service=admin dbname=app_db" -f legacy.sql
