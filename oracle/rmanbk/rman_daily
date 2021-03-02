@@ -1,0 +1,3 @@
+MAILTO=""
+#LEVEL BACKUP DATABASE
+0 1 * * * oracle sh /home/oracle/rmanbk/rmanbk.sh
