@@ -38,3 +38,11 @@ https://github.com/desktop/desktop/issues/2085
 https://docs.github.com/en/github/importing-your-projects-to-github/adding-an-existing-project-to-github-using-the-command-line
 
 https://forum.freecodecamp.org/t/push-a-new-local-branch-to-a-remote-git-repository-and-track-it-too/13222
+
+## Github add ssh key(Error fix)
+
+![](pics/err_github_desktop.jpg)
+
+https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
+
+https://gist.github.com/Tamal/1cc77f88ef3e900aeae65f0e5e504794
