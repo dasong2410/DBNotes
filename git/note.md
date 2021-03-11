@@ -46,3 +46,20 @@ https://forum.freecodecamp.org/t/push-a-new-local-branch-to-a-remote-git-reposit
 https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
 
 https://gist.github.com/Tamal/1cc77f88ef3e900aeae65f0e5e504794
+
+
+## Github clear history
+
+https://gist.github.com/stephenhardy/5470814
+
+    -- Remove the history from 
+    rm -rf .git
+
+    -- recreate the repos from the current content only
+    git init
+    git add .
+    git commit -m "Initial commit"
+
+    -- push to the github remote repos ensuring you overwrite history
+    git remote add origin git@github.com:<YOUR ACCOUNT>/<YOUR REPOS>.git
+    git push -u --force origin master

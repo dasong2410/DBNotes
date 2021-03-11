@@ -113,6 +113,25 @@ select SUSER_SID('sa');
 
 # get user name
 select SUSER_SNAME(0x01);
+
+select * from  sys.sql_logins where is_expiration_checked=1;
+
+SELECT  name, LOGINPROPERTY(name, 'BadPasswordCount') AS 'BadPasswordCount'
+,LOGINPROPERTY(name, 'BadPasswordTime') AS 'BadPasswordTime'
+,LOGINPROPERTY(name, 'DaysUntilExpiration') AS 'DaysUntilExpiration'
+,LOGINPROPERTY(name, 'DefaultDatabase') AS 'DefaultDatabase'
+,LOGINPROPERTY(name, 'DefaultLanguage') AS 'DefaultLanguage'
+,LOGINPROPERTY(name, 'HistoryLength') AS 'HistoryLength'
+,LOGINPROPERTY(name, 'IsExpired') AS 'IsExpired'
+,LOGINPROPERTY(name, 'IsLocked') AS 'IsLocked'
+,LOGINPROPERTY(name, 'IsMustChange') AS 'IsMustChange'
+,LOGINPROPERTY(name, 'LockoutTime') AS 'LockoutTime'
+,LOGINPROPERTY(name, 'PasswordHash') AS 'PasswordHash'
+,LOGINPROPERTY(name, 'PasswordLastSetTime') AS 'PasswordLastSetTime'
+,LOGINPROPERTY(name, 'PasswordHashAlgorithm') AS 'PasswordHashAlgorithm'
+,is_expiration_checked  As 'is_expiration_checked'
+FROM    sys.sql_logins
+WHERE   is_policy_checked = 1 and is_expiration_checked=1
 ```
 
 <a href="Login&User-mapping"></a>
